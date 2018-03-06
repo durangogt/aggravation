@@ -135,5 +135,12 @@ def leftTopCoordsOfBox(boxx, boxy):
     top = boxy * (BOXSIZE + GAPSIZE) + YMARGIN
     return (left, top)
 
+def roll_a_dice():
+    """
+    Simple function just to return a single random
+    """
+    dice = random.randrange(1, 6);
+    return dice
+
 if __name__ == '__main__':
     main()
