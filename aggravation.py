@@ -33,19 +33,19 @@ from pygame.locals import *
 
 BOARD_TEMPLATE =    ['...............................',
                      '...........#.#.#.#.#...........',
-                     '...#.......#...#...#.......#...',
-                     '.....#.....#...#...#.....#.....',
-                     '.......#...#...#...#...#.......',
-                     '.........#.#...#...#.#.........',
+                     '...1.......#...1...#.......2...',
+                     '.....1.....#...1...#.....2.....',
+                     '.......1...#...1...#...2.......',
+                     '.........1.#...1...#.2.........',
                      '.#.#.#.#.#.#.......#.#.#.#.#.#.',
                      '.#...........................#.',
-                     '.#.#.#.#.#.....#.....#.#.#.#.#.',
+                     '.#.4.4.4.4.....#.....2.2.2.2.#.',
                      '.#...........................#.',
                      '.#.#.#.#.#.#.......#.#.#.#.#.#.',
-                     '.........#.#...#...#.#.........',
-                     '.......#...#...#...#...#.......',
-                     '.....#.....#...#...#.....#.....',
-                     '...#.......#...#...#.......#...',
+                     '.........4.#...3...#.3.........',
+                     '.......4...#...3...#...3.......',
+                     '.....4.....#...3...#.....3.....',
+                     '...4.......#...3...#.......3...',
                      '...........#.#.#.#.#...........',
                      '...............................']
 
@@ -58,6 +58,7 @@ GAPSIZE = 10 # size of gap between boxes in pixels
 BOARDWIDTH = 30 # number of columns of icons
 BOARDHEIGHT = 16 # number of rows of icons
 BLANK = '.'
+SPOT = '#'
 #assert (BOARDWIDTH * BOARDHEIGHT) % 2 == 0, 'Board needs to have an even number of boxes for pairs of matches.'
 XMARGIN = int((WINDOWWIDTH - (BOARDWIDTH * (BOXSIZE + GAPSIZE))) / 2)
 YMARGIN = int((WINDOWHEIGHT - (BOARDHEIGHT * (BOXSIZE + GAPSIZE))) / 2)
@@ -78,6 +79,11 @@ BGCOLOR = NAVYBLUE
 LIGHTBGCOLOR = GRAY
 BOXCOLOR = WHITE
 HIGHLIGHTCOLOR = BLUE
+
+P1COLOR = RED
+P2COLOR = YELLOW
+P3COLOR = GREEN
+P4COLOR = BLUE
 
 DONUT = 'donut'
 SQUARE = 'square'
@@ -119,13 +125,24 @@ def main():
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
-
 def drawBoard():
     # Draws all of the boxes in their covered or revealed state.
     for boxx in range(BOARDWIDTH):
         for boxy in range(BOARDHEIGHT):
-            if BOARD_TEMPLATE[boxy][boxx] != BLANK:
-              left, top = leftTopCoordsOfBox(boxx, boxy)
+            left, top = leftTopCoordsOfBox(boxx, boxy)
+            if BOARD_TEMPLATE[boxy][boxx] == '1':
+              # Draw a small box representing a game board spot for player 1
+              pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+            if BOARD_TEMPLATE[boxy][boxx] == '2':
+              # Draw a small box representing a game board spot for player 2
+              pygame.draw.rect(DISPLAYSURF, P2COLOR, (left, top, BOXSIZE, BOXSIZE))              
+            if BOARD_TEMPLATE[boxy][boxx] == '3':
+              # Draw a small box representing a game board spot for player 3
+              pygame.draw.rect(DISPLAYSURF, P3COLOR, (left, top, BOXSIZE, BOXSIZE))              
+            if BOARD_TEMPLATE[boxy][boxx] == '4':
+              # Draw a small box representing a game board spot for player 4
+              pygame.draw.rect(DISPLAYSURF, P4COLOR, (left, top, BOXSIZE, BOXSIZE))              
+            if BOARD_TEMPLATE[boxy][boxx] == SPOT:
               # Draw a small box representing a game board spot
               pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
