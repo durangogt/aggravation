@@ -52,7 +52,7 @@ BOARD_TEMPLATE =    ['...............................',
 FPS = 30 # frames per second, the general speed of the program
 WINDOWWIDTH = 640 # size of window's width in pixels
 WINDOWHEIGHT = 480 # size of windows' height in pixels
-REVEALSPEED = 8 # speed boxes' sliding reveals and covers
+REVEALSPEED = 8 # speed of player movement in simulation
 BOXSIZE = 10 # size of box height & width in pixels (using box size for now to be the board spot marker)
 GAPSIZE = 10 # size of gap between boxes in pixels
 BOARDWIDTH = 30 # number of columns of icons
@@ -110,6 +110,8 @@ def main():
 
         DISPLAYSURF.fill(BGCOLOR) # drawing the window
         drawBoard()
+        textSurfaceObj, textRectObj = displayDice()
+        DISPLAYSURF.blit(textSurfaceObj, textRectObj)
 
         for event in pygame.event.get(): # event handling loop
             if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
@@ -131,16 +133,16 @@ def drawBoard():
         for boxy in range(BOARDHEIGHT):
             left, top = leftTopCoordsOfBox(boxx, boxy)
             if BOARD_TEMPLATE[boxy][boxx] == '1':
-              # Draw a small box representing a game board spot for player 1
+              # Draw a small box representing a game board spot for player 1 red
               pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
             if BOARD_TEMPLATE[boxy][boxx] == '2':
-              # Draw a small box representing a game board spot for player 2
+              # Draw a small box representing a game board spot for player 2 yellow
               pygame.draw.rect(DISPLAYSURF, P2COLOR, (left, top, BOXSIZE, BOXSIZE))              
             if BOARD_TEMPLATE[boxy][boxx] == '3':
-              # Draw a small box representing a game board spot for player 3
+              # Draw a small box representing a game board spot for player 3 green
               pygame.draw.rect(DISPLAYSURF, P3COLOR, (left, top, BOXSIZE, BOXSIZE))              
             if BOARD_TEMPLATE[boxy][boxx] == '4':
-              # Draw a small box representing a game board spot for player 4
+              # Draw a small box representing a game board spot for player 4 blue
               pygame.draw.rect(DISPLAYSURF, P4COLOR, (left, top, BOXSIZE, BOXSIZE))              
             if BOARD_TEMPLATE[boxy][boxx] == SPOT:
               # Draw a small box representing a game board spot
@@ -158,6 +160,22 @@ def roll_a_dice():
     """
     dice = random.randrange(1, 6);
     return dice
+
+def displayDice():
+    """
+    Display two numbers representing dice
+    """
+    die1 = roll_a_dice()
+    die2 = roll_a_dice()
+
+    # testing of text for showing dice rolls via text at first
+    fontObj = pygame.font.Font('freesansbold.ttf', 32)
+    diceString = 'Die 1: %s Die 2: %s' % (die1,die2)
+    textSurfaceObj = fontObj.render(diceString, True, GREEN, BLUE)
+    textRectObj = textSurfaceObj.get_rect()
+    textRectObj.center = (150, 50) # top left corner
+    
+    return (textSurfaceObj,textRectObj)
 
 if __name__ == '__main__':
     main()
