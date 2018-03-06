@@ -110,8 +110,8 @@ def main():
 
         DISPLAYSURF.fill(BGCOLOR) # drawing the window
         drawBoard()
-        textSurfaceObj, textRectObj = displayDice()
-        DISPLAYSURF.blit(textSurfaceObj, textRectObj)
+        #textSurfaceObj, textRectObj = displayDice()
+        #DISPLAYSURF.blit(textSurfaceObj, textRectObj)
 
         for event in pygame.event.get(): # event handling loop
             if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
@@ -122,6 +122,9 @@ def main():
             elif event.type == MOUSEBUTTONUP:
                 mousex, mousey = event.pos
                 mouseClicked = True
+                #textSurfaceObj, textRectObj = displayDice()
+                displayDice()
+                #pygame.time.wait(1000) # 1000 milliseconds = 1 sec
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
@@ -174,8 +177,10 @@ def displayDice():
     textSurfaceObj = fontObj.render(diceString, True, GREEN, BLUE)
     textRectObj = textSurfaceObj.get_rect()
     textRectObj.center = (150, 50) # top left corner
-    
-    return (textSurfaceObj,textRectObj)
+    DISPLAYSURF.blit(textSurfaceObj, textRectObj)
+    pygame.display.update()
+    pygame.time.wait(1000) # 1000 milliseconds = 1 sec
+    #return (textSurfaceObj,textRectObj)
 
 if __name__ == '__main__':
     main()
