@@ -29,6 +29,12 @@ from pygame.locals import *
 4[   #       #   #   #       #   ]
 5[           # # # # #           ]
 6[                               ]
+
+PLAYER 1 STARTING POSITION IS BOARD_TEMPLATE[1][15]
+PLAYER 2 STARTING POSITION IS BOARD_TEMPLATE[8][29]
+PLAYER 3 STARTING POSITION IS BOARD_TEMPLATE[15][15]
+PLAYER 4 STARTING POSITION IS BOARD_TEMPLATE[8][1]
+
 '''
 
 BOARD_TEMPLATE =    ['...............................',
@@ -48,6 +54,12 @@ BOARD_TEMPLATE =    ['...............................',
                      '...4.......#...3...#.......3...',
                      '...........#.#.#.#.#...........',
                      '...............................']
+
+
+P1START = 'BOARD_TEMPLATE[1][15]'
+P2START = 'BOARD_TEMPLATE[8][29]'
+P3START = 'BOARD_TEMPLATE[15][15]'
+P4START = 'BOARD_TEMPLATE[8][1]'
 
 FPS = 30 # frames per second, the general speed of the program
 WINDOWWIDTH = 640 # size of window's width in pixels
@@ -178,8 +190,9 @@ def displayDice():
     pygame.time.wait(1000) # 1000 milliseconds = 1 sec
     return dieTotal
 
-def startGameSimulation(board):
+def startGameSimulation():
     # Simulate one player moving around the board as a starting point.
+    # Start with player 1
     coveredBoxes = generateRevealedBoxesData(False)
     boxes = []
     for x in range(BOARDWIDTH):
