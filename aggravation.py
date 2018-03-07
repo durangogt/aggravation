@@ -122,6 +122,7 @@ def main():
 
         DISPLAYSURF.fill(BGCOLOR) # drawing the window
         drawBoard()
+        startGameSimulation()
 
         for event in pygame.event.get(): # event handling loop
             if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
@@ -190,21 +191,50 @@ def displayDice():
     pygame.time.wait(1000) # 1000 milliseconds = 1 sec
     return dieTotal
 
+def getNextMove(x,y):
+    # given on board spot x,y what is the next board spot
+    # look forward, down & up for spot
+    #
+    # passed in x=19,y=1 # p1 at corner
+    # player is at [19,1] - if [x+2][1] != SPOT # means you are off the board and need to increment y & don't add 2 to x (go down)
+    # 
+    # return [x][y+1]
+    return (x,y)
+
 def startGameSimulation():
     # Simulate one player moving around the board as a starting point.
-    # Start with player 1
-    coveredBoxes = generateRevealedBoxesData(False)
-    boxes = []
-    for x in range(BOARDWIDTH):
-        for y in range(BOARDHEIGHT):
-            boxes.append( (x, y) )
-    random.shuffle(boxes)
-    boxGroups = splitIntoGroupsOf(8, boxes)
+    # Start with player 1 - P1START
+    
+    # roll dice
+    moves = displayDice()
+    # start at p1start
+    # P1START = 'BOARD_TEMPLATE[1][15]'
+    left, top = leftTopCoordsOfBox(15, 1)
+    pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+    pygame.display.update()
+    pygame.time.wait(1000) # 1000 milliseconds = 1 sec
+    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    pygame.display.update()
+        
+    left, top = leftTopCoordsOfBox(15+2, 1) # move to next spot on board
+    pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+    pygame.display.update()
+    pygame.time.wait(1000) # 1000 milliseconds = 1 sec
+    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    pygame.display.update()
 
-    drawBoard(board, coveredBoxes)
-    for boxGroup in boxGroups:
-        revealBoxesAnimation(board, boxGroup)
-        coverBoxesAnimation(board, boxGroup)
+    left, top = leftTopCoordsOfBox(15+4, 1) # move to 3rd spot (x==moves) on board and leave it there
+    pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+    pygame.display.update()
+    pygame.time.wait(1000) # 1000 milliseconds = 1 sec
+    #pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    pygame.display.update()
+
+    # wait for debugging
+    pygame.time.wait(3000)
+    
+    # move along the # signs on the board clockwise - animate (how to tell where you are at on the board? and differientiate between same row diff columns?)
+    # wait 2-3 seconds then roll again
 
 if __name__ == '__main__':
     main()
