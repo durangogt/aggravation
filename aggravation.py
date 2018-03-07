@@ -162,20 +162,36 @@ def roll_a_dice():
 
 def displayDice():
     """
-    Display two numbers representing dice
+    Display two numbers representing dice & return combined integer
     """
     die1 = roll_a_dice()
     die2 = roll_a_dice()
-
+    dieTotal = die1 + die2
     # testing of text for showing dice rolls via text at first
     fontObj = pygame.font.Font('freesansbold.ttf', 32)
-    diceString = 'D1: %s   D2: %s  ' % (die1,die2)
+    diceString = 'D1: %s   D2: %s  Total: %i' % (die1,die2,dieTotal)
     textSurfaceObj = fontObj.render(diceString, True, GREEN, BLUE)
     textRectObj = textSurfaceObj.get_rect()
-    textRectObj.center = (150, 50) # top left corner
+    textRectObj.center = (175, 50) # top left corner
     DISPLAYSURF.blit(textSurfaceObj, textRectObj)
     pygame.display.update()
     pygame.time.wait(1000) # 1000 milliseconds = 1 sec
+    return dieTotal
+
+def startGameSimulation(board):
+    # Simulate one player moving around the board as a starting point.
+    coveredBoxes = generateRevealedBoxesData(False)
+    boxes = []
+    for x in range(BOARDWIDTH):
+        for y in range(BOARDHEIGHT):
+            boxes.append( (x, y) )
+    random.shuffle(boxes)
+    boxGroups = splitIntoGroupsOf(8, boxes)
+
+    drawBoard(board, coveredBoxes)
+    for boxGroup in boxGroups:
+        revealBoxesAnimation(board, boxGroup)
+        coverBoxesAnimation(board, boxGroup)
 
 if __name__ == '__main__':
     main()
