@@ -193,7 +193,8 @@ def displayDice():
 
 def getNextMove(x,y):
     # given on board spot x,y what is the next board spot
-    # look forward, down & up for spot
+    # hard set corners coords - there are 12 of them and check to see if there
+    # 19,1 - 19,6 - 6,29 - 10,29 - 10,19 - 15,19 - 15,11 - 10,11 - 10,1 - 6,1 - 6,11 - 1,11
     #
     # passed in x=19,y=1 # p1 at corner
     # player is at [19,1] - if [x+2][1] != SPOT # means you are off the board and need to increment y & don't add 2 to x (go down)
