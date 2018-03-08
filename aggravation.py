@@ -170,7 +170,7 @@ def roll_a_dice():
     """
     Simple function just to return a single random
     """
-    dice = random.randrange(1, 6);
+    dice = random.randrange(1, 6)
     return dice
 
 def displayDice():
@@ -223,7 +223,7 @@ def getNextMove(x,y):
     elif (x,y) == (11,6):   # p4 inside corner
         nextMove = (11,5)
     elif (x,y) == (11,1):   # p1 outside corner
-        nextMove = (13,1)         # here and below we assume we are not on corners
+        nextMove = (13,1)        
     elif ( (x,y)[1] == 1 or (x,y)[1] == 6 ):   # horizontal top side of board, moves right/clockwise
         nextMove = (x+2,y)
     elif ( (x,y)[1] == 10 or (x,y)[1] == 15 ):  # horizontal bottom side of board, moves left/clockwise
@@ -239,39 +239,36 @@ def startGameSimulation():
     # Start with player 1 - P1START
     
     # roll dice
-    #moves = displayDice()
-    moves = 75
+    moves = displayDice()
+    #moves = 5
     SIMSPEED = 250
     
     # start at p1start
     # P1START = 'BOARD_TEMPLATE[1][15]'
-    left, top = leftTopCoordsOfBox(15, 1)
+    # P1START = (15,1)
+    p1start = (15,1)
+    left, top = leftTopCoordsOfBox(p1start[0],p1start[1])
     pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+    print('Move 1 to %s' % str(p1start))
     pygame.display.update()
     pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
     pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
 
-    coords = getNextMove(15,1)
-    print(coords)
-    left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to next spot on board
-    pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
-    pygame.display.update()
-    pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
-    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
-    pygame.display.update()
-
-    for move in range(0,moves):
-        coords = getNextMove(coords[0],coords[1])
-        print('Move %i to %s' % (move,coords))
+    coords = getNextMove(p1start[0],p1start[1])
+    
+    for move in range(1,moves):
+        print('Move %i to %s' % (move+1,coords))
         left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
         pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
         pygame.display.update()
         pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
         pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
         pygame.display.update()
+        coords = getNextMove(coords[0],coords[1])
 
     # wait for debugging
+    print('End of roll...')
     pygame.time.wait(3000)
     
     # move along the # signs on the board clockwise - animate (how to tell where you are at on the board? and differientiate between same row diff columns?)
