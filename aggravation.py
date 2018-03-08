@@ -235,8 +235,8 @@ def getNextMove(x,y):
     return nextMove
 
 def startGameSimulation():
-    # Simulate one player moving around the board as a starting point. DONE
-    # Start with player 1 - P1START - DONE
+    # Simulate one player moving around the board as a starting point..................DONE
+    # Start with player 1 - P1START - .................................................DONE
     # save game state of p1's end spot
     # save game state for number of marbles left in home 4,3,2,1
     # save game state for reaching starting point again and going into home base
