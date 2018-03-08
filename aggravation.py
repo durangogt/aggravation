@@ -196,40 +196,80 @@ def getNextMove(x,y):
     # hard set corners coords - there are 12 of them and check to see if there
     # 19,1 - 19,6 - 6,29 - 10,29 - 10,19 - 15,19 - 15,11 - 10,11 - 10,1 - 6,1 - 6,11 - 1,11
     #
-    # passed in x=19,y=1 # p1 at corner
+    # passed in x=19,y=1 # p1 at first corner
     # player is at [19,1] - if [x+2][1] != SPOT # means you are off the board and need to increment y & don't add 2 to x (go down)
     # 
-    # return [x][y+1]
-    return (x,y)
+    assert BOARD_TEMPLATE[y][x] == SPOT, 'Current spot passed in must be # or occupied by a player.'
+    if (x,y) == (19,1):     # p1 outside corner
+        nextMove = (19,2)
+    elif (x,y) == (19,6):   # p1 inside corner
+        nextMove = (21,6)
+    elif (x,y) == (29,6):   # p2 outside corner
+        nextMove = (29,7)
+    elif (x,y) == (29,10):  # p2 outside corner
+        nextMove = (27,10)
+    elif (x,y) == (19,10):  # p2 inside corner
+        nextMove = (19,11)
+    elif (x,y) == (19,15):  # p3 outside corner
+        nextMove = (17,15)
+    elif (x,y) == (11,15):  # p3 outside corner
+        nextMove = (11,14)
+    elif (x,y) == (11,10):  # p3 inside corner
+        nextMove = (9,10)
+    elif (x,y) == (1,10):   # p4 outside corner
+        nextMove = (1,9)
+    elif (x,y) == (1,6):    # p4 outside corner
+        nextMove = (3,6)
+    elif (x,y) == (11,6):   # p4 inside corner
+        nextMove = (11,5)
+    elif (x,y) == (11,1):   # p1 outside corner
+        nextMove = (13,1)         # here and below we assume we are not on corners
+    elif ( (x,y)[1] == 1 or (x,y)[1] == 6 ):   # horizontal top side of board, moves right/clockwise
+        nextMove = (x+2,y)
+    elif ( (x,y)[1] == 10 or (x,y)[1] == 15 ):  # horizontal bottom side of board, moves left/clockwise
+        nextMove = (x-2,y)        
+    elif ( (x,y)[0] == 19 or (x,y)[0] == 29 ):  # vertical right side of board, moves down/clockwise
+        nextMove = (x,y+1)
+    elif ( (x,y)[0] == 1 or (x,y)[0] == 11 ):   # vertical left side of board, moves up/clockwise 
+        nextMove = (x,y-1)
+    return nextMove
 
 def startGameSimulation():
     # Simulate one player moving around the board as a starting point.
     # Start with player 1 - P1START
     
     # roll dice
-    moves = displayDice()
+    #moves = displayDice()
+    moves = 75
+    SIMSPEED = 250
+    
     # start at p1start
     # P1START = 'BOARD_TEMPLATE[1][15]'
     left, top = leftTopCoordsOfBox(15, 1)
     pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
-    pygame.time.wait(1000) # 1000 milliseconds = 1 sec
-    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
-    pygame.display.update()
-        
-    left, top = leftTopCoordsOfBox(15+2, 1) # move to next spot on board
-    pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
-    pygame.display.update()
-    pygame.time.wait(1000) # 1000 milliseconds = 1 sec
+    pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
     pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
 
-    left, top = leftTopCoordsOfBox(15+4, 1) # move to 3rd spot (x==moves) on board and leave it there
+    coords = getNextMove(15,1)
+    print(coords)
+    left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to next spot on board
     pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
-    pygame.time.wait(1000) # 1000 milliseconds = 1 sec
-    #pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
+
+    for move in range(0,moves):
+        coords = getNextMove(coords[0],coords[1])
+        print('Move %i to %s' % (move,coords))
+        left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
+        pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+        pygame.display.update()
+        pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+        pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+        pygame.display.update()
 
     # wait for debugging
     pygame.time.wait(3000)
