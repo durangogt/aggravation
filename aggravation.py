@@ -249,6 +249,7 @@ def startGameSimulation():
     p1start = (15,1)
     left, top = leftTopCoordsOfBox(p1start[0],p1start[1])
     pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+    print('Dice roll of %i' % moves)
     print('Move 1 to %s' % str(p1start))
     pygame.display.update()
     pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
