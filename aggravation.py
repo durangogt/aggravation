@@ -243,7 +243,7 @@ def startGameSimulation():
     # if roll doubles go again
     # if roll exact in middle give the option
     # 1 or 6 to get out of home base
-    # ...
+    # ...check readme for more on the to do list
     
     # roll dice
     moves = displayDice()
@@ -264,7 +264,28 @@ def startGameSimulation():
     pygame.display.update()
 
     coords = getNextMove(p1start[0],p1start[1])
-    
+    # make this loop into one function called something like movePlayer(player,moves)
+    for move in range(1,moves):
+        print('Move %i to %s' % (move+1,coords))
+        left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
+        pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+        pygame.display.update()
+        pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+        pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+        pygame.display.update()
+        coords = getNextMove(coords[0],coords[1])
+
+    # simulate saving spot and rolling again from there
+    moves = displayDice()
+    left, top = leftTopCoordsOfBox(coords[0],coords[1])
+    pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+    print('Dice roll of %i' % moves)
+    print('Move 1 to %s' % str(coords))
+    pygame.display.update()
+    pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    pygame.display.update()
+
     for move in range(1,moves):
         print('Move %i to %s' % (move+1,coords))
         left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there

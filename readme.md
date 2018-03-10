@@ -7,6 +7,10 @@ Creating this game to refresh python proficiency and learn more about the pygame
 
 [Invent with Python](https://inventwithpython.com)
 
+[Game Rules](https://hobbylark.com/board-games/Aggravation-Board-Game-Instructions)
+
+[Game Rules 2](https://en.wikipedia.org/wiki/Aggravation_(board_game))
+
 Board Coordinates:
 ```
   0123456789012345678901234567890
@@ -33,6 +37,7 @@ To do list to be ordered:
 ```
     # Simulate one player moving around the board as a starting point..................DONE
     # Start with player 1 - P1START - .................................................DONE
+    # update player start is actually two clockwise from first position out of home
     # save game state of p1's end spot
     # save game state for number of marbles left in home 4,3,2,1
     # save game state for reaching starting point again and going into home base
