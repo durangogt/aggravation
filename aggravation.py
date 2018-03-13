@@ -56,15 +56,21 @@ BOARD_TEMPLATE =    ['...............................',
                      '...............................']
 
 
-P1START = 'BOARD_TEMPLATE[1][15]'
-P2START = 'BOARD_TEMPLATE[8][29]'
-P3START = 'BOARD_TEMPLATE[15][15]'
-P4START = 'BOARD_TEMPLATE[8][1]'
+P1START = (15,1)
+P2START = (29,8)
+P3START = (15,15)
+P4START = (1,8)
+
+P1END = None # stores the (x, y) of the last board spot per turn
+P2END = None # stores the (x, y) of the last board spot per turn
+P3END = None # stores the (x, y) of the last board spot per turn
+P4END = None # stores the (x, y) of the last board spot per turn
 
 FPS = 30 # frames per second, the general speed of the program
 WINDOWWIDTH = 640 # size of window's width in pixels
 WINDOWHEIGHT = 480 # size of windows' height in pixels
 REVEALSPEED = 8 # speed of player movement in simulation
+SIMSPEED = 250 # speed of game simulation
 BOXSIZE = 10 # size of box height & width in pixels (using box size for now to be the board spot marker)
 GAPSIZE = 10 # size of gap between boxes in pixels
 BOARDWIDTH = 30 # number of columns of icons
@@ -199,6 +205,10 @@ def getNextMove(x,y):
     # passed in x=19,y=1 # p1 at first corner
     # player is at [19,1] - if [x+2][1] != SPOT # means you are off the board and need to increment y & don't add 2 to x (go down)
     # 
+    # TODO: from inside getNextMove will eventually call decision functions like: takeShortCut() which would return true or false and only happen in 4 scenarios
+    #         and only happen if ended on one of those 4 spots...and this function (getNextMove) doesn't know about where the player ends, he only knows
+    #         what the nextMove on the board is regardless of other players on it, proximity to home base, shortcut or others homebase
+    #
     assert BOARD_TEMPLATE[y][x] == SPOT, 'Current spot passed in must be # or occupied by a player.'
     if (x,y) == (19,1):     # p1 outside corner
         nextMove = (19,2)
@@ -245,59 +255,42 @@ def startGameSimulation():
     # 1 or 6 to get out of home base
     # ...check readme for more on the to do list
     
-    # roll dice
+    # roll dice to see if sim player can get out 
     moves = displayDice()
-    #moves = 5
-    SIMSPEED = 250
     
-    # start at p1start
-    # P1START = 'BOARD_TEMPLATE[1][15]'
-    # P1START = (15,1)
-    p1start = (15,1)
-    left, top = leftTopCoordsOfBox(p1start[0],p1start[1])
+    # start sim player at P1START & move to first place
+    left, top = leftTopCoordsOfBox(P1START[0],P1START[1])
     pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
     print('Dice roll of %i' % moves)
-    print('Move 1 to %s' % str(p1start))
+    print('Move 1 to %s' % str(P1START))
     pygame.display.update()
     pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
     pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
 
-    coords = getNextMove(p1start[0],p1start[1])
+    coords = getNextMove(P1START[0],P1START[1]) # get next move
+    P1END = coords # set next move as p1 ending spot 
+    #assert P1END == P1START, 'First move is equal to ending point. Check player start or dice roll'
     # make this loop into one function called something like movePlayer(player,moves)
-    for move in range(1,moves):
-        print('Move %i to %s' % (move+1,coords))
-        left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
-        pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
-        pygame.display.update()
-        pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
-        pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
-        pygame.display.update()
-        coords = getNextMove(coords[0],coords[1])
-
-    # simulate saving spot and rolling again from there
-    moves = displayDice()
-    left, top = leftTopCoordsOfBox(coords[0],coords[1])
-    pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
-    print('Dice roll of %i' % moves)
-    print('Move 1 to %s' % str(coords))
-    pygame.display.update()
-    pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
-    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
-    pygame.display.update()
-
-    for move in range(1,moves):
-        print('Move %i to %s' % (move+1,coords))
-        left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
-        pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
-        pygame.display.update()
-        pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
-        pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
-        pygame.display.update()
-        coords = getNextMove(coords[0],coords[1])
+    while P1END != P1START:
+        # ROLL DICE & check each roll if landed on start
+        for move in range(1,moves):
+            print('Move %i to %s' % (move+1,coords))
+            left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
+            pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+            pygame.display.update()
+            pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+            pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+            pygame.display.update()
+            if P1END == P1START:
+                print('Player went around the board and landed directly on starting position.')
+                pygame.quit()
+                sys.exit()
+            coords = getNextMove(coords[0],coords[1])
+            P1END = coords
 
     # wait for debugging
-    print('End of roll...')
+    print('End of all the way around the board sim...')
     pygame.time.wait(3000)
     
     # move along the # signs on the board clockwise - animate (how to tell where you are at on the board? and differientiate between same row diff columns?)
