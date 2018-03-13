@@ -274,7 +274,9 @@ def startGameSimulation():
 
     coords = getNextMove(P1START[0],P1START[1]) # get next move from starting point
     P1END = coords # set next move as p1 ending spot 
+
     assert P1END != P1START, 'First move is equal to ending point. Check player start or dice roll'
+
     # make this loop into one function called something like movePlayer(player,moves)
     while P1END != P1START:
         # ROLL DICE & check each roll if landed on start
@@ -287,6 +289,8 @@ def startGameSimulation():
                 sys.exit()
             coords = getNextMove(coords[0],coords[1]) # get next board spot
             P1END = coords
+        moves = displayDice()
+        print('Dice roll of %i' % moves)
 
     # wait for debugging
     print('End of all the way around the board sim...')
