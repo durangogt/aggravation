@@ -244,49 +244,48 @@ def getNextMove(x,y):
         nextMove = (x,y-1)
     return nextMove
 
-def startGameSimulation():
-    # Simulate one player moving around the board as a starting point..................DONE
-    # Start with player 1 - P1START - .................................................DONE
-    # save game state of p1's end spot
-    # save game state for number of marbles left in home 4,3,2,1
-    # save game state for reaching starting point again and going into home base
-    # if roll doubles go again
-    # if roll exact in middle give the option
-    # 1 or 6 to get out of home base
-    # ...check readme for more on the to do list
-    
-    # roll dice to see if sim player can get out 
-    moves = displayDice()
-    
-    # start sim player at P1START & move to first place
-    left, top = leftTopCoordsOfBox(P1START[0],P1START[1])
+def drawPlayerBox(playerColor,coords):
+    # draw player's box in board coordinates x,y
+    left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
     pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
-    print('Dice roll of %i' % moves)
-    print('Move 1 to %s' % str(P1START))
     pygame.display.update()
     pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
     pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
 
-    coords = getNextMove(P1START[0],P1START[1]) # get next move
+def startGameSimulation():
+    # Simulate one player moving around the board as a starting point..................DONE
+    # Start with player 1 - P1START - .................................................DONE
+    # save game state of p1's end spot.................................................DONE
+    # save game state for number of marbles left in home 4,3,2,1
+    # save game state for reaching starting point again and going into home base
+    # if roll doubles go again
+    # if roll exact in middle give the option to take the shortcut
+    # 1 or 6 to get out of home base
+    # ...check readme for more on the to do list
+    
+    # roll dice to see if sim player can get out and/or move along
+    moves = displayDice()
+    
+    # start sim player at P1START & move to first place if p1start is in home
+    print('Dice roll of %i' % moves)
+    print('Move 1 to %s' % str(P1START))
+    drawPlayerBox(P1COLOR,P1START)
+
+    coords = getNextMove(P1START[0],P1START[1]) # get next move from starting point
     P1END = coords # set next move as p1 ending spot 
-    #assert P1END == P1START, 'First move is equal to ending point. Check player start or dice roll'
+    assert P1END != P1START, 'First move is equal to ending point. Check player start or dice roll'
     # make this loop into one function called something like movePlayer(player,moves)
     while P1END != P1START:
         # ROLL DICE & check each roll if landed on start
         for move in range(1,moves):
             print('Move %i to %s' % (move+1,coords))
-            left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
-            pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
-            pygame.display.update()
-            pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
-            pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
-            pygame.display.update()
+            drawPlayerBox(P1COLOR,coords)
             if P1END == P1START:
                 print('Player went around the board and landed directly on starting position.')
                 pygame.quit()
                 sys.exit()
-            coords = getNextMove(coords[0],coords[1])
+            coords = getNextMove(coords[0],coords[1]) # get next board spot
             P1END = coords
 
     # wait for debugging
