@@ -61,8 +61,6 @@ P2START = (29,8)
 P3START = (15,15)
 P4START = (1,8)
 
-P1HOME = [(3,2),(5,3),(7,4),(9,5)]
-
 P1END = None # stores the (x, y) of the last board spot per turn
 P2END = None # stores the (x, y) of the last board spot per turn
 P3END = None # stores the (x, y) of the last board spot per turn
@@ -255,6 +253,18 @@ def drawPlayerBox(playerColor,coords):
     pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
 
+def removeFromHome(P1HOME):
+    # remove one marble if at least one exists from home & draw blank spot at home position that was removed
+    # return true if removed and false if none left
+    if (len(P1HOME) >= 1):
+        remove = P1HOME[(len(P1HOME)-1)]
+        P1HOME = P1HOME[:(len(P1HOME)-1)] # update global variable
+        left, top = leftTopCoordsOfBox(remove[0],remove[1]) 
+        pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE)) # animate marble removed
+        pygame.display.update()
+        #return True
+        return P1HOME
+
 def startGameSimulation():
     # Simulate one player moving around the board as a starting point..................DONE
     # Start with player 1 - P1START - .................................................DONE
@@ -268,12 +278,13 @@ def startGameSimulation():
     
     # roll dice to see if sim player can get out and/or move along
     moves = displayDice()
-    P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # might have to be a global
-    p1marble = P1HOME[3] # set current marble marker
-    P1HOME = P1HOME[:3]  # remove 1 dice from home
-    left, top = leftTopCoordsOfBox(p1marble[0],p1marble[1]) 
-    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE)) # animate marble gone
-    pygame.display.update()    
+    P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # might have to be a global, WHY CAN'T THIS BE REFERENCED WHEN INIT ABOVE?
+    #p1marble = P1HOME[3] # set current marble marker
+    #P1HOME = P1HOME[:3]  # remove 1 dice from home
+    #left, top = leftTopCoordsOfBox(p1marble[0],p1marble[1]) 
+    #pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE)) # animate marble gone
+    #pygame.display.update()    
+    P1HOME = removeFromHome(P1HOME)
 
     # start sim player at P1START & move to first place if p1start is in home
     print('Dice roll of %i' % moves)
@@ -301,16 +312,13 @@ def startGameSimulation():
         moves = displayDice()
         print('Dice roll of %i' % moves)
 
+    #######################################################################
     # DO IT ALL OVER AGAIN HARD CODED TO MAKE SURE IT LOOKS THE WAY WE WANT
-    
+    #######################################################################
     # roll dice to see if sim player can get out and/or move along
     moves = displayDice()
 
-    p1marble = P1HOME[2] # set current marble marker
-    P1HOME = P1HOME[:2]  # remove 1 dice from home
-    left, top = leftTopCoordsOfBox(p1marble[0],p1marble[1]) 
-    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE)) # animate marble gone
-    pygame.display.update()    
+    P1HOME = removeFromHome(P1HOME)
 
     # start sim player at P1START & move to first place if p1start is in home
     print('Dice roll of %i' % moves)
