@@ -268,7 +268,7 @@ def startGameSimulation():
     
     # roll dice to see if sim player can get out and/or move along
     moves = displayDice()
-    
+    P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # might have to be a global
     p1marble = P1HOME[3] # set current marble marker
     P1HOME = P1HOME[:3]  # remove 1 dice from home
     left, top = leftTopCoordsOfBox(p1marble[0],p1marble[1]) 
@@ -305,7 +305,7 @@ def startGameSimulation():
     
     # roll dice to see if sim player can get out and/or move along
     moves = displayDice()
-    
+
     p1marble = P1HOME[2] # set current marble marker
     P1HOME = P1HOME[:2]  # remove 1 dice from home
     left, top = leftTopCoordsOfBox(p1marble[0],p1marble[1]) 
