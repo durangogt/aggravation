@@ -255,7 +255,7 @@ def drawPlayerBox(playerColor,coords):
 
 def removeFromHome(P1HOME):
     # remove one marble if at least one exists from home & draw blank spot at home position that was removed
-    # return true if removed and false if none left
+    # return true if removed and false if none left...
     if (len(P1HOME) >= 1):
         remove = P1HOME[(len(P1HOME)-1)]
         P1HOME = P1HOME[:(len(P1HOME)-1)] # update global variable
@@ -278,7 +278,7 @@ def startGameSimulation():
     
     # roll dice to see if sim player can get out and/or move along
     moves = displayDice()
-    P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # might have to be a global, WHY CAN'T THIS BE REFERENCED WHEN INIT ABOVE?
+    P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # not global cuz it changes so either in sim or main and passed around?
     #p1marble = P1HOME[3] # set current marble marker
     #P1HOME = P1HOME[:3]  # remove 1 dice from home
     #left, top = leftTopCoordsOfBox(p1marble[0],p1marble[1]) 
