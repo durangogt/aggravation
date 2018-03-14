@@ -61,6 +61,8 @@ P2START = (29,8)
 P3START = (15,15)
 P4START = (1,8)
 
+P1HOME = [(3,2),(5,3),(7,4),(9,5)]
+
 P1END = None # stores the (x, y) of the last board spot per turn
 P2END = None # stores the (x, y) of the last board spot per turn
 P3END = None # stores the (x, y) of the last board spot per turn
@@ -267,6 +269,12 @@ def startGameSimulation():
     # roll dice to see if sim player can get out and/or move along
     moves = displayDice()
     
+    p1marble = P1HOME[3] # set current marble marker
+    P1HOME = P1HOME[:3]  # remove 1 dice from home
+    left, top = leftTopCoordsOfBox(p1marble[0],p1marble[1]) 
+    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE)) # animate marble gone
+    pygame.display.update()    
+
     # start sim player at P1START & move to first place if p1start is in home
     print('Dice roll of %i' % moves)
     print('Move 1 to %s' % str(P1START))
@@ -285,6 +293,44 @@ def startGameSimulation():
             drawPlayerBox(P1COLOR,coords)
             if P1END == P1START:
                 print('Player went around the board and landed directly on starting position.')
+                break
+                #pygame.quit()
+                #sys.exit()
+            coords = getNextMove(coords[0],coords[1]) # get next board spot
+            P1END = coords
+        moves = displayDice()
+        print('Dice roll of %i' % moves)
+
+    # DO IT ALL OVER AGAIN HARD CODED TO MAKE SURE IT LOOKS THE WAY WE WANT
+    
+    # roll dice to see if sim player can get out and/or move along
+    moves = displayDice()
+    
+    p1marble = P1HOME[2] # set current marble marker
+    P1HOME = P1HOME[:2]  # remove 1 dice from home
+    left, top = leftTopCoordsOfBox(p1marble[0],p1marble[1]) 
+    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE)) # animate marble gone
+    pygame.display.update()    
+
+    # start sim player at P1START & move to first place if p1start is in home
+    print('Dice roll of %i' % moves)
+    print('Move 1 to %s' % str(P1START))
+    drawPlayerBox(P1COLOR,P1START)
+
+    coords = getNextMove(P1START[0],P1START[1]) # get next move from starting point
+    P1END = coords # set next move as p1 ending spot 
+
+    assert P1END != P1START, 'First move is equal to ending point. Check player start or dice roll'
+
+    # make this loop into one function called something like movePlayer(player,moves)
+    while P1END != P1START:
+        # ROLL DICE & check each roll if landed on start
+        for move in range(1,moves):
+            print('Move %i to %s' % (move+1,coords))
+            drawPlayerBox(P1COLOR,coords)
+            if P1END == P1START:
+                print('Player went around the board and landed directly on starting position.')
+                #break
                 pygame.quit()
                 sys.exit()
             coords = getNextMove(coords[0],coords[1]) # get next board spot
