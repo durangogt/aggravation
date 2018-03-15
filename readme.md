@@ -38,17 +38,18 @@ To do list to be ordered:
     # Simulate one player moving around the board as a starting point..................DONE
     # Start with player 1 - P1START - .................................................DONE
     # update player start is actually two clockwise from first position out of home
-    # save game state of p1's end spot
-    # save game state for number of marbles left in home 4,3,2,1
+    # save game state of p1's end spot.................................................DONE
+    # save game state for number of marbles left in home 4,3,2,1.......................ALMOST
     # save game state for reaching starting point again and going into home base
     # if roll doubles go again
     # if roll exact in middle give the option
     # 1 or 6 to get out of home base
-    # allow user to play
+    # allow user to play (might be easier than finishing simulation at first)
     # simulate whole games and tally score
     #   * who wins the most? the player who starts first, etc...
     # tally scores in cloud scoreboard
     # update readme documentation
+
 ```
 
 Usage
