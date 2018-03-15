@@ -55,7 +55,6 @@ BOARD_TEMPLATE =    ['...............................',
                      '...........#.#.#.#.#...........',
                      '...............................']
 
-
 P1START = (15,1)
 P2START = (29,8)
 P3START = (15,15)
@@ -75,8 +74,11 @@ BOXSIZE = 10 # size of box height & width in pixels (using box size for now to b
 GAPSIZE = 10 # size of gap between boxes in pixels
 BOARDWIDTH = 30 # number of columns of icons
 BOARDHEIGHT = 16 # number of rows of icons
+BASICFONTSIZE = 20 # font size of options buttons
+
 BLANK = '.'
 SPOT = '#'
+
 #assert (BOARDWIDTH * BOARDHEIGHT) % 2 == 0, 'Board needs to have an even number of boxes for pairs of matches.'
 XMARGIN = int((WINDOWWIDTH - (BOARDWIDTH * (BOXSIZE + GAPSIZE))) / 2)
 YMARGIN = int((WINDOWHEIGHT - (BOARDHEIGHT * (BOXSIZE + GAPSIZE))) / 2)
@@ -92,7 +94,13 @@ YELLOW   = (255, 255,   0)
 ORANGE   = (255, 128,   0)
 PURPLE   = (255,   0, 255)
 CYAN     = (  0, 255, 255)
+BLACK    = (  0,   0,   0)
 
+BUTTONCOLOR = WHITE
+BUTTONTEXTCOLOR = BLACK
+MESSAGECOLOR = WHITE
+TILECOLOR = GREEN
+TEXTCOLOR = WHITE
 BGCOLOR = NAVYBLUE
 LIGHTBGCOLOR = GRAY
 BOXCOLOR = WHITE
@@ -104,12 +112,18 @@ P3COLOR = GREEN
 P4COLOR = BLUE
 
 def main():
-    global FPSCLOCK, DISPLAYSURF
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, RESET_SURF, RESET_RECT, NEW_SURF, NEW_RECT, SOLVE_SURF, SOLVE_RECT
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
-
     pygame.display.set_caption('Aggravation')
+
+    BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
+
+    # Store the option buttons and their rectangles in OPTIONS.
+    RESET_SURF, RESET_RECT = makeText('Reset',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
+    NEW_SURF,   NEW_RECT   = makeText('New Game', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
+    SOLVE_SURF, SOLVE_RECT = makeText('Solve',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
 
     DISPLAYSURF.fill(BGCOLOR)
 
@@ -155,6 +169,10 @@ def drawBoard():
             if BOARD_TEMPLATE[boxy][boxx] == SPOT:
               # Draw a small box representing a game board spot
               pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    
+    DISPLAYSURF.blit(RESET_SURF, RESET_RECT)
+    DISPLAYSURF.blit(NEW_SURF, NEW_RECT)
+    DISPLAYSURF.blit(SOLVE_SURF, SOLVE_RECT)    
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates
@@ -233,6 +251,13 @@ def getNextMove(x,y):
     elif ( (x,y)[0] == 1 or (x,y)[0] == 11 ):   # vertical left side of board, moves up/clockwise 
         nextMove = (x,y-1)
     return nextMove
+
+def makeText(text, color, bgcolor, top, left):
+    # create the Surface and Rect objects for some text.
+    textSurf = BASICFONT.render(text, True, color, bgcolor)
+    textRect = textSurf.get_rect()
+    textRect.topleft = (top, left)
+    return (textSurf, textRect)
 
 def drawPlayerBox(playerColor,coords):
     # draw player's box in board coordinates x,y
