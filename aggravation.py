@@ -151,17 +151,20 @@ def main():
                     if ROLL_RECT.collidepoint(event.pos): #STARTING WITH MOVING JUST ONE PIECE FROM HOME AND AROUND BOARD EVERYTIME USER CLICKS ROLL
                         print("Clicked on the ROLL Button") # clicked on ROLL button
                         moves = displayDice()
-                        if ((p1StartOccuppied == False) and (moves == 1 or moves == 6)): # get out of home roll but need to check if something is already on the "start" position
-                            P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
-                            drawPlayerBox(P1COLOR,P1START) # draw player on their start position
-                            P1END = P1START
-                            p1StartOccuppied = True
                         if (p1StartOccuppied == True): # continue moving using P1END as the new start from position
+                            drawPlayerBox(BOXCOLOR,P1END,False) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
+                            p1StartOccuppied = False
                             for move in range(0,moves):
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
                                 print('Move %i to %s' % (move,coords))
-                                drawPlayerBox(P1COLOR,coords) # draw player on their next position
+                                drawPlayerBox(P1COLOR,coords,True) # animate player on their next position
                                 P1END = coords # reset last spot to new spot
+                            drawPlayerBox(P1COLOR,coords,False) # draw player on their last position
+                        elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6)): # get out of home roll but need to check if something is already on the "start" position
+                            P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
+                            drawPlayerBox(P1COLOR,P1START,False) # draw player on their start position
+                            P1END = P1START # set end of turn locator
+                            p1StartOccuppied = True
                     elif NEW_RECT.collidepoint(event.pos):
                         print("Clicked on the New Game Button") # clicked on New Game button
                     elif SOLVE_RECT.collidepoint(event.pos):
@@ -300,14 +303,15 @@ def makeText(text, color, bgcolor, top, left):
     textRect.topleft = (top, left)
     return (textSurf, textRect)
 
-def drawPlayerBox(playerColor,coords):
+def drawPlayerBox(playerColor,coords,animate):
     # draw player's box in board coordinates x,y
     left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
-    pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+    pygame.draw.rect(DISPLAYSURF, playerColor, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
-    #pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
-    #pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
-    #pygame.display.update()
+    if animate == True:
+        pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+        pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+        pygame.display.update()
 
 def removeFromHome(PHOME):
     # remove one marble if at least one exists from home & draw blank spot at home position that was removed
