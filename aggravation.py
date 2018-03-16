@@ -112,7 +112,7 @@ P3COLOR = GREEN
 P4COLOR = BLUE
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, RESET_SURF, RESET_RECT, NEW_SURF, NEW_RECT, SOLVE_SURF, SOLVE_RECT
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, NEW_SURF, NEW_RECT, SOLVE_SURF, SOLVE_RECT
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -121,7 +121,7 @@ def main():
     BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
 
     # Store the option buttons and their rectangles in OPTIONS.
-    RESET_SURF, RESET_RECT = makeText('Reset',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
+    ROLL_SURF, ROLL_RECT = makeText('Roll',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
     NEW_SURF,   NEW_RECT   = makeText('New Game', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
     SOLVE_SURF, SOLVE_RECT = makeText('Solve',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
 
@@ -132,18 +132,23 @@ def main():
 
         DISPLAYSURF.fill(BGCOLOR) # drawing the window
         drawBoard()
-        startGameSimulation()
+        #startGameSimulation()
 
+        checkForQuit()
         for event in pygame.event.get(): # event handling loop
-            if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
-                pygame.quit()
-                sys.exit()
-            elif event.type == MOUSEMOTION:
-                mousex, mousey = event.pos
-            elif event.type == MOUSEBUTTONUP:
+            if event.type == MOUSEBUTTONUP:
                 mousex, mousey = event.pos
                 mouseClicked = True
-                displayDice()
+                boxx, boxy = getBoxAtPixel(mousex, mousey)
+                if boxx == None and boxy == None:
+                    # check if the user clicked on an option button
+                    if ROLL_RECT.collidepoint(event.pos):
+                        print("Clicked on the ROLL Button") # clicked on ROLL button
+                        displayDice()
+                    elif NEW_RECT.collidepoint(event.pos):
+                        print("Clicked on the New Game Button") # clicked on New Game button
+                    elif SOLVE_RECT.collidepoint(event.pos):
+                        print("Clicked on the Solve Button") # clicked on Solve button
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
@@ -170,7 +175,7 @@ def drawBoard():
               # Draw a small box representing a game board spot
               pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     
-    DISPLAYSURF.blit(RESET_SURF, RESET_RECT)
+    DISPLAYSURF.blit(ROLL_SURF, ROLL_RECT)
     DISPLAYSURF.blit(NEW_SURF, NEW_RECT)
     DISPLAYSURF.blit(SOLVE_SURF, SOLVE_RECT)    
 
@@ -179,6 +184,27 @@ def leftTopCoordsOfBox(boxx, boxy):
     left = boxx * (BOXSIZE + GAPSIZE) + XMARGIN
     top = boxy * (BOXSIZE + GAPSIZE) + YMARGIN
     return (left, top)
+
+def getBoxAtPixel(x, y):
+    for boxx in range(BOARDWIDTH):
+        for boxy in range(BOARDHEIGHT):
+            left, top = leftTopCoordsOfBox(boxx, boxy)
+            boxRect = pygame.Rect(left, top, BOXSIZE, BOXSIZE)
+            if boxRect.collidepoint(x, y):
+                return (boxx, boxy)
+    return (None, None)
+
+def terminate():
+    pygame.quit()
+    sys.exit()
+
+def checkForQuit():
+    for event in pygame.event.get(QUIT): # get all the QUIT events
+        terminate() # terminate if any QUIT events are present
+    for event in pygame.event.get(KEYUP): # get all the KEYUP events
+        if event.key == K_ESCAPE:
+            terminate() # terminate if the KEYUP event was for the Esc key
+        pygame.event.post(event) # put the other KEYUP event objects back
 
 def roll_a_dice():
     """
@@ -189,21 +215,19 @@ def roll_a_dice():
 
 def displayDice():
     """
-    Display two numbers representing dice & return combined integer
+    Display a number representing 1 die roll & return the integer
     """
     die1 = roll_a_dice()
-    die2 = roll_a_dice()
-    dieTotal = die1 + die2
     # testing of text for showing dice rolls via text at first
     fontObj = pygame.font.Font('freesansbold.ttf', 32)
-    diceString = 'D1: %s   D2: %s  Total: %i' % (die1,die2,dieTotal)
+    diceString = 'D1: %s ' % die1
     textSurfaceObj = fontObj.render(diceString, True, GREEN, BLUE)
     textRectObj = textSurfaceObj.get_rect()
     textRectObj.center = (175, 50) # top left corner
     DISPLAYSURF.blit(textSurfaceObj, textRectObj)
     pygame.display.update()
     pygame.time.wait(1000) # 1000 milliseconds = 1 sec
-    return dieTotal
+    return die1
 
 def getNextMove(x,y):
     # given on board spot x,y what is the next board spot

@@ -40,10 +40,12 @@ To do list to be ordered:
     # update player start is actually two clockwise from first position out of home
     # save game state of p1's end spot.................................................DONE
     # save game state for number of marbles left in home 4,3,2,1.......................ALMOST
-    # save game state for reaching starting point again and going into home base
-    # if roll doubles go again
+    # last board spot before going into home base is 2 spots prior to "start"
+    # update dice roll to only use one die.............................................DONE
+    # a roll of 6 allows to go again
     # if roll exact in middle give the option
     # 1 or 6 to get out of home base
+    # update dice roll to show pic of die (use other project for code)
     # allow user to play (might be easier than finishing simulation at first)
     # simulate whole games and tally score
     #   * who wins the most? the player who starts first, etc...
