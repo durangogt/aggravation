@@ -189,16 +189,29 @@ def drawBoard():
             left, top = leftTopCoordsOfBox(boxx, boxy)
             if BOARD_TEMPLATE[boxy][boxx] == '1':
               # Draw a small box representing a game board spot for player 1 red
-              pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+              if boxx == 15:
+                  pygame.draw.circle(DISPLAYSURF, P1COLOR, (left+5, top+5), 5, 0)
+              else:
+                  pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+
             if BOARD_TEMPLATE[boxy][boxx] == '2':
               # Draw a small box representing a game board spot for player 2 yellow
-              pygame.draw.rect(DISPLAYSURF, P2COLOR, (left, top, BOXSIZE, BOXSIZE))              
+              if boxy == 8:
+                  pygame.draw.circle(DISPLAYSURF, P2COLOR, (left+5, top+5), 5, 0)
+              else:
+                  pygame.draw.rect(DISPLAYSURF, P2COLOR, (left, top, BOXSIZE, BOXSIZE))
             if BOARD_TEMPLATE[boxy][boxx] == '3':
               # Draw a small box representing a game board spot for player 3 green
-              pygame.draw.rect(DISPLAYSURF, P3COLOR, (left, top, BOXSIZE, BOXSIZE))              
+              if boxx == 15:
+                  pygame.draw.circle(DISPLAYSURF, P3COLOR, (left+5, top+5), 5, 0)
+              else:
+                  pygame.draw.rect(DISPLAYSURF, P3COLOR, (left, top, BOXSIZE, BOXSIZE))
             if BOARD_TEMPLATE[boxy][boxx] == '4':
               # Draw a small box representing a game board spot for player 4 blue
-              pygame.draw.rect(DISPLAYSURF, P4COLOR, (left, top, BOXSIZE, BOXSIZE))              
+              if boxy == 8:
+                  pygame.draw.circle(DISPLAYSURF, P4COLOR, (left+5, top+5), 5, 0)
+              else:
+                  pygame.draw.rect(DISPLAYSURF, P4COLOR, (left, top, BOXSIZE, BOXSIZE))
             if BOARD_TEMPLATE[boxy][boxx] == SPOT:
               # Draw a small box representing a game board spot
               pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
