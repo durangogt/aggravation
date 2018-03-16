@@ -53,6 +53,7 @@ To do list to be ordered:
     # tally scores in cloud scoreboard
     # update readme documentation
 
+
 ```
 
 Usage
@@ -90,3 +91,9 @@ add description here & a new section for each function
 | x | <code>string</code> | aggravation xxx. |
 | y | <code>string</code> | aggravation xxx. |
 
+
+### 1 MARBLE ROLLING OPTIONS ###
+| Param | Type | Description |
+| --- | --- | --- |
+| x | <code>string</code> | aggravation xxx. |
+| y | <code>string</code> | aggravation xxx. |

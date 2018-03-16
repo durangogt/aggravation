@@ -107,7 +107,7 @@ BOXCOLOR = WHITE
 HIGHLIGHTCOLOR = BLUE
 
 P1COLOR = RED
-P2COLOR = YELLOW
+P2COLOR = BLACK
 P3COLOR = GREEN
 P4COLOR = BLUE
 
@@ -160,11 +160,13 @@ def main():
                                 drawPlayerBox(P1COLOR,coords,True) # animate player on their next position
                                 P1END = coords # reset last spot to new spot
                             drawPlayerBox(P1COLOR,coords,False) # draw player on their last position
+
                         elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6)): # get out of home roll but need to check if something is already on the "start" position
                             P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
                             drawPlayerBox(P1COLOR,P1START,False) # draw player on their start position
                             P1END = P1START # set end of turn locator
                             p1StartOccuppied = True
+
                         elif (P1END != P1START):
                             drawPlayerBox(BOXCOLOR,P1END,False) # since moving off LAST position, redraw as normal open spot
                             for move in range(0,moves):
@@ -173,6 +175,7 @@ def main():
                                 drawPlayerBox(P1COLOR,coords,True) # animate player on their next position
                                 P1END = coords # reset last spot to new spot
                             drawPlayerBox(P1COLOR,coords,False) # draw player on their last position                            
+                            
                     elif NEW_RECT.collidepoint(event.pos):
                         print("Clicked on the New Game Button") # clicked on New Game button
                     elif SOLVE_RECT.collidepoint(event.pos):
