@@ -151,9 +151,9 @@ def main():
                     if ROLL_RECT.collidepoint(event.pos): #STARTING WITH MOVING JUST ONE PIECE FROM HOME AND AROUND BOARD EVERYTIME USER CLICKS ROLL
                         print("Clicked on the ROLL Button") # clicked on ROLL button
                         moves = displayDice()
-                        if (p1StartOccuppied == True): # continue moving using P1END as the new start from position
+                        if ((p1StartOccuppied == True) and (P1END == P1START)): # continue moving using P1END as the new start from position (ONLY FOR THE FIRST MARBLE FOR NOW)
                             drawPlayerBox(BOXCOLOR,P1END,False) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
-                            p1StartOccuppied = False
+                            #p1StartOccuppied = False  # TEMPORARY CODE FOR RUNNING JUST ONE MARBLE THROUGH, uncomment if want to remove more marbles from home
                             for move in range(0,moves):
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
                                 print('Move %i to %s' % (move,coords))
@@ -165,6 +165,14 @@ def main():
                             drawPlayerBox(P1COLOR,P1START,False) # draw player on their start position
                             P1END = P1START # set end of turn locator
                             p1StartOccuppied = True
+                        elif (P1END != P1START):
+                            drawPlayerBox(BOXCOLOR,P1END,False) # since moving off LAST position, redraw as normal open spot
+                            for move in range(0,moves):
+                                coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
+                                print('Move %i to %s' % (move,coords))
+                                drawPlayerBox(P1COLOR,coords,True) # animate player on their next position
+                                P1END = coords # reset last spot to new spot
+                            drawPlayerBox(P1COLOR,coords,False) # draw player on their last position                            
                     elif NEW_RECT.collidepoint(event.pos):
                         print("Clicked on the New Game Button") # clicked on New Game button
                     elif SOLVE_RECT.collidepoint(event.pos):

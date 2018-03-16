@@ -44,7 +44,7 @@ To do list to be ordered:
     # update dice roll to only use one die.............................................DONE
     # a roll of 6 allows to go again
     # if roll exact in middle give the option
-    # 1 or 6 to get out of home base if "start" isn't occupied
+    # 1 or 6 to get out of home base if "start" isn't occupied.........................DONE
     # update dice roll to show pic of die (use other project for code)
     # allow user to play (might be easier than finishing simulation at first)
     # simulate whole games and tally score
