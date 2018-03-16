@@ -55,7 +55,7 @@ BOARD_TEMPLATE =    ['...............................',
                      '...........#.#.#.#.#...........',
                      '...............................']
 
-P1START = (15,1)
+P1START = (19,1)
 P2START = (29,8)
 P3START = (15,15)
 P4START = (1,8)
@@ -127,11 +127,17 @@ def main():
 
     DISPLAYSURF.fill(BGCOLOR)
 
+    P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # not global cuz it changes so either in main and passed around or where?
+
+    DISPLAYSURF.fill(BGCOLOR) # drawing the window
+    drawBoard()
+    p1StartOccuppied = False
+
     while True: # main game loop
         mouseClicked = False
 
-        DISPLAYSURF.fill(BGCOLOR) # drawing the window
-        drawBoard()
+        #DISPLAYSURF.fill(BGCOLOR) # drawing the window
+        #drawBoard()
         #startGameSimulation()
 
         checkForQuit()
@@ -142,9 +148,20 @@ def main():
                 boxx, boxy = getBoxAtPixel(mousex, mousey)
                 if boxx == None and boxy == None:
                     # check if the user clicked on an option button
-                    if ROLL_RECT.collidepoint(event.pos):
+                    if ROLL_RECT.collidepoint(event.pos): #STARTING WITH MOVING JUST ONE PIECE FROM HOME AND AROUND BOARD EVERYTIME USER CLICKS ROLL
                         print("Clicked on the ROLL Button") # clicked on ROLL button
-                        displayDice()
+                        moves = displayDice()
+                        if ((p1StartOccuppied == False) and (moves == 1 or moves == 6)): # get out of home roll but need to check if something is already on the "start" position
+                            P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
+                            drawPlayerBox(P1COLOR,P1START) # draw player on their start position
+                            P1END = P1START
+                            p1StartOccuppied = True
+                        if (p1StartOccuppied == True): # continue moving using P1END as the new start from position
+                            for move in range(0,moves):
+                                coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
+                                print('Move %i to %s' % (move,coords))
+                                drawPlayerBox(P1COLOR,coords) # draw player on their next position
+                                P1END = coords # reset last spot to new spot
                     elif NEW_RECT.collidepoint(event.pos):
                         print("Clicked on the New Game Button") # clicked on New Game button
                     elif SOLVE_RECT.collidepoint(event.pos):
@@ -288,13 +305,14 @@ def drawPlayerBox(playerColor,coords):
     left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
     pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
-    pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
-    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
-    pygame.display.update()
+    #pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+    #pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    #pygame.display.update()
 
 def removeFromHome(PHOME):
     # remove one marble if at least one exists from home & draw blank spot at home position that was removed
-    # return true if removed and false if none left...
+    # return new home list with one marble removed 
+    # will need another function to addToHome(PHOME) when we get to other players going on top of another
     if (len(PHOME) >= 1):
         remove = PHOME[(len(PHOME)-1)]
         PHOME = PHOME[:(len(PHOME)-1)] # update global variable

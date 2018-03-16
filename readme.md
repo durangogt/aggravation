@@ -37,14 +37,14 @@ To do list to be ordered:
 ```
     # Simulate one player moving around the board as a starting point..................DONE
     # Start with player 1 - P1START - .................................................DONE
-    # update player start is actually two clockwise from first position out of home
+    # update player start is actually two clockwise from first position out of home....DONE
     # save game state of p1's end spot.................................................DONE
-    # save game state for number of marbles left in home 4,3,2,1.......................ALMOST
-    # last board spot before going into home base is 2 spots prior to "start"
+    # save game state for number of marbles left in home 4,3,2,1.......................DONE
+    # check 2 spots prior to "start" for ability to go home
     # update dice roll to only use one die.............................................DONE
     # a roll of 6 allows to go again
     # if roll exact in middle give the option
-    # 1 or 6 to get out of home base
+    # 1 or 6 to get out of home base if "start" isn't occupied
     # update dice roll to show pic of die (use other project for code)
     # allow user to play (might be easier than finishing simulation at first)
     # simulate whole games and tally score
