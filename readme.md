@@ -92,8 +92,15 @@ add description here & a new section for each function
 | y | <code>string</code> | aggravation xxx. |
 
 
-### 1 MARBLE ROLLING OPTIONS ###
-| Param | Type | Description |
-| --- | --- | --- |
-| x | <code>string</code> | aggravation xxx. |
-| y | <code>string</code> | aggravation xxx. |
+### 1 PLAYER'S MARBLES ROLLING OPTIONS not considering other players yet ###
+| DiceRoll | StartOccuppied | NumInHome | Actions | UserChoice |
+| --- | --- | --- | --- | --- |
+| 1-6    | True  | 3   | move marble from start die moves                    | False |
+| 1-6    | True  | 1-3 | chose to move an on board marble                    | True  |
+| 1 or 6 | False | 4   | move to start                                       | False |
+| 1 or 6 | False | 1-3 | chose to move out of home or move a on board marble | True  |
+| 2-5    | False | 4   | turn is over, must roll 1 or 6 to get out           | False |
+| 2-5    | False | 3   | move only marble on table die roll                  | False |
+| 2-5    | False | 2   | move one of two marbles on table dice roll          | True  |
+| 2-5    | False | 1   | move one of three marbles on table dice roll        | True  |
+| 2-5    | False | 0   | move one of four marbles on table dice roll         | True  |
