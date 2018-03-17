@@ -112,7 +112,7 @@ P3COLOR = GREEN
 P4COLOR = BLUE
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, NEW_SURF, NEW_RECT, SOLVE_SURF, SOLVE_RECT
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, NEW_SURF, NEW_RECT, EXIT_SURF, EXIT_RECT
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -123,7 +123,7 @@ def main():
     # Store the option buttons and their rectangles in OPTIONS.
     ROLL_SURF, ROLL_RECT = makeText('Roll',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
     NEW_SURF,   NEW_RECT   = makeText('New Game', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
-    SOLVE_SURF, SOLVE_RECT = makeText('Solve',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
+    EXIT_SURF, EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
 
     DISPLAYSURF.fill(BGCOLOR)
 
@@ -175,11 +175,12 @@ def main():
                                 drawPlayerBox(P1COLOR,coords,True) # animate player on their next position
                                 P1END = coords # reset last spot to new spot
                             drawPlayerBox(P1COLOR,coords,False) # draw player on their last position                            
-                            
+
                     elif NEW_RECT.collidepoint(event.pos):
                         print("Clicked on the New Game Button") # clicked on New Game button
-                    elif SOLVE_RECT.collidepoint(event.pos):
-                        print("Clicked on the Solve Button") # clicked on Solve button
+                    elif EXIT_RECT.collidepoint(event.pos):
+                        print("Clicked on the EXIT Button") # clicked on EXIT button
+                        terminate()
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
@@ -221,7 +222,7 @@ def drawBoard():
     
     DISPLAYSURF.blit(ROLL_SURF, ROLL_RECT)
     DISPLAYSURF.blit(NEW_SURF, NEW_RECT)
-    DISPLAYSURF.blit(SOLVE_SURF, SOLVE_RECT)    
+    DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)    
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates
