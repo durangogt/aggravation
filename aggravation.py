@@ -128,6 +128,7 @@ def main():
     DISPLAYSURF.fill(BGCOLOR)
 
     P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # not global cuz it changes so either in main and passed around or where?
+    P1END = None
 
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
     drawBoard()
@@ -167,6 +168,9 @@ def main():
                             P1END = P1START # set end of turn locator
                             p1StartOccuppied = True
 
+                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6)): # 
+                            print("Turn over...")
+
                         elif (P1END != P1START):
                             drawPlayerBox(BOXCOLOR,P1END,False) # since moving off LAST position, redraw as normal open spot
                             for move in range(0,moves):
@@ -187,7 +191,7 @@ def main():
         FPSCLOCK.tick(FPS)
 
 def drawBoard():
-    # Draws all of the boxes in their covered or revealed state.
+    # ...
     for boxx in range(BOARDWIDTH):
         for boxy in range(BOARDHEIGHT):
             left, top = leftTopCoordsOfBox(boxx, boxy)
