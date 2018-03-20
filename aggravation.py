@@ -174,6 +174,7 @@ def main():
                         elif (P1END != P1START):
                             drawPlayerBox(BOXCOLOR,P1END,False) # since moving off LAST position, redraw as normal open spot
                             for move in range(0,moves):
+                                drawPlayerBox(BOXCOLOR,P1END,False)
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
                                 print('Move %i to %s' % (move,coords))
                                 drawPlayerBox(P1COLOR,coords,True) # animate player on their next position
@@ -225,6 +226,7 @@ def drawBoard():
 
             if BOARD_TEMPLATE[boxy][boxx] == SPOT:
               # Draw a small box representing a game board spot
+              
               pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     
     DISPLAYSURF.blit(ROLL_SURF, ROLL_RECT)
@@ -278,7 +280,7 @@ def displayDice():
     textRectObj.center = (175, 50) # top left corner
     DISPLAYSURF.blit(textSurfaceObj, textRectObj)
     pygame.display.update()
-    pygame.time.wait(1000) # 1000 milliseconds = 1 sec
+    pygame.time.wait(500) # 1000 milliseconds = 1 sec
     return die1
 
 def getNextMove(x,y):
@@ -338,7 +340,7 @@ def makeText(text, color, bgcolor, top, left):
 def drawPlayerBox(playerColor,coords,animate):
     # draw player's box in board coordinates x,y
     left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
-    pygame.draw.rect(DISPLAYSURF, playerColor, (left, top, BOXSIZE, BOXSIZE))
+    pygame.draw.circle(DISPLAYSURF, playerColor, (left+5, top+5), 7, 0)
     pygame.display.update()
     if animate == True:
         pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec

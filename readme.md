@@ -41,6 +41,7 @@ To do list to be ordered:
     # save game state of p1's end spot.................................................DONE
     # save game state for number of marbles left in home 4,3,2,1.......................DONE
     # check 2 spots prior to "start" for ability to go home
+    # need to redraw board with new marbles on it ~updateBoard
     # how to deal with tracking location of each players 4 marbles?
     # update dice roll to only use one die.............................................DONE
     # a roll of 6 allows to go again
