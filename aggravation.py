@@ -239,7 +239,10 @@ def main():
                     
                     elif ROLL1_RECT.collidepoint(event.pos):
                         print("Clicked on the ROLL 1 Button") # clicked on New Game button
-                    
+
+                    elif OPTION_RECT.collidepoint(event.pos):
+                        print("Clicked on the OPTION Button") # clicked on New Game button
+
                     elif EXIT_RECT.collidepoint(event.pos):
                         print("Clicked on the EXIT Button") # clicked on EXIT button
                         terminate()

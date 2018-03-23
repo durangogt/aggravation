@@ -53,6 +53,8 @@ To do list to be ordered:
     # P1marbles[ len(P1HOME) ] = 'current marble just pulled out of home'
     #
     #
+    # Move furthest ahead marble first to initially elleviate collisions..............
+    #
     # Update drawBoardBox() to not draw if 
     # need to redraw board with new marbles on it ~updateBoard (maybe)
     # Tally scores in cloud scoreboard (leaderboard for fun)
