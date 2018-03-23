@@ -50,12 +50,11 @@ To do list to be ordered:
     # simpler could just be remove P1m1 & use array index as marble number
     # P1marbles = [(x,y), (x,y), (x,y), (x,y)]
     # 
-    # P1marbles[ len(P1HOME) ] = 'current marble just pulled out of home'
+    # P1marbles[ len(P1HOME) ] = 'current marble just pulled out of home'..............DONE
     #
     #
-    # Move furthest ahead marble first to initially elleviate collisions..............
+    # Move furthest ahead marble first to initially elleviate collisions(count to end).
     #
-    # Update drawBoardBox() to not draw if 
     # need to redraw board with new marbles on it ~updateBoard (maybe)
     # Tally scores in cloud scoreboard (leaderboard for fun)
     # update dice roll to only use one die.............................................DONE

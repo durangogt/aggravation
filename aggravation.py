@@ -131,11 +131,13 @@ def main():
 
     P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # not global cuz it changes so either in main and passed around or where?
     P1marbles = [(None,None), (None,None), (None,None), (None,None)]
-    P1END = None
+    P1END = (None, None)
 
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
     drawBoard()
     p1StartOccuppied = False
+
+    waitingForInput = False
 
     while True: # main game loop
         mouseClicked = False
@@ -162,6 +164,10 @@ def main():
                             moves = displayDice()
                         
                         if ((p1StartOccuppied == True) and (len(P1HOME) > 0)): # if marble on start & 1 or more marbles in home (no option to make a choice yet...)
+                            # display option to choose marble to move....figure out how to take in additional mouse clicks inside (set chosen marble to P1END)
+                            DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)
+                            waitingForInput = True
+                            break
                             drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
                             p1StartOccuppied = False  # reset
                             P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
@@ -197,6 +203,17 @@ def main():
                     elif EXIT_RECT.collidepoint(event.pos):
                         print("Clicked on the EXIT Button") # clicked on EXIT button
                         terminate()
+                else:
+                    print("clicked on a box...")
+                    # need to check if its in p1marble but for now we will click the right one
+                    P1END = getBoxAtPixel(mousex,mousey)
+                    print('P1END is now: %s ' % str(P1END))
+                    if ((p1StartOccuppied == True) and (len(P1HOME) > 0)): # if marble on start & 1 or more marbles in home (no option to make a choice yet...)
+                        drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
+                        p1StartOccuppied = False  # reset
+                        P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+
+
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
@@ -264,7 +281,7 @@ def drawBoard():
     DISPLAYSURF.blit(ROLL_SURF, ROLL_RECT)
     DISPLAYSURF.blit(ROLL1_SURF, ROLL1_RECT)
     DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)    
-    DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)    
+    #DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)    
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates
@@ -307,7 +324,7 @@ def displayDice():
     die1 = roll_a_dice()
     # testing of text for showing dice rolls via text at first
     fontObj = pygame.font.Font('freesansbold.ttf', 32)
-    diceString = 'D1: %s ' % die1
+    diceString = 'Dice Roll: %s ' % die1
     textSurfaceObj = fontObj.render(diceString, True, GREEN, BLUE)
     textRectObj = textSurfaceObj.get_rect()
     textRectObj.center = (175, 50) # top left corner
