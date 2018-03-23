@@ -120,3 +120,32 @@ add description here & a new section for each function
 | 2-5    | False | 2   | move one of two marbles on table dice roll          | True  |
 | 2-5    | False | 1   | move one of three marbles on table dice roll        | True  |
 | 2-5    | False | 0   | move one of four marbles on table dice roll         | True  |
+
+
+### Remember Python's Short-circuit evaluation method ###
+http://www.openbookproject.net/books/bpp4awd/ch03.html
+
+3.19. Short-circuit evaluation
+Boolean expressions in Python use short-circuit evaluation, which means only the first argument of an and or or expression is evaluated when its value is suffient to determine the value of the entire expression.
+
+This can be quite useful in preventing runtime errors. Imagine you want check if the fifth number in a tuple of integers named numbers is even.
+
+The following expression will work:
+```
+>>> numbers = (5, 11, 13, 24)
+>>> numbers[4] % 2 == 0
+```
+unless of course there are not 5 elements in numbers, in which case you will get:
+```
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+IndexError: tuple index out of range
+>>>
+```
+Short-circuit evaluation makes it possible to avoid this problem.
+```
+>>> len(numbers) >= 5 and numbers[4] % 2 == 0
+False
+```
+Since the left hand side of this and expression is false, Python does not need to evaluate the right hand side to determine that the whole expression is false. Since it uses short-circuit evaluation, it does not, and the runtime error is avoided.
+
