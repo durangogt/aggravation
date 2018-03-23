@@ -174,7 +174,6 @@ def main():
                         elif (P1END != P1START):
                             drawPlayerBox(BOXCOLOR,P1END,False) # since moving off LAST position, redraw as normal open spot
                             for move in range(0,moves):
-                                drawPlayerBox(BOXCOLOR,P1END,False)
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
                                 print('Move %i to %s' % (move,coords))
                                 drawPlayerBox(P1COLOR,coords,True) # animate player on their next position
