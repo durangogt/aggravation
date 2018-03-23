@@ -112,7 +112,7 @@ P3COLOR = GREEN
 P4COLOR = BLUE
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, NEW_SURF, NEW_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -122,7 +122,7 @@ def main():
 
     # Store the option buttons and their rectangles in OPTIONS.
     ROLL_SURF, ROLL_RECT = makeText('Roll',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
-    NEW_SURF,   NEW_RECT   = makeText('New Game', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
+    ROLL1_SURF,   ROLL1_RECT   = makeText('ROLL 1', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
     EXIT_SURF, EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
     OPTION_SURF, OPTION_RECT = makeText('Click Marble to Move',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
@@ -152,19 +152,38 @@ def main():
                 boxx, boxy = getBoxAtPixel(mousex, mousey)
                 if boxx == None and boxy == None:
                     # check if the user clicked on an option button
-                    if ROLL_RECT.collidepoint(event.pos): 
+                    if (ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos)): 
                         print("Clicked on the ROLL Button") # clicked on ROLL button
-                        moves = displayDice()
+                        
+                        # for debug purposes putting in a roll 1 button to speed up
+                        if ROLL1_RECT.collidepoint(event.pos):
+                            moves = 1
+                        else:
+                            moves = displayDice()
+                        
                         if ((p1StartOccuppied == True) and (len(P1HOME) > 0)): # if marble on start & 1 or more marbles in home (no option to make a choice yet...)
                             drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
                             p1StartOccuppied = False  # reset
                             for move in range(0,moves):
-                                drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
-                                pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+                                # check to see if there is a marble in this location, if yes, just print for now & continue
+                                if (P1END in P1marbles):
+                                    print("Marble exists here already, not drawing board box...")
+                                    drawPlayerBox(P1COLOR,coords) # animate player on their next position
+                                else:
+                                    drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
+                                
+                                pygame.time.wait(SIMSPEED)
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
                                 print('Move %i to %s' % (move,coords))
-                                drawPlayerBox(P1COLOR,coords) # animate player on their next position
-                                pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+
+                                # check to see if there is a marble in this location, if yes, just print for now & continue
+                                if (coords in P1marbles):
+                                    print("Marble exists here already, not drawing board box...")
+                                    drawPlayerBox(P1COLOR,coords) # animate player on their next position
+                                else:
+                                    drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
+
+                                pygame.time.wait(SIMSPEED)
                                 P1END = coords # reset last spot to new spot
                                 P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
                                 print('P1marbles marble coords tracking: %s' % (P1marbles))                                
@@ -188,7 +207,13 @@ def main():
                                 pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
                                 print('Move %i to %s' % (move,coords))
-                                drawPlayerBox(P1COLOR,coords) # animate player on their next position
+
+                                if (coords in P1marbles):
+                                    print("Marble exists here already, not drawing board box...")
+                                    drawPlayerBox(P1COLOR,coords) # animate player on their next position
+                                else:
+                                    drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
+
                                 pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
                                 P1END = coords # reset last spot to new spot
                                 P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
@@ -202,7 +227,13 @@ def main():
                                 pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
                                 print('Move %i to %s' % (move,coords))
-                                drawPlayerBox(P1COLOR,coords) # animate player on their next position
+
+                                if (coords in P1marbles):
+                                    print("Marble exists here already, not drawing board box...")
+                                    drawPlayerBox(P1COLOR,coords) # animate player on their next position
+                                else:
+                                    drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
+
                                 pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
                                 P1END = coords # reset last spot to new spot
                                 P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
@@ -211,8 +242,8 @@ def main():
                         else:
                             print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
                     
-                    elif NEW_RECT.collidepoint(event.pos):
-                        print("Clicked on the New Game Button") # clicked on New Game button
+                    elif ROLL1_RECT.collidepoint(event.pos):
+                        print("Clicked on the ROLL 1 Button") # clicked on New Game button
                     
                     elif EXIT_RECT.collidepoint(event.pos):
                         print("Clicked on the EXIT Button") # clicked on EXIT button
@@ -261,7 +292,7 @@ def drawBoard():
               pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     
     DISPLAYSURF.blit(ROLL_SURF, ROLL_RECT)
-    DISPLAYSURF.blit(NEW_SURF, NEW_RECT)
+    DISPLAYSURF.blit(ROLL1_SURF, ROLL1_RECT)
     DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)    
     DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)    
 
