@@ -165,25 +165,19 @@ def main():
                             drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
                             p1StartOccuppied = False  # reset
                             for move in range(0,moves):
-                                # check to see if there is a marble in this location, if yes, just print for now & continue
-                                if (P1END in P1marbles):
-                                    print("Marble exists here already, not drawing board box...")
-                                    drawPlayerBox(P1COLOR,coords) # animate player on their next position
-                                else:
-                                    drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
                                 
-                                pygame.time.wait(SIMSPEED)
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
-                                print('Move %i to %s' % (move,coords))
+                                print('Roll of %i to %s' % (move,coords))
 
                                 # check to see if there is a marble in this location, if yes, just print for now & continue
-                                if (coords in P1marbles):
-                                    print("Marble exists here already, not drawing board box...")
+                                if ((coords in P1marbles) != True):
                                     drawPlayerBox(P1COLOR,coords) # animate player on their next position
+                                    pygame.time.wait(SIMSPEED)
+                                    drawBoardBox(P1END) 
                                 else:
-                                    drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
+                                    print("Marble exists here already, not drawing board box...")
 
-                                pygame.time.wait(SIMSPEED)
+                                #pygame.time.wait(SIMSPEED)
                                 P1END = coords # reset last spot to new spot
                                 P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
                                 print('P1marbles marble coords tracking: %s' % (P1marbles))                                
@@ -203,16 +197,17 @@ def main():
                             for move in range(0,moves):
                                 # user should choose which marble to move here...so need to display options or take in input somehow
                                 #
-                                drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
-                                pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+                                #drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
+                                #pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
-                                print('Move %i to %s' % (move,coords))
+                                print('Roll of %i to %s' % (move,coords))
 
-                                if (coords in P1marbles):
-                                    print("Marble exists here already, not drawing board box...")
+                                if ((coords in P1marbles) != True):
                                     drawPlayerBox(P1COLOR,coords) # animate player on their next position
+                                    pygame.time.wait(SIMSPEED)
+                                    drawBoardBox(P1END) 
                                 else:
-                                    drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
+                                    print("Marble exists here already, not drawing board box...")
 
                                 pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
                                 P1END = coords # reset last spot to new spot
@@ -223,21 +218,21 @@ def main():
                             drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
                             p1StartOccuppied = False  # reset
                             for move in range(0,moves):
-                                drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
-                                pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
-                                print('Move %i to %s' % (move,coords))
+                                print('Roll of %i to %s' % (move,coords))
 
-                                if (coords in P1marbles):
-                                    print("Marble exists here already, not drawing board box...")
+                                # check to see if there is a marble in this location, if yes, just print for now & continue
+                                if ((coords in P1marbles) != True):
                                     drawPlayerBox(P1COLOR,coords) # animate player on their next position
+                                    pygame.time.wait(SIMSPEED)
+                                    drawBoardBox(P1END) 
                                 else:
-                                    drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
+                                    print("Marble exists here already, not drawing board box...")
 
-                                pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+                                #pygame.time.wait(SIMSPEED)
                                 P1END = coords # reset last spot to new spot
                                 P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
-                                print('P1marbles marble coords tracking: %s' % (P1marbles))                                                            
+                                print('P1marbles marble coords tracking: %s' % (P1marbles))                                                          
                         
                         else:
                             print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
@@ -437,7 +432,7 @@ def startGameSimulation():
 
     # start sim player at P1START & move to first place if p1start is in home
     print('Dice roll of %i' % moves)
-    print('Move 1 to %s' % str(P1START))
+    print('Roll of 1 to %s' % str(P1START))
     drawPlayerBox(P1COLOR,P1START)
 
     coords = getNextMove(P1START[0],P1START[1]) # get next move from starting point
@@ -449,7 +444,7 @@ def startGameSimulation():
     while P1END != P1START:
         # ROLL DICE & check each roll if landed on start
         for move in range(1,moves):
-            print('Move %i to %s' % (move+1,coords))
+            print('Roll of %i to %s' % (move+1,coords))
             drawPlayerBox(P1COLOR,coords)
             if P1END == P1START:
                 print('Player went around the board and landed directly on starting position.')
@@ -471,7 +466,7 @@ def startGameSimulation():
 
     # start sim player at P1START & move to first place if p1start is in home
     print('Dice roll of %i' % moves)
-    print('Move 1 to %s' % str(P1START))
+    print('Roll of 1 to %s' % str(P1START))
     drawPlayerBox(P1COLOR,P1START)
 
     coords = getNextMove(P1START[0],P1START[1]) # get next move from starting point
@@ -483,7 +478,7 @@ def startGameSimulation():
     while P1END != P1START:
         # ROLL DICE & check each roll if landed on start
         for move in range(1,moves):
-            print('Move %i to %s' % (move+1,coords))
+            print('Roll of %i to %s' % (move+1,coords))
             drawPlayerBox(P1COLOR,coords)
             if P1END == P1START:
                 print('Player went around the board and landed directly on starting position.')
