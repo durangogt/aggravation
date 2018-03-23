@@ -45,6 +45,10 @@ To do list to be ordered:
     # *** How to deal with tracking location of each players 4 marbles? 
     #       * Each player's 4 marbles: P1m1, P1m2, P1m3, P1m4
     #       * ...so we can tell if P1m1 can take out P2m3 for example...
+    #       * currently P1END constantly gets updated with last position...
+    # P1marbles = [(P1m1,(x,y)), (P1m2,(x,y)), (P1m3,(x,y)), (P1m4,(x,y))]
+    # simpler could just be remove P1m1 & use array index as marble number
+    # P1marbles = [(x,y), (x,y), (x,y), (x,y)]
     #
     # need to redraw board with new marbles on it ~updateBoard (maybe)
     # Tally scores in cloud scoreboard (leaderboard for fun)

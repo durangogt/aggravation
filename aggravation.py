@@ -128,6 +128,7 @@ def main():
     DISPLAYSURF.fill(BGCOLOR)
 
     P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # not global cuz it changes so either in main and passed around or where?
+    P1marbles = [(None,None), (None,None), (None,None), (None,None)]
     P1END = None
 
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
@@ -149,12 +150,12 @@ def main():
                 boxx, boxy = getBoxAtPixel(mousex, mousey)
                 if boxx == None and boxy == None:
                     # check if the user clicked on an option button
-                    if ROLL_RECT.collidepoint(event.pos): #STARTING WITH MOVING JUST ONE PIECE FROM HOME AND AROUND BOARD EVERYTIME USER CLICKS ROLL
+                    if ROLL_RECT.collidepoint(event.pos): 
                         print("Clicked on the ROLL Button") # clicked on ROLL button
                         moves = displayDice()
-                        if ((p1StartOccuppied == True) and (P1END == P1START)): # continue moving using P1END as the new start from position (ONLY FOR THE FIRST MARBLE FOR NOW)
+                        if ((p1StartOccuppied == True) and (len(P1HOME) > 0)): # if marble on start & 1 or more marbles in home (no option to make a choice yet...)
                             drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
-                            #p1StartOccuppied = False  # TEMPORARY CODE FOR RUNNING JUST ONE MARBLE THROUGH, uncomment if want to remove more marbles from home
+                            p1StartOccuppied = False  # reset
                             for move in range(0,moves):
                                 drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
                                 pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
@@ -163,14 +164,19 @@ def main():
                                 drawPlayerBox(P1COLOR,coords) # animate player on their next position
                                 pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
                                 P1END = coords # reset last spot to new spot
+                                P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
+                                print('P1marbles marble coords tracking: %s' % (P1marbles))                                
 
                         elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6)): # get out of home roll but need to check if something is already on the "start" position
-                            P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
-                            drawPlayerBox(P1COLOR,P1START) # draw player on their start position
-                            P1END = P1START # set end of turn locator
-                            p1StartOccuppied = True
+                            if (len(P1HOME) >= 1):
+                                P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
+                                drawPlayerBox(P1COLOR,P1START) # draw player on their start position
+                                P1END = P1START # set end of turn locator
+                                P1marbles[len(P1HOME)] = P1END #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
+                                print('P1marbles marble coords tracking: %s' % (P1marbles))
+                                p1StartOccuppied = True
 
-                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6)): # 
+                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6)): # FOR NOW just pulling out all 4 marbles and moving them around the board 
                             print("Turn over...")
 
                         elif (P1END != P1START):
@@ -182,7 +188,8 @@ def main():
                                 drawPlayerBox(P1COLOR,coords) # animate player on their next position
                                 pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
                                 P1END = coords # reset last spot to new spot
-                            #drawPlayerBox(P1COLOR,coords,False) # draw player on their last position                            
+                                P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
+                                print('P1marbles marble coords tracking: %s' % (P1marbles))
 
                     elif NEW_RECT.collidepoint(event.pos):
                         print("Clicked on the New Game Button") # clicked on New Game button
@@ -351,6 +358,10 @@ def drawPlayerBox(playerColor,coords):
     left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
     pygame.draw.circle(DISPLAYSURF, playerColor, (left+5, top+5), 7, 0)
     pygame.display.update()    
+
+def getNumInHome(PHOME):
+    # return number of marbles in players home at this moment
+    return len(PHOME)
 
 def removeFromHome(PHOME):
     # remove one marble if at least one exists from home & draw blank spot at home position that was removed
