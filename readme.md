@@ -41,8 +41,13 @@ To do list to be ordered:
     # save game state of p1's end spot.................................................DONE
     # save game state for number of marbles left in home 4,3,2,1.......................DONE
     # check 2 spots prior to "start" for ability to go home
-    # need to redraw board with new marbles on it ~updateBoard
-    # how to deal with tracking location of each players 4 marbles?
+    #
+    # *** How to deal with tracking location of each players 4 marbles? 
+    #       * Each player's 4 marbles: P1m1, P1m2, P1m3, P1m4
+    #       * ...so we can tell if P1m1 can take out P2m3 for example...
+    #
+    # need to redraw board with new marbles on it ~updateBoard (maybe)
+    # Tally scores in cloud scoreboard (leaderboard for fun)
     # update dice roll to only use one die.............................................DONE
     # a roll of 6 allows to go again
     # if roll exact in middle give the option
@@ -51,7 +56,6 @@ To do list to be ordered:
     # allow user to play (might be easier than finishing simulation at first)
     # simulate whole games and tally score
     #   * who wins the most? the player who starts first, etc...
-    # tally scores in cloud scoreboard
     # update readme documentation
 
 
