@@ -49,7 +49,11 @@ To do list to be ordered:
     # P1marbles = [(P1m1,(x,y)), (P1m2,(x,y)), (P1m3,(x,y)), (P1m4,(x,y))]
     # simpler could just be remove P1m1 & use array index as marble number
     # P1marbles = [(x,y), (x,y), (x,y), (x,y)]
+    # 
+    # P1marbles[ len(P1HOME) ] = 'current marble just pulled out of home'
     #
+    #
+    # Update drawBoardBox() to not draw if 
     # need to redraw board with new marbles on it ~updateBoard (maybe)
     # Tally scores in cloud scoreboard (leaderboard for fun)
     # update dice roll to only use one die.............................................DONE
@@ -106,6 +110,7 @@ add description here & a new section for each function
 | --- | --- | --- | --- | --- |
 | 1-6    | True  | 3   | move marble from start die moves                    | False |
 | 1-6    | True  | 1-3 | chose to move an on board marble                    | True  |
+| 1-6    | True  | 0   | chose to move an on board marble                    | True  |
 | 1 or 6 | False | 4   | move to start                                       | False |
 | 1 or 6 | False | 1-3 | chose to move out of home or move a on board marble | True  |
 | 2-5    | False | 4   | turn is over, must roll 1 or 6 to get out           | False |

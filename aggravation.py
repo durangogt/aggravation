@@ -112,7 +112,7 @@ P3COLOR = GREEN
 P4COLOR = BLUE
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, NEW_SURF, NEW_RECT, EXIT_SURF, EXIT_RECT
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, NEW_SURF, NEW_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -124,6 +124,8 @@ def main():
     ROLL_SURF, ROLL_RECT = makeText('Roll',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
     NEW_SURF,   NEW_RECT   = makeText('New Game', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
     EXIT_SURF, EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
+    OPTION_SURF, OPTION_RECT = makeText('Click Marble to Move',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+
 
     DISPLAYSURF.fill(BGCOLOR)
 
@@ -167,20 +169,21 @@ def main():
                                 P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
                                 print('P1marbles marble coords tracking: %s' % (P1marbles))                                
 
-                        elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6)): # get out of home roll but need to check if something is already on the "start" position
-                            if (len(P1HOME) >= 1):
-                                P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
-                                drawPlayerBox(P1COLOR,P1START) # draw player on their start position
-                                P1END = P1START # set end of turn locator
-                                P1marbles[len(P1HOME)] = P1END #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
-                                print('P1marbles marble coords tracking: %s' % (P1marbles))
-                                p1StartOccuppied = True
+                        elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and (len(P1HOME) >= 1)): # get out of home roll but need to check if something is already on the "start" position
+                            P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
+                            drawPlayerBox(P1COLOR,P1START) # draw player on their start position
+                            P1END = P1START # set end of turn locator
+                            P1marbles[len(P1HOME)] = P1END #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
+                            print('P1marbles marble coords tracking: %s' % (P1marbles))
+                            p1StartOccuppied = True
 
-                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6)): # FOR NOW just pulling out all 4 marbles and moving them around the board 
+                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 4)): # FOR NOW just pulling out all 4 marbles and moving them around the board 
                             print("Turn over...")
 
-                        elif (P1END != P1START):
+                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) < 4)):
                             for move in range(0,moves):
+                                # user should choose which marble to move here...so need to display options or take in input somehow
+                                #
                                 drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
                                 pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
                                 coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
@@ -191,8 +194,26 @@ def main():
                                 P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
                                 print('P1marbles marble coords tracking: %s' % (P1marbles))
 
+                        elif ((p1StartOccuppied == True) and (len(P1HOME) == 0)):
+                            drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
+                            p1StartOccuppied = False  # reset
+                            for move in range(0,moves):
+                                drawBoardBox(P1END) # since moving off LAST position, redraw as normal open spot
+                                pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+                                coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
+                                print('Move %i to %s' % (move,coords))
+                                drawPlayerBox(P1COLOR,coords) # animate player on their next position
+                                pygame.time.wait(SIMSPEED) # 1000 milliseconds = 1 sec
+                                P1END = coords # reset last spot to new spot
+                                P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
+                                print('P1marbles marble coords tracking: %s' % (P1marbles))                                                            
+                        
+                        else:
+                            print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
+                    
                     elif NEW_RECT.collidepoint(event.pos):
                         print("Clicked on the New Game Button") # clicked on New Game button
+                    
                     elif EXIT_RECT.collidepoint(event.pos):
                         print("Clicked on the EXIT Button") # clicked on EXIT button
                         terminate()
@@ -242,6 +263,7 @@ def drawBoard():
     DISPLAYSURF.blit(ROLL_SURF, ROLL_RECT)
     DISPLAYSURF.blit(NEW_SURF, NEW_RECT)
     DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)    
+    DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)    
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates
