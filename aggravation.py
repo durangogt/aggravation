@@ -99,7 +99,7 @@ BLACK    = (  0,   0,   0)
 BUTTONCOLOR = WHITE
 BUTTONTEXTCOLOR = BLACK
 MESSAGECOLOR = WHITE
-TILECOLOR = GREEN
+TILECOLOR = BLACK
 TEXTCOLOR = WHITE
 BGCOLOR = NAVYBLUE
 LIGHTBGCOLOR = GRAY
@@ -124,7 +124,7 @@ def main():
     ROLL_SURF, ROLL_RECT = makeText('Roll',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
     ROLL1_SURF,   ROLL1_RECT   = makeText('ROLL 1', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
     EXIT_SURF, EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
-    OPTION_SURF, OPTION_RECT = makeText('Click Marble to Move',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+    OPTION_SURF, OPTION_RECT = makeText('Click Marble to Move',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
 
     DISPLAYSURF.fill(BGCOLOR)
@@ -148,6 +148,7 @@ def main():
 
         checkForQuit()
         for event in pygame.event.get(): # event handling loop
+            DISPLAYSURF.blit()
             if event.type == MOUSEBUTTONUP:
                 mousex, mousey = event.pos
                 mouseClicked = True
@@ -281,7 +282,6 @@ def drawBoard():
     DISPLAYSURF.blit(ROLL_SURF, ROLL_RECT)
     DISPLAYSURF.blit(ROLL1_SURF, ROLL1_RECT)
     DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)    
-    #DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)    
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates

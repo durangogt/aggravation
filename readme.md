@@ -66,6 +66,8 @@ To do list to be ordered:
     # simulate whole games and tally score
     #   * who wins the most? the player who starts first, etc...
     # update readme documentation
+    #
+    # A possible good game loop example is in fourinarow.py
 
 
 ```
