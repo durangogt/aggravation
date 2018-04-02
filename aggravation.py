@@ -112,7 +112,7 @@ P3COLOR = GREEN
 P4COLOR = BLUE
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT
+    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT, CLEAR_SURF, CLEAR_RECT
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -125,30 +125,27 @@ def main():
     ROLL1_SURF,   ROLL1_RECT   = makeText('ROLL 1', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
     EXIT_SURF, EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
     OPTION_SURF, OPTION_RECT = makeText('Click Marble to Move',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-
+    CLEAR_SURF, CLEAR_RECT = makeText('Click Marble to Move',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
     DISPLAYSURF.fill(BGCOLOR)
 
     P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # not global cuz it changes so either in main and passed around or where?
-    P1marbles = [(None,None), (None,None), (None,None), (None,None)]
-    P1END = (None, None)
+    P1marbles = [(None,None), (None,None), (None,None), (None,None)] # location of all player one's marbles at all times
+    P1END = (None, None) # last location of player 1's marble 
+    p1StartOccuppied = False # begin with nothing on the start position
 
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
     drawBoard()
-    p1StartOccuppied = False
 
     waitingForInput = False
 
     while True: # main game loop
         mouseClicked = False
 
-        #DISPLAYSURF.fill(BGCOLOR) # drawing the window
-        #drawBoard()
-        #startGameSimulation()
-
         checkForQuit()
         for event in pygame.event.get(): # event handling loop
-            DISPLAYSURF.blit()
+            DISPLAYSURF.blit(CLEAR_SURF, CLEAR_RECT) # clear 'click marble to move' text
+            pygame.display.update() # update screen with invisible text
             if event.type == MOUSEBUTTONUP:
                 mousex, mousey = event.pos
                 mouseClicked = True
@@ -164,14 +161,13 @@ def main():
                         else:
                             moves = displayDice()
                         
-                        if ((p1StartOccuppied == True) and (len(P1HOME) > 0)): # if marble on start & 1 or more marbles in home (no option to make a choice yet...)
-                            # display option to choose marble to move....figure out how to take in additional mouse clicks inside (set chosen marble to P1END)
+                        if ((p1StartOccuppied == True) and ((len(P1HOME) >= 0) and (len(P1HOME) < 3))): # if marble on start & 1 or more marbles in home (no option to make a choice yet...)
+                            # display option to choose marble to move....
                             DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)
+                            pygame.display.update()
                             waitingForInput = True
+                            pygame.time.wait(2000) # WAIT for player to choose marbe - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
                             break
-                            drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
-                            p1StartOccuppied = False  # reset
-                            P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
 
                         elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and (len(P1HOME) >= 1)): # get out of home roll but need to check if something is already on the "start" position
                             P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
@@ -187,11 +183,10 @@ def main():
                         elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) < 4)):
                             P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
 
-                        elif ((p1StartOccuppied == True) and (len(P1HOME) == 0)):
-                            drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
-                            p1StartOccuppied = False  # reset
+                        elif ((p1StartOccuppied == True) and (len(P1HOME) == 3)):
                             P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
-                        
+                            p1StartOccuppied = False
+
                         else:
                             print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
                     
@@ -205,16 +200,21 @@ def main():
                         print("Clicked on the EXIT Button") # clicked on EXIT button
                         terminate()
                 else:
-                    print("clicked on a box...")
+                    
+                    print("clicked on a board spot...") # even if you click on a horizonal clear space it picks up...TODO need to fix this
                     # need to check if its in p1marble but for now we will click the right one
                     P1END = getBoxAtPixel(mousex,mousey)
                     print('P1END is now: %s ' % str(P1END))
+
                     if ((p1StartOccuppied == True) and (len(P1HOME) > 0)): # if marble on start & 1 or more marbles in home (no option to make a choice yet...)
                         drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
                         p1StartOccuppied = False  # reset
                         P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
 
-
+                    elif ((p1StartOccuppied == True) and (len(P1HOME) == 0)):
+                        drawBoardBox(P1END) # since moving last marble off start position, redraw as normal open spot & reset p1StartOccuppied
+                        p1StartOccuppied = False  # reset
+                        P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
