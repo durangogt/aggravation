@@ -112,7 +112,7 @@ add description here & a new section for each function
 | DiceRoll | StartOccuppied | NumInHome | Actions | UserChoice |
 | --- | --- | --- | --- | --- |
 | 1-6    | True  | 3   | move marble from start die moves                    | False |
-| 1-6    | True  | 1-3 | chose to move an on board marble                    | True  |
+| 1-6    | True  | 1-2 | chose to move an on board marble                    | True  |
 | 1-6    | True  | 0   | chose to move an on board marble                    | True  |
 | 1 or 6 | False | 4   | move to start                                       | False |
 | 1 or 6 | False | 1-3 | chose to move out of home or move a on board marble | True  |

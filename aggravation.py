@@ -169,7 +169,7 @@ def main():
                             pygame.time.wait(2000) # WAIT for player to choose marbe - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
                             break
 
-                        elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and (len(P1HOME) >= 1)): # get out of home roll but need to check if something is already on the "start" position
+                        elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and (len(P1HOME) == 4)): 
                             P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
                             drawPlayerBox(P1COLOR,P1START) # draw player on their start position
                             P1END = P1START # set end of turn locator
@@ -177,11 +177,34 @@ def main():
                             print('P1marbles marble coords tracking: %s' % (P1marbles))
                             p1StartOccuppied = True
 
-                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 4)): # FOR NOW just pulling out all 4 marbles and moving them around the board 
+                        elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and ((len(P1HOME) >= 1) and (len(P1HOME) < 4))): 
+                            # choose to move out of home or move a marble on the table...
+                            DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)
+                            pygame.display.update()
+                            waitingForInput = True
+                            pygame.time.wait(2000) # WAIT for player to choose marbe - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
+                            break
+
+                            #P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
+                            #drawPlayerBox(P1COLOR,P1START) # draw player on their start position
+                            #P1END = P1START # set end of turn locator
+                            #P1marbles[len(P1HOME)] = P1END #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
+                            #print('P1marbles marble coords tracking: %s' % (P1marbles))
+                            #p1StartOccuppied = True
+
+                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 4)): 
                             print("Turn over...")
 
-                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) < 4)):
+                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 3)): 
                             P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+
+                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and ((len(P1HOME) == 2) or (len(P1HOME) == 1) or (len(P1HOME) == 0))):
+                            # display option to choose marble to move....
+                            DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)
+                            pygame.display.update()
+                            waitingForInput = True
+                            pygame.time.wait(2000) # WAIT for player to choose marbe - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
+                            break
 
                         elif ((p1StartOccuppied == True) and (len(P1HOME) == 3)):
                             P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
@@ -206,15 +229,22 @@ def main():
                     P1END = getBoxAtPixel(mousex,mousey)
                     print('P1END is now: %s ' % str(P1END))
 
-                    if ((p1StartOccuppied == True) and (len(P1HOME) > 0)): # if marble on start & 1 or more marbles in home (no option to make a choice yet...)
-                        drawBoardBox(P1END) # since moving off start position, redraw as normal open spot & reset p1StartOccuppied
-                        p1StartOccuppied = False  # reset
+                    if (p1StartOccuppied == True): # if start is occuppied then draw board box over the top of it and then animate
+                        drawBoardBox(P1END)
                         P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                        p1StartOccuppied = False
+                    elif(p1StartOccuppied == False and waitingForInput == True): 
+                        # check if the spot clicked on is a board spot or home spot (i.e. is P1END a # or integer)
+                        if (BOARD_TEMPLATE[ P1END[1] ][ P1END[0] ] != SPOT): # this means the player clicked on a marble in the home spot
+                            P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
+                            drawPlayerBox(P1COLOR,P1START) # draw player on their start position
+                            P1END = P1START # set end of turn locator
+                            P1marbles[len(P1HOME)] = P1END #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
+                            print('P1marbles marble coords tracking: %s' % (P1marbles))
+                            p1StartOccuppied = True
 
-                    elif ((p1StartOccuppied == True) and (len(P1HOME) == 0)):
-                        drawBoardBox(P1END) # since moving last marble off start position, redraw as normal open spot & reset p1StartOccuppied
-                        p1StartOccuppied = False  # reset
-                        P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                        elif (BOARD_TEMPLATE[ P1END[1] ][ P1END[0] ] == SPOT): # animate board movement 
+                            P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
