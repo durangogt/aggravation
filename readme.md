@@ -53,7 +53,8 @@ To do list to be ordered:
     # P1marbles[ len(P1HOME) ] = 'current marble just pulled out of home'..............DONE
     #
     #
-    # Move furthest ahead marble first to initially elleviate collisions(count to end).
+    # Need a isValidMove() function, true if another marble isn't there.....
+    # ...before making each move test that there isn't a marble on the way...
     #
     # need to redraw board with new marbles on it ~updateBoard (maybe)
     # Tally scores in cloud scoreboard (leaderboard for fun)

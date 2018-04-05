@@ -160,7 +160,7 @@ def main():
                             moves = 1
                         else:
                             moves = displayDice()
-                        
+                        ### FUNCTIONIZE THE BELOW BODIES & IN THE ELSE STATEMENT FOR WAITINGFORINPUT - THEN GET TO STORING MARBLE LOCATION WITH A BETTER MANNER
                         if ((p1StartOccuppied == True) and ((len(P1HOME) >= 0) and (len(P1HOME) < 3))): # if marble on start & 1 or more marbles in home (no option to make a choice yet...)
                             # display option to choose marble to move....
                             DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)
@@ -196,7 +196,10 @@ def main():
                             print("Turn over...")
 
                         elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 3)): 
-                            P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                            if (isValidMove(moves,P1marbles,P1END) == True):
+                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                            else:
+                                print("Invalid move, marble already exists, can't jump your own marbles")                                
 
                         elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and ((len(P1HOME) == 2) or (len(P1HOME) == 1) or (len(P1HOME) == 0))):
                             # display option to choose marble to move....
@@ -207,8 +210,11 @@ def main():
                             break
 
                         elif ((p1StartOccuppied == True) and (len(P1HOME) == 3)):
-                            P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
-                            p1StartOccuppied = False
+                            if (isValidMove(moves,P1marbles,P1END) == True):
+                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                                p1StartOccuppied = False
+                            else:
+                                print("Invalid move, marble already exists, can't jump your own marbles")                                
 
                         else:
                             print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
@@ -223,7 +229,7 @@ def main():
                         print("Clicked on the EXIT Button") # clicked on EXIT button
                         terminate()
                 else:
-                    
+                    # This else is executed when the code breaks above...and thus really when waitingForInput is activated
                     print("clicked on a board spot...") # even if you click on a horizonal clear space it picks up...TODO need to fix this
                     # need to check if its in p1marble but for now we will click the right one
                     P1END = getBoxAtPixel(mousex,mousey)
@@ -231,8 +237,11 @@ def main():
 
                     if (p1StartOccuppied == True): # if start is occuppied then draw board box over the top of it and then animate
                         drawBoardBox(P1END)
-                        P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
-                        p1StartOccuppied = False
+                        if (isValidMove(moves,P1marbles,P1END) == True):
+                            P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                            p1StartOccuppied = False
+                        else:
+                            print("Invalid move, marble already exists, can't jump your own marbles")                            
                     elif(p1StartOccuppied == False and waitingForInput == True): 
                         # check if the spot clicked on is a board spot or home spot (i.e. is P1END a # or integer)
                         if (BOARD_TEMPLATE[ P1END[1] ][ P1END[0] ] != SPOT): # this means the player clicked on a marble in the home spot
@@ -242,31 +251,36 @@ def main():
                             P1marbles[len(P1HOME)] = P1END #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
                             print('P1marbles marble coords tracking: %s' % (P1marbles))
                             p1StartOccuppied = True
+                            waitingForInput = False
 
                         elif (BOARD_TEMPLATE[ P1END[1] ][ P1END[0] ] == SPOT): # animate board movement 
-                            P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                            if (isValidMove(moves,P1marbles,P1END) == True):
+                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                            else:
+                                print("Invalid move, marble already exists, can't jump your own marbles")
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
+def isValidMove(moves,P1marbles,P1END):
+    # isValidMove() fn below...breakout when showing works
+    for move in range(0,moves):
+        coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
+        if ((coords in P1marbles) == True):     # if next move has a marble already stop - this dice roll is no dice to move this marble...
+            return False # no need to continue, can't jump your own marbles
+
+    return True # if made it through the all the moves without a collision then valid move 
+
 def animatePlayerMove(moves,P1marbles,P1END,P1HOME):
     for move in range(0,moves):
-        
         coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
         print('Roll of %i to %s' % (move,coords))
-
-        # check to see if there is a marble in this location, if yes, just print for now & continue
-        if ((coords in P1marbles) != True):
-            drawPlayerBox(P1COLOR,coords) # animate player on their next position
-            pygame.time.wait(SIMSPEED)
-            drawBoardBox(P1END) 
-        else:
-            print("Marble exists here already, not drawing board box...")
-
-        #pygame.time.wait(SIMSPEED)
+        drawPlayerBox(P1COLOR,coords) # animate player on their next position
+        pygame.time.wait(SIMSPEED)
+        drawBoardBox(P1END) 
         P1END = coords # reset last spot to new spot
-        P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1
+        P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1 (rememeber the index of a marble in the home array is the marbles id)
         print('P1marbles marble coords tracking: %s' % (P1marbles))                                
 
     return P1marbles, P1END
