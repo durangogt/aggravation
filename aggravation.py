@@ -158,10 +158,12 @@ def main():
                         # for debug purposes putting in a roll 1 button to speed up
                         if ROLL1_RECT.collidepoint(event.pos):
                             moves = 1
+                            print("A roll of 1 has been rolled....manually")
                         else:
                             moves = displayDice()
+                            print("A roll of %i has been rolled...." % moves)
                         ### FUNCTIONIZE THE BELOW BODIES & IN THE ELSE STATEMENT FOR WAITINGFORINPUT - THEN GET TO STORING MARBLE LOCATION WITH A BETTER MANNER
-                        if ((p1StartOccuppied == True) and ((len(P1HOME) >= 0) and (len(P1HOME) < 3))): # if marble on start & 1 or more marbles in home (no option to make a choice yet...)
+                        if ((p1StartOccuppied == True) and ((len(P1HOME) >= 0) and (len(P1HOME) < 3))): # if marble on start & 1 or more marbles in home
                             # display option to choose marble to move....
                             DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)
                             pygame.display.update()
@@ -200,6 +202,7 @@ def main():
                                 P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")                                
+                                print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
 
                         elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and ((len(P1HOME) == 2) or (len(P1HOME) == 1) or (len(P1HOME) == 0))):
                             # display option to choose marble to move....
@@ -215,6 +218,7 @@ def main():
                                 p1StartOccuppied = False
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")                                
+                                print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))                                
 
                         else:
                             print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
@@ -231,20 +235,27 @@ def main():
                 else:
                     # This else is executed when the code breaks above...and thus really when waitingForInput is activated
                     print("clicked on a board spot...") # even if you click on a horizonal clear space it picks up...TODO need to fix this
+                    
                     # need to check if its in p1marble but for now we will click the right one
-                    P1END = getBoxAtPixel(mousex,mousey)
-                    print('P1END is now: %s ' % str(P1END))
+                    tempP1END = getBoxAtPixel(mousex,mousey)
+                    #P1END = getBoxAtPixel(mousex,mousey)
+                    #print('P1END is now: %s ' % str(P1END))
 
+                    # HERE IS THE PROBLEM - start can be occuppied but user clicked on a non start marble thus don't reset startOccuppied
                     if (p1StartOccuppied == True): # if start is occuppied then draw board box over the top of it and then animate
-                        drawBoardBox(P1END)
-                        if (isValidMove(moves,P1marbles,P1END) == True):
+                        #drawBoardBox(P1END)
+                        if (isValidMove(moves,P1marbles,tempP1END) == True):
+                            P1END = getBoxAtPixel(mousex,mousey)
+                            print('P1END is now: %s ' % str(P1END))
                             P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
                             p1StartOccuppied = False
                         else:
-                            print("Invalid move, marble already exists, can't jump your own marbles")                            
+                            print("Invalid move, marble already exists, can't jump your own marbles")   
+                            print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))                            
+
                     elif(p1StartOccuppied == False and waitingForInput == True): 
                         # check if the spot clicked on is a board spot or home spot (i.e. is P1END a # or integer)
-                        if (BOARD_TEMPLATE[ P1END[1] ][ P1END[0] ] != SPOT): # this means the player clicked on a marble in the home spot
+                        if (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] != SPOT): # this means the player clicked on a marble in the home spot
                             P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
                             drawPlayerBox(P1COLOR,P1START) # draw player on their start position
                             P1END = P1START # set end of turn locator
@@ -253,11 +264,13 @@ def main():
                             p1StartOccuppied = True
                             waitingForInput = False
 
-                        elif (BOARD_TEMPLATE[ P1END[1] ][ P1END[0] ] == SPOT): # animate board movement 
-                            if (isValidMove(moves,P1marbles,P1END) == True):
+                        elif (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] == SPOT): # animate board movement 
+                            if (isValidMove(moves,P1marbles,tempP1END) == True):
                                 P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                                p1StartOccuppied = True
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
+                                print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))                                
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()

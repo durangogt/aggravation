@@ -1,0 +1,61 @@
+* roll of 2 and it wasn't valid but went anyways...zero in home
+
+* start occupied - true 
+-------------------------
+* roll of 5
+* 2 in home
+* marble on start & pos.3 
+* clicking on start marble - should show can't move - works
+--------------------------
+* then roll of 1
+* 2 in home
+* 1 marble on start
+* 1 marble on 8
+*  [(None, None), (None, None), (23, 6), (19, 2)]
+* clicked on marble on start but it says it can't due to (19,2) - sooo, the problem happened immedietly:
+   * initally clicked on roll 1 then next roll seemed to move it but then the marble tracking didn't update after that...added better logging to see more - need more around; num in home, num on board, p1marbles, choice(true | false), etc...
+--------------------------
+another problem more reproducible:
+2 in home
+1 at start
+1 at 7 spot
+* user choice, click on start marble & get error saying can't make move due to marble on 
+
+
+
+
+
+
+PS C:\Users\IckesJ\Source\Repos\aggravation> python .\aggravation.py
+Clicked on the ROLL Button
+P1marbles marble coords tracking: [(None, None), (None, None), (None, None), (19, 1)]
+Clicked on the ROLL Button
+Roll of 0 to (19, 2)
+P1marbles marble coords tracking: [(None, None), (None, None), (None, None), (19, 2)]
+Clicked on the ROLL Button
+clicked on a board spot...
+P1marbles marble coords tracking: [(None, None), (None, None), (19, 1), (19, 2)]
+Clicked on the ROLL Button
+clicked on a board spot...
+Invalid move, marble already exists, can't jump your own marbles
+clicked on a board spot...
+P1END is now: (19, 2)
+Roll of 0 to (19, 3)
+P1marbles marble coords tracking: [(None, None), (None, None), (19, 3), (19, 2)]
+Clicked on the ROLL Button
+clicked on a board spot...
+Invalid move, marble already exists, can't jump your own marbles
+clicked on a board spot...
+Roll of 0 to (19, 4)
+P1marbles marble coords tracking: [(None, None), (None, None), (19, 4), (19, 2)]
+Roll of 1 to (19, 5)
+P1marbles marble coords tracking: [(None, None), (None, None), (19, 5), (19, 2)]
+Roll of 2 to (19, 6)
+P1marbles marble coords tracking: [(None, None), (None, None), (19, 6), (19, 2)]
+Roll of 3 to (21, 6)
+P1marbles marble coords tracking: [(None, None), (None, None), (21, 6), (19, 2)]
+Roll of 4 to (23, 6)
+P1marbles marble coords tracking: [(None, None), (None, None), (23, 6), (19, 2)]
+Clicked on the ROLL Button
+clicked on a board spot...
+Invalid move, marble already exists, can't jump your own marbles
