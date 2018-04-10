@@ -35,6 +35,12 @@ Board Coordinates:
 
 To do list to be ordered:
 ```
+    # 4/10/18 - The current problem to fix is...when 2 marbles are out and a user chooses a marble to move that wasn't the last marble chosen
+    # it updates the marble tracking of the last marble chosen and not the marble chosen this roll...
+    # so if having a marble on 19,4 & 21,6 - i clicked on the marble on 21,6 - that marbled moved but the tracking list updated
+    # the marble at 19,4 --> thus giving a marble tracking result of 25,6 & 21,6
+
+
     # Simulate one player moving around the board as a starting point..................DONE
     # Start with player 1 - P1START - .................................................DONE
     # update player start is actually two clockwise from first position out of home....DONE
