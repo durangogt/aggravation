@@ -150,9 +150,11 @@ def main():
 
         checkForQuit()
         for event in pygame.event.get(): # event handling loop
+
             DISPLAYSURF.blit(CLEAR_SURF, CLEAR_RECT)                    # clear 'click marble to move' text
             DISPLAYSURF.blit(CLEARERROR_SURF, CLEARERROR_RECT)          # clear 'invalid choice' text            
             DISPLAYSURF.blit(CLEARTURNOVER_SURF, CLEARTURNOVER_RECT)    # clear 'TURN OVER' text            
+
             pygame.display.update()                                     # update screen with invisible text
             if event.type == MOUSEBUTTONUP:
                 mousex, mousey = event.pos
@@ -163,7 +165,7 @@ def main():
                     if (ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos) or ROLL6_RECT.collidepoint(event.pos)): 
                         print("Clicked on the ROLL Button") # clicked on ROLL button
                         
-                        # for debug purposes putting in a roll 1 button to speed up
+                        # for debug purposes putting in a roll 1 & 6 button to speed up testing
                         if ROLL1_RECT.collidepoint(event.pos):
                             moves = 1
                             print("A roll of 1 has been rolled....manually")
@@ -173,7 +175,7 @@ def main():
                         else:
                             moves = displayDice()
                             print("A roll of %i has been rolled...." % moves)
-                        ### FUNCTIONIZE THE BELOW BODIES & IN THE ELSE STATEMENT FOR WAITINGFORINPUT
+
                         if ((p1StartOccuppied == True) and ((len(P1HOME) >= 0) and (len(P1HOME) < 3))): # if marble on start & 1 or more marbles in home
                             # display option to choose marble to move....
                             displayStatus(OPTION_SURF, OPTION_RECT)
@@ -238,14 +240,14 @@ def main():
                     # This else is executed when the code breaks above...and thus really when waitingForInput is activated
                     print("clicked on a board spot...") # even if you click on a horizonal clear space it picks up...TODO need to fix this
                     
-                    # need to check if its in p1marble but for now we will click the right one
+                    # Need to check if its in p1marble but for now we will click the right one
                     tempP1END = getBoxAtPixel(mousex,mousey) # grab where user clicked - might need a getMarbleAtPixel() due to circle vs square pixel coverage
 
                     # Start can be occuppied by 1 marble and another marble elsewhere
                     # so a user can click on a non start marble & then we don't reset startOccuppied
                     # or a user can click on a start marble and thus reset start
                     if (p1StartOccuppied == True and waitingForInput == True): 
-                        #drawBoardBox(P1END)
+
                         if (tempP1END == P1START and tempP1END in P1marbles):    # player clicked on a marble on the start position & its in this players marble tracking array
                             if (isValidMove(moves,P1marbles,tempP1END) == True): # no marbles of its own in the way
                                 P1END = tempP1END                                # update actual variable with temporary
