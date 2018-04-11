@@ -130,6 +130,8 @@ def main():
     CLEAR_SURF, CLEAR_RECT = makeText('Click Marble to Move',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     PLAYERROR_SURF, PLAYERROR_RECT = makeText('Cant jump own marbles',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEARERROR_SURF, CLEARERROR_RECT = makeText('Cant jump own marbles',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+    TURNOVER_SURF, TURNOVER_RECT = makeText('TURN OVER',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+    CLEARTURNOVER_SURF, CLEARTURNOVER_RECT = makeText('TURN OVER',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
     DISPLAYSURF.fill(BGCOLOR)
 
@@ -148,9 +150,10 @@ def main():
 
         checkForQuit()
         for event in pygame.event.get(): # event handling loop
-            DISPLAYSURF.blit(CLEAR_SURF, CLEAR_RECT)             # clear 'click marble to move' text
-            DISPLAYSURF.blit(CLEARERROR_SURF, CLEARERROR_RECT)   # clear 'invalid choice' text            
-            pygame.display.update() # update screen with invisible text
+            DISPLAYSURF.blit(CLEAR_SURF, CLEAR_RECT)                    # clear 'click marble to move' text
+            DISPLAYSURF.blit(CLEARERROR_SURF, CLEARERROR_RECT)          # clear 'invalid choice' text            
+            DISPLAYSURF.blit(CLEARTURNOVER_SURF, CLEARTURNOVER_RECT)    # clear 'TURN OVER' text            
+            pygame.display.update()                                     # update screen with invisible text
             if event.type == MOUSEBUTTONUP:
                 mousex, mousey = event.pos
                 mouseClicked = True
@@ -170,13 +173,11 @@ def main():
                         else:
                             moves = displayDice()
                             print("A roll of %i has been rolled...." % moves)
-                        ### FUNCTIONIZE THE BELOW BODIES & IN THE ELSE STATEMENT FOR WAITINGFORINPUT - THEN GET TO STORING MARBLE LOCATION WITH A BETTER MANNER
+                        ### FUNCTIONIZE THE BELOW BODIES & IN THE ELSE STATEMENT FOR WAITINGFORINPUT
                         if ((p1StartOccuppied == True) and ((len(P1HOME) >= 0) and (len(P1HOME) < 3))): # if marble on start & 1 or more marbles in home
                             # display option to choose marble to move....
-                            DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)
-                            pygame.display.update()
+                            displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
-                            pygame.time.wait(2000) # WAIT for player to choose marbe - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
                             break
 
                         elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and (len(P1HOME) == 4)): 
@@ -189,29 +190,27 @@ def main():
 
                         elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and ((len(P1HOME) >= 1) and (len(P1HOME) < 4))): 
                             # choose to move out of home or move a marble on the table...
-                            DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)
-                            pygame.display.update()
+                            displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
-                            pygame.time.wait(2000) # WAIT for player to choose marbe - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
                             break
 
                         elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 4)): 
-                            print("Turn over...")
+                            displayStatus(TURNOVER_SURF, TURNOVER_RECT)
+                            waitingForInput = True
+                            break
 
                         elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 3)): 
                             if (isValidMove(moves,P1marbles,P1END) == True):
                                 P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles") 
-                                displayError(PLAYERROR_SURF, PLAYERROR_RECT)                                                               
+                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)                                                               
                                 print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
 
                         elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and ((len(P1HOME) == 2) or (len(P1HOME) == 1) or (len(P1HOME) == 0))):
                             # display option to choose marble to move....
-                            DISPLAYSURF.blit(OPTION_SURF, OPTION_RECT)
-                            pygame.display.update()
+                            displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
-                            pygame.time.wait(2000) # WAIT for player to choose marbe - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
                             break
 
                         elif ((p1StartOccuppied == True) and (len(P1HOME) == 3)):
@@ -220,7 +219,7 @@ def main():
                                 p1StartOccuppied = False
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles") 
-                                displayError(PLAYERROR_SURF, PLAYERROR_RECT)
+                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
                                 print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))                                
 
                         else:
@@ -242,9 +241,6 @@ def main():
                     # need to check if its in p1marble but for now we will click the right one
                     tempP1END = getBoxAtPixel(mousex,mousey) # grab where user clicked - might need a getMarbleAtPixel() due to circle vs square pixel coverage
 
-                    #P1END = getBoxAtPixel(mousex,mousey)
-                    #print('P1END is now: %s ' % str(P1END))
-
                     # Start can be occuppied by 1 marble and another marble elsewhere
                     # so a user can click on a non start marble & then we don't reset startOccuppied
                     # or a user can click on a start marble and thus reset start
@@ -259,7 +255,7 @@ def main():
                                 waitingForInput = False    # reset waiting for input flag
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                displayError(PLAYERROR_SURF, PLAYERROR_RECT)  
+                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)  
                                 print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))                            
 
                         elif (tempP1END != P1START and tempP1END in P1marbles):  # this means the player clicked on a marble NOT in the start position to move forward & its this players marble
@@ -271,7 +267,7 @@ def main():
                                 waitingForInput = False   # reset waiting for input flag
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")   
-                                displayError(PLAYERROR_SURF, PLAYERROR_RECT)
+                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
                                 print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))                                                        
 
                     elif(p1StartOccuppied == False and waitingForInput == True): 
@@ -292,7 +288,7 @@ def main():
                                 waitingForInput = False
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                displayError(PLAYERROR_SURF, PLAYERROR_RECT)                                
+                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)                                
                                 print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))                                
 
         # Redraw the screen and wait a clock tick.
@@ -310,10 +306,10 @@ def isValidMove(moves,P1marbles,P1END):
 
     return True # if made it through the all the moves without a collision then valid move 
 
-def displayError(PLAYERROR_SURF, PLAYERROR_RECT):
-    DISPLAYSURF.blit(PLAYERROR_SURF, PLAYERROR_RECT)  # let user know they can't choose that marble
+def displayStatus(passed_SURF, passed_RECT):
+    DISPLAYSURF.blit(passed_SURF, passed_RECT)  # let user know they can't choose that marble
     pygame.display.update()
-    pygame.time.wait(2000) # WAIT for player to choose marbe - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
+    pygame.time.wait(2000) # WAIT for player to see status message - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
 
 def animatePlayerMove(moves,P1marbles,P1END,P1HOME):
     for move in range(0,moves):
