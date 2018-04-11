@@ -187,13 +187,6 @@ def main():
                             pygame.time.wait(2000) # WAIT for player to choose marbe - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
                             break
 
-                            #P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
-                            #drawPlayerBox(P1COLOR,P1START) # draw player on their start position
-                            #P1END = P1START # set end of turn locator
-                            #P1marbles[len(P1HOME)] = P1END #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
-                            #print('P1marbles marble coords tracking: %s' % (P1marbles))
-                            #p1StartOccuppied = True
-
                         elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 4)): 
                             print("Turn over...")
 
@@ -258,7 +251,7 @@ def main():
                                 print("Invalid move, marble already exists, can't jump your own marbles")   
                                 print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))                            
 
-                        elif (tempP1END != P1START and tempP1END in P1marbles):    # this means the player clicked on a marble NOT in the start position to move forward & its this players marble
+                        elif (tempP1END != P1START and tempP1END in P1marbles):  # this means the player clicked on a marble NOT in the start position to move forward & its this players marble
                             if (isValidMove(moves,P1marbles,tempP1END) == True): # no marbles of its own in the way
                                 P1END = tempP1END                                # update actual variable with temporary
                                 print('P1END is now: %s ' % str(P1END))          # debug
@@ -295,10 +288,12 @@ def main():
 
 def isValidMove(moves,P1marbles,P1END):
     # isValidMove() fn below...breakout when showing works
+    coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point    
     for move in range(0,moves):
-        coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
         if ((coords in P1marbles) == True):     # if next move has a marble already stop - this dice roll is no dice to move this marble...
             return False # no need to continue, can't jump your own marbles
+        else:
+            coords = getNextMove(coords[0], coords[1])
 
     return True # if made it through the all the moves without a collision then valid move 
 

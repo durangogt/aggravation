@@ -36,12 +36,12 @@ Board Coordinates:
 To do list to be ordered:
 ```
     # 4/10/18 - The current problem to fix is...when 2 marbles are out and a user chooses a marble to move that wasn't the last marble chosen
-    # it updates the marble tracking of the last marble chosen and not the marble chosen this roll...
+    # it updates the marble tracking of the last marble chosen and not the marble chosen this roll......
     # so if having a marble on 19,4 & 21,6 - i clicked on the marble on 21,6 - that marbled moved but the tracking list updated
     # the marble at 19,4 --> thus giving a marble tracking result of 25,6 & 21,6.......DONE
-    # 4/10/18 - problem fixed with P1marbles[P1marbles.index(oldLocation)] = newLocation
+    # 4/10/18 - problem fixed with P1marbles[P1marbles.index(oldLocation)] = newLocation...DONE
     #
-    # 4/10/18 - most own marble collisions failed except on...need to test again (major)
+    # 4/10/18 - most own marble collisions failed except on...need to test again (major)...DONE --- BIG ONE & recorded in my github's issues
     # 4/10/18 - one more issue ... even when all marbles are used up at home - attempts to pull out (minor)
     #
     # Simulate one player moving around the board as a starting point..................DONE
@@ -58,11 +58,12 @@ To do list to be ordered:
     # P1marbles = [(P1m1,(x,y)), (P1m2,(x,y)), (P1m3,(x,y)), (P1m4,(x,y))]
     # simpler could just be remove P1m1 & use array index as marble number
     # P1marbles = [(x,y), (x,y), (x,y), (x,y)]
-    # 
+    # 4/10 - except the below didn't work...did for taking out of home but not for other calls, needed to check 
+    # which index has the last one in it (see List[array.index(oldLocation)]   )
     # P1marbles[ len(P1HOME) ] = 'current marble just pulled out of home'..............DONE
     #
     #
-    # Need a isValidMove() function, true if another marble isn't there.....
+    # Need a isValidMove() function, true if another marble isn't there................DONE
     # ...before making each move test that there isn't a marble on the way...
     #
     # need to redraw board with new marbles on it ~updateBoard (maybe)
