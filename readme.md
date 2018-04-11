@@ -69,7 +69,7 @@ To do list to be ordered:
     # need to redraw board with new marbles on it ~updateBoard (maybe)
     # Tally scores in cloud scoreboard (leaderboard for fun)
     # update dice roll to only use one die.............................................DONE
-    # a roll of 6 allows to go again
+    # a roll of 6 allows to go again (not needed until more than one player at a time)
     # if roll exact in middle give the option
     # 1 or 6 to get out of home base if "start" isn't occupied.........................DONE
     # update dice roll to show pic of die (use other project for code)
