@@ -308,9 +308,10 @@ def animatePlayerMove(moves,P1marbles,P1END,P1HOME):
         print('Roll of %i to %s' % (move,coords))
         drawPlayerBox(P1COLOR,coords) # animate player on their next position
         pygame.time.wait(SIMSPEED)
-        drawBoardBox(P1END) 
+        drawBoardBox(P1END)
+        oldLocation = P1END
         P1END = coords # reset last spot to new spot
-        P1marbles[len(P1HOME)] = P1END #keep track of P1marble_1 (rememeber the index of a marble in the home array is the marbles id)
+        P1marbles[P1marbles.index(oldLocation)] = P1END #keep track of P1marble_1 (rememeber the index of a marble in the home array is the marbles id)
         print('P1marbles marble coords tracking: %s' % (P1marbles))                                
 
     return P1marbles, P1END
