@@ -139,11 +139,10 @@ def main():
     P1marbles = [(None,None), (None,None), (None,None), (None,None)] # location of all player one's marbles at all times
     P1END = (None, None) # last location of player 1's marble 
     p1StartOccuppied = False # begin with nothing on the start position
+    waitingForInput = False
 
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
     drawBoard()
-
-    waitingForInput = False
 
     while True: # main game loop
         mouseClicked = False
