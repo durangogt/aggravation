@@ -128,8 +128,13 @@ def main():
     EXIT_SURF, EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
     OPTION_SURF, OPTION_RECT = makeText('Click Marble to Move',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEAR_SURF, CLEAR_RECT = makeText('Click Marble to Move',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+
     PLAYERROR_SURF, PLAYERROR_RECT = makeText('Cant jump own marbles',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEARERROR_SURF, CLEARERROR_RECT = makeText('Cant jump own marbles',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+    PLAYERROR2_SURF, PLAYERROR2_RECT = makeText('No marbles in home',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+    CLEARERROR2_SURF, CLEARERROR2_RECT = makeText('No marbles in home',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+
+
     TURNOVER_SURF, TURNOVER_RECT = makeText('TURN OVER',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEARTURNOVER_SURF, CLEARTURNOVER_RECT = makeText('TURN OVER',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
@@ -153,6 +158,7 @@ def main():
             DISPLAYSURF.blit(CLEAR_SURF, CLEAR_RECT)                    # clear 'click marble to move' text
             DISPLAYSURF.blit(CLEARERROR_SURF, CLEARERROR_RECT)          # clear 'invalid choice' text            
             DISPLAYSURF.blit(CLEARTURNOVER_SURF, CLEARTURNOVER_RECT)    # clear 'TURN OVER' text            
+            DISPLAYSURF.blit(CLEARERROR2_SURF, CLEARERROR2_RECT)        # clear 'no marbles home' text            
 
             pygame.display.update()                                     # update screen with invisible text
             if event.type == MOUSEBUTTONUP:
@@ -181,7 +187,7 @@ def main():
                             waitingForInput = True
                             break
 
-                        elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and (len(P1HOME) == 4)): 
+                        elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and (len(P1HOME) == 4)): # 
                             P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
                             drawPlayerBox(P1COLOR,P1START) # draw player on their start position
                             P1END = P1START # set end of turn locator
@@ -273,7 +279,7 @@ def main():
 
                     elif(p1StartOccuppied == False and waitingForInput == True): 
                         # check if the spot clicked on is a board spot or home spot (i.e. is P1END a # or integer)
-                        if (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] != SPOT): # this means the player clicked on a marble in the home spot
+                        if (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] != SPOT and len(P1HOME) > 0): # this means the player clicked on a marble in the home spot and there is at least one marble there
                             P1HOME = removeFromHome(P1HOME)                          # remove one from home, doesn't matter which marble in home they clicked on - it will pull out the last one
                             drawPlayerBox(P1COLOR,P1START)                           # draw player on their start position
                             P1END = P1START                                          # set end of turn locator
@@ -291,6 +297,11 @@ def main():
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)                                
                                 print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))                                
+
+                        elif (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] != SPOT and len(P1HOME) == 0): 
+                            # this means the player clicked on a position in the home base but no marbles exist TODO asset this further up instead of here
+                            displayStatus(PLAYERROR2_SURF, PLAYERROR2_RECT)                                
+                            print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
