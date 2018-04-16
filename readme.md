@@ -20,11 +20,11 @@ Board Coordinates:
 3[     #     #   #   #     #     ]
 4[       #   #   #   #   #       ]
 5[         # #   #   # #         ]
-6[ # # # # # #       # # # # # # ]
+6[ # # # # # *       * # # # # # ]
 7[ #                           # ]
 8[ # # # # #     #     # # # # # ]
 9[ #                           # ]
-0[ # # # # # #       # # # # # # ]
+0[ # # # # # *       * # # # # # ]
 1[         # #   #   # #         ]
 2[       #   #   #   #   #       ]
 3[     #     #   #   #     #     ]
@@ -32,54 +32,6 @@ Board Coordinates:
 5[           # # # # #           ]
 6[                               ]
 ```
-
-To do list to be ordered:
-```
-    # 4/10/18 - The current problem to fix is...when 2 marbles are out and a user chooses a marble to move that wasn't the last marble chosen
-    # it updates the marble tracking of the last marble chosen and not the marble chosen this roll......
-    # so if having a marble on 19,4 & 21,6 - i clicked on the marble on 21,6 - that marbled moved but the tracking list updated
-    # the marble at 19,4 --> thus giving a marble tracking result of 25,6 & 21,6.......DONE
-    # 4/10/18 - problem fixed with P1marbles[P1marbles.index(oldLocation)] = newLocation...DONE
-    #
-    # 4/10/18 - most own marble collisions failed except on...need to test again (major)...DONE --- BIG ONE & recorded in my github's issues
-    # 4/10/18 - one more issue ... even when all marbles are used up at home - attempts to pull out (minor)
-    #
-    # Simulate one player moving around the board as a starting point..................DONE
-    # Start with player 1 - P1START - .................................................DONE
-    # update player start is actually two clockwise from first position out of home....DONE
-    # save game state of p1's end spot.................................................DONE
-    # save game state for number of marbles left in home 4,3,2,1.......................DONE
-    # check 2 spots prior to "start" for ability to go home
-    #
-    # *** How to deal with tracking location of each players 4 marbles? 
-    #       * Each player's 4 marbles: P1m1, P1m2, P1m3, P1m4
-    #       * ...so we can tell if P1m1 can take out P2m3 for example...
-    #       * currently P1END constantly gets updated with last position...
-    # P1marbles = [(P1m1,(x,y)), (P1m2,(x,y)), (P1m3,(x,y)), (P1m4,(x,y))]
-    # simpler could just be remove P1m1 & use array index as marble number
-    # P1marbles = [(x,y), (x,y), (x,y), (x,y)]
-    # 4/10 - except the below didn't work...did for taking out of home but not for other calls, needed to check 
-    # which index has the last one in it (see List[array.index(oldLocation)]   )
-    # P1marbles[ len(P1HOME) ] = 'current marble just pulled out of home'..............DONE
-    #
-    #
-    # Need a isValidMove() function, true if another marble isn't there................DONE
-    # ...before making each move test that there isn't a marble on the way...
-    #
-    # need to redraw board with new marbles on it ~updateBoard (maybe)
-    # Tally scores in cloud scoreboard (leaderboard for fun)
-    # update dice roll to only use one die.............................................DONE
-    # a roll of 6 allows to go again (not needed until more than one player at a time)
-    # if roll exact in middle give the option
-    # 1 or 6 to get out of home base if "start" isn't occupied.........................DONE
-    # update dice roll to show pic of die (use other project for code)
-    # allow user to play (might be easier than finishing simulation at first)
-    # simulate whole games and tally score
-    #   * who wins the most? the player who starts first, etc...
-    # update readme documentation
-    #
-    # A possible good game loop example is in fourinarow.py
-
 
 ```
 
@@ -161,3 +113,9 @@ False
 ```
 Since the left hand side of this and expression is false, Python does not need to evaluate the right hand side to determine that the whole expression is false. Since it uses short-circuit evaluation, it does not, and the runtime error is avoided.
 
+### Board Move Shortcuts:
+Center hole shortcut: This is the best shortcut. Obviously, it is located in the game board center. To take this shortcut, you must roll the exact number needed for your marble to land directly in the center hole (the center hole is considered one space further than a star hole). If you are already in a star hole, you need to roll exactly one. Once you are in the center hole, rolling a one on a subsequent turn is the only way out. When you roll a one, then you can move to any star hole (most likely the star hole closest to your home row).
+
+Star hole shortcut: For this shortcut to be activated, a marble must land in a star hole with the exact count on the dice. Then on the next roll of the dice, the marble can be advanced clockwise around the star holes. You move the marble the number of holes allowed by the roll on the dice around the star holes and then down the path that takes you to the home area with any remaining count on your dice. (At the player's discretion, he or she can exit from any star hole.)
+
+Shortcuts are optional. They can be very beneficial because they reduce the time it takes to advance around the board. But there are dangers! Your marble can be aggravated in the star or center holes, just like in regular play!

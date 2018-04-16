@@ -467,7 +467,7 @@ def getNextMove(x,y):
         nextMove = (11,5)
     elif (x,y) == (11,1):   # p1 outside corner
         nextMove = (13,1)        
-    elif ( (x,y)[1] == 1 or (x,y)[1] == 6 ):   # horizontal top side of board, moves right/clockwise
+    elif ( (x,y)[1] == 1 or (x,y)[1] == 6 ):    # horizontal top side of board, moves right/clockwise
         nextMove = (x+2,y)
     elif ( (x,y)[1] == 10 or (x,y)[1] == 15 ):  # horizontal bottom side of board, moves left/clockwise
         nextMove = (x-2,y)        
