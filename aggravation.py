@@ -31,9 +31,13 @@ from pygame.locals import *
 6[                               ]
 
 PLAYER 1 STARTING POSITION IS BOARD_TEMPLATE[1][15]
+1st safe spot entry point 11, 3 (then 11,2 , 11, 1 , 13,1 , 15,1 )
 PLAYER 2 STARTING POSITION IS BOARD_TEMPLATE[8][29]
+1st safe spot entry point 25, 6
 PLAYER 3 STARTING POSITION IS BOARD_TEMPLATE[15][15]
+1st safe spot entry point 29, 3
 PLAYER 4 STARTING POSITION IS BOARD_TEMPLATE[8][1]
+1st safe spot entry point 5, 10
 
 '''
 
@@ -134,7 +138,6 @@ def main():
     PLAYERROR2_SURF, PLAYERROR2_RECT = makeText('No marbles in home',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEARERROR2_SURF, CLEARERROR2_RECT = makeText('No marbles in home',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
-
     TURNOVER_SURF, TURNOVER_RECT = makeText('TURN OVER',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEARTURNOVER_SURF, CLEARTURNOVER_RECT = makeText('TURN OVER',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
@@ -142,7 +145,9 @@ def main():
 
     P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # not global cuz it changes so either in main and passed around or where?
     P1marbles = [(None,None), (None,None), (None,None), (None,None)] # location of all player one's marbles at all times
-    P1END = (None, None) # last location of player 1's marble 
+    # TODO would be great to name the P1marbles indexes like [('p1m1'),('p1m2'),('p1m3'),('p1m4')] = P1marbles
+    P1END = (None, None) # last location of player 1's marble (come up with a better name eventually)
+    P1EndHome = [(None,None), (None,None), (None,None), (None,None)] # if all marbles are in winning position then [ (15,2) , (15,3) , (15,4) , (15,5) ]
     p1StartOccuppied = False # begin with nothing on the start position
     waitingForInput = False
 
@@ -208,7 +213,7 @@ def main():
 
                         elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 3)): 
                             if (isValidMove(moves,P1marbles,P1END) == True):
-                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END)
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles") 
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)                                                               
@@ -222,7 +227,7 @@ def main():
 
                         elif ((p1StartOccuppied == True) and (len(P1HOME) == 3)):
                             if (isValidMove(moves,P1marbles,P1END) == True):
-                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END)
                                 p1StartOccuppied = False
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles") 
@@ -257,7 +262,7 @@ def main():
                             if (isValidMove(moves,P1marbles,tempP1END) == True): # no marbles of its own in the way
                                 P1END = tempP1END                                # update actual variable with temporary
                                 print('P1END is now: %s ' % str(P1END))          # debug
-                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME) # move player to new position
+                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END) # move player to new position
                                 p1StartOccuppied = False   # reset start position is now unoccuppied
                                 waitingForInput = False    # reset waiting for input flag
                             else:
@@ -269,7 +274,7 @@ def main():
                             if (isValidMove(moves,P1marbles,tempP1END) == True): # no marbles of its own in the way
                                 P1END = tempP1END                                # update actual variable with temporary
                                 print('P1END is now: %s ' % str(P1END))          # debug
-                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME) # move player to new position
+                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END) # move player to new position
                                 p1StartOccuppied = True   # don't reset startOccuppied flag due to not moving the marble on start
                                 waitingForInput = False   # reset waiting for input flag
                             else:
@@ -291,7 +296,7 @@ def main():
                         elif (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] == SPOT): # this means the player clicked on a marble not on the home position
                             if (isValidMove(moves,P1marbles,tempP1END) == True):
                                 P1END = tempP1END
-                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END,P1HOME)
+                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END)
                                 waitingForInput = False
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -309,11 +314,47 @@ def main():
 
 def isValidMove(moves,P1marbles,P1END):
     # isValidMove() fn below...breakout when showing works
+    # A valid move is defined as:
+    #   1. doesn't have another marble in that position (for now just check if a p1 marble exists)
+    #   2. ...
     coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point    
     for move in range(0,moves):
-        if ((coords in P1marbles) == True):     # if next move has a marble already stop - this dice roll is no dice to move this marble...
+        if ((coords in P1marbles) == True):     # if next move has a marble already stop, eventually will look for other players marbles
             return False # no need to continue, can't jump your own marbles
         else:
+            p1homeStretch = [(11, 3), (11,2), (11,1), (13,1), (15,1)] # valid p1 home stretch starting positions limits
+            #
+            # if this single move's coords are between 11,3 & 15,1 then check if valid home move is possible...
+            if ( (coords in p1homeStretch) == True ):
+            # goInSafeHome = isValidHomeMove(coords, (moves-move) ) - given current location (coords) and moves left (moves - move) can we go into home?
+              goInSafeHome = isValidHomeMove(coords, (moves-move),P1marbles )
+              if (goInSafeHome == False):
+                  return False # can't move into home due to marbles in the way
+              else:
+                  print("move is able to go into home...now what? don't return yet")
+                  #return True
+            else:
+                # coords are not even able to possibly go into their home safe spots
+                coords = getNextMove(coords[0], coords[1])
+
+    return True # if made it through the all the moves without a collision then valid move 
+
+def isValidHomeMove(coords, movesLeft, P1marbles):
+    # isValidHomeMove()
+    # A valid home move is defined as:
+    #   1. current spot is between [(11, 3), (11,2), (11,1), (13,1), (15,1)] --- p1 marbles can never be in 27, 1 (good assert statement)
+    #   2. 6 spaces before the first home position is the furthest out you can be and still get into home (limit) (i.e. 11,3 )
+    #   3. 6 spaces all the way to the end of the home safe position
+    #   4. fits in safe home exactly
+    # p1homeStretch = [(11, 3), (11,2), (11,1), (13,1), (15,1)] # valid p1 home stretch starting positions limits
+    # validRolls =    [(6..9), (5..8), (4..7), (3..6), (2..5)] <-- rolls if home safe is empty
+    for move in range(0,movesLeft):
+        # check if any moves between here and p1 safe home is in p1marbles - if so stop here, return false
+        # check if roll can get into home 
+        if ((coords in P1marbles) == True):     # if next move has a marble already stop, eventually will look for other players marbles
+            return False
+        else:
+            # test to see if this move is landing on a home safe spot & that there is not a marble already there
             coords = getNextMove(coords[0], coords[1])
 
     return True # if made it through the all the moves without a collision then valid move 
@@ -323,7 +364,7 @@ def displayStatus(passed_SURF, passed_RECT):
     pygame.display.update()
     pygame.time.wait(2000) # WAIT for player to see status message - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
 
-def animatePlayerMove(moves,P1marbles,P1END,P1HOME):
+def animatePlayerMove(moves,P1marbles,P1END):
     for move in range(0,moves):
         coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
         print('Roll of %i to %s' % (move,coords))
@@ -442,6 +483,16 @@ def getNextMove(x,y):
     #         and only happen if ended on one of those 4 spots...and this function (getNextMove) doesn't know about where the player ends, he only knows
     #         what the nextMove on the board is regardless of other players on it, proximity to home base, shortcut or others homebase
     #
+    # Text below is used for knowing if a player is even able to move into their safe home base...
+    # PLAYER 1 STARTING POSITION IS BOARD_TEMPLATE[1][15]
+    # 1st safe spot entry point 21, 3
+    # PLAYER 2 STARTING POSITION IS BOARD_TEMPLATE[8][29]
+    # 1st safe spot entry point 25, 6
+    # PLAYER 3 STARTING POSITION IS BOARD_TEMPLATE[15][15]
+    # 1st safe spot entry point 29, 3
+    # PLAYER 4 STARTING POSITION IS BOARD_TEMPLATE[8][1]
+    # 1st safe spot entry point 5, 10
+
     assert BOARD_TEMPLATE[y][x] == SPOT, 'Current spot passed in must be # or occupied by a player.'
     if (x,y) == (19,1):     # p1 outside corner
         nextMove = (19,2)
