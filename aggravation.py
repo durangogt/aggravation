@@ -118,6 +118,7 @@ P4COLOR = BLUE
 def main():
     global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT, CLEAR_SURF, CLEAR_RECT, ROLL6_SURF, ROLL6_RECT
     global PLAYERROR_SURF, PLAYERROR_RECT, CLEARERROR_SURF, CLEARERROR_RECT
+    global TEST_SURF, TEST_RECT
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -140,6 +141,8 @@ def main():
 
     TURNOVER_SURF, TURNOVER_RECT = makeText('TURN OVER',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEARTURNOVER_SURF, CLEARTURNOVER_RECT = makeText('TURN OVER',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+
+    TEST_SURF, TEST_RECT = makeText('DEBUG', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 30)
 
     DISPLAYSURF.fill(BGCOLOR)
 
@@ -172,6 +175,15 @@ def main():
                 boxx, boxy = getBoxAtPixel(mousex, mousey)
                 if boxx == None and boxy == None:
                     # check if the user clicked on an option button
+                    if ( TEST_RECT.collidepoint(event.pos) ): # if clicked the debug button setup marbles going home
+                        P1marbles = [(11,2), (11,3), (11,4), (11,5)]
+                        P1HOME = []
+                        waitingForInput = True
+                        drawPlayerBox(P1COLOR,P1marbles[0])
+                        drawPlayerBox(P1COLOR,P1marbles[1])
+                        drawPlayerBox(P1COLOR,P1marbles[2])
+                        drawPlayerBox(P1COLOR,P1marbles[3])
+
                     if (ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos) or ROLL6_RECT.collidepoint(event.pos)): 
                         print("Clicked on the ROLL Button") # clicked on ROLL button
                         
@@ -348,6 +360,7 @@ def isValidHomeMove(coords, movesLeft, P1marbles):
     #   4. fits in safe home exactly
     # p1homeStretch = [(11, 3), (11,2), (11,1), (13,1), (15,1)] # valid p1 home stretch starting positions limits
     # validRolls =    [(6..9), (5..8), (4..7), (3..6), (2..5)] <-- rolls if home safe is empty
+    tempP1EndHome = [ (15,2) , (15,3) , (15,4) , (15,5) ]
     for move in range(0,movesLeft):
         # check if any moves between here and p1 safe home is in p1marbles - if so stop here, return false
         # check if roll can get into home 
@@ -355,7 +368,17 @@ def isValidHomeMove(coords, movesLeft, P1marbles):
             return False
         else:
             # test to see if this move is landing on a home safe spot & that there is not a marble already there
-            coords = getNextMove(coords[0], coords[1])
+            # TODO This is where I left off (Mon., 4/23) - - - if moves allow you not to collide with any marbles then prepare
+            # to go into home safe place, check here if roll will get you into home...getNextMove() will bypass the home so need something 
+            # similar maybe like a getNextHomeMove()...
+            if(getNextHomeMove(coords[0], coords[1]) in tempP1EndHome): # if true then this move can go into the safe home base
+                # TODO this exact move can go into but can the rest? if not then flag as can move until otherwise shown
+                print("Marble move able to go into home...")
+                P1marbles,P1END = animatePlayerHomeMove(movesLeft,P1marbles,coords)
+                break
+                #return True
+            else:
+                coords = getNextMove(coords[0], coords[1])
 
     return True # if made it through the all the moves without a collision then valid move 
 
@@ -377,6 +400,21 @@ def animatePlayerMove(moves,P1marbles,P1END):
         print('P1marbles marble coords tracking: %s' % (P1marbles))                                
 
     return P1marbles, P1END
+
+def animatePlayerHomeMove(moves,P1marbles,P1END):
+    for move in range(0,moves):
+        coords = getNextHomeMove(P1END[0],P1END[1]) # get next move from last ending point
+        print('Roll of %i to %s' % (move,coords))
+        drawPlayerBox(P1COLOR,coords) # animate player on their next position
+        pygame.time.wait(SIMSPEED)
+        drawBoardBox(P1END)
+        oldLocation = P1END
+        P1END = coords # reset last spot to new spot
+        P1marbles[P1marbles.index(oldLocation)] = P1END #keep track of P1marble_1 (rememeber the index of a marble in the home array is the marbles id)
+        print('P1marbles marble coords tracking: %s' % (P1marbles))                                
+
+    return P1marbles, P1END
+
 
 def drawBoard():
     # ...
@@ -420,6 +458,7 @@ def drawBoard():
     DISPLAYSURF.blit(ROLL1_SURF, ROLL1_RECT)
     DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)
     DISPLAYSURF.blit(ROLL6_SURF, ROLL6_RECT)    
+    DISPLAYSURF.blit(TEST_SURF, TEST_RECT)
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates
@@ -470,6 +509,33 @@ def displayDice():
     pygame.display.update()
     pygame.time.wait(500) # 1000 milliseconds = 1 sec
     return die1
+
+def getNextHomeMove(x,y):
+    # This function will only be called if you are on the home stretch for your respective home
+    # For example, player 1's home stretch is below:
+    # p1homeStretch = [(11, 3), (11,2), (11,1), (13,1), (15,1)] # valid p1 home stretch starting positions limits
+    # So, if you are on 11,3 the next move is 11,2, however if you are just outside your home, 15,1...then the next move is 
+    # 15,2...not 17,1...and so on...if you are on 15,2 (inside home) your next move would be 15,3
+    #
+    #
+    assert BOARD_TEMPLATE[y][x] == SPOT, 'Current spot passed in must be # or occupied by a player.'
+    if (x,y) == (11,3):     
+        nextMove = (11,2)
+    elif (x,y) == (11,2):   
+        nextMove = (11,1)
+    elif (x,y) == (11,1):   
+        nextMove = (13,1)
+    elif (x,y) == (13,1):  
+        nextMove = (15,1)
+    elif (x,y) == (15,1):  
+        nextMove = (15,2)
+    elif (x,y) == (15,2):  
+        nextMove = (15,3)
+    elif (x,y) == (15,3):  
+        nextMove = (15,4)
+    elif (x,y) == (15,4):  
+        nextMove = (15,5)
+    return nextMove
 
 def getNextMove(x,y):
     # given on board spot x,y what is the next board spot
