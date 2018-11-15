@@ -371,6 +371,11 @@ def isValidHomeMove(coords, movesLeft, P1marbles):
             # TODO This is where I left off (Mon., 4/23) - - - if moves allow you not to collide with any marbles then prepare
             # to go into home safe place, check here if roll will get you into home...getNextMove() will bypass the home so need something 
             # similar maybe like a getNextHomeMove()...
+            #
+            # coords is the current player's turn to where they will land...
+            if(coords not in tempP1EndHome):
+                return True
+            
             if(getNextHomeMove(coords[0], coords[1]) in tempP1EndHome): # if true then this move can go into the safe home base
                 # TODO this exact move can go into but can the rest? if not then flag as can move until otherwise shown
                 print("Marble move able to go into home...")
