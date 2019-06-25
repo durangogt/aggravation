@@ -11,6 +11,11 @@ Creating this game to refresh python proficiency and learn more about the pygame
 
 [Game Rules 2](https://en.wikipedia.org/wiki/Aggravation_(board_game))
 
+* Some more good links for working with children and games: https://www.mattlayman.com/blog/2019/teach-kid-code-pygame-zero/
+* https://opensource.com/article/18/4/easy-2d-game-creation-python-and-arcade
+* A very good starting place for playing with pygame - this is where I started:
+* http://inventwithpython.com/pygame/chapter2.html
+
 Board Coordinates:
 ```
   0123456789012345678901234567890
