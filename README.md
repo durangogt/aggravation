@@ -139,7 +139,7 @@ The game includes complex decision logic for marble movement. See `DecisionTable
 ```
 aggravation/
 ├── aggravation.py          # Main game (717 lines)
-├── fourinarow.py           # Four-in-a-Row game (363 lines)
+├── fourinarow.py           # Four-in-a-Row game (364 lines)
 ├── README.md               # This file
 ├── DebugNotes.txt          # Development debugging notes
 ├── DecisionTables.xlsx     # Game rule decision tables
