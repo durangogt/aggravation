@@ -113,11 +113,11 @@ export DISPLAY=:99 && python aggravation.py
 ## Code Structure
 
 ### Main Files
-- `aggravation.py` (716 lines) - Main Aggravation board game implementation
+- `aggravation.py` (717 lines) - Main Aggravation board game implementation
 - `fourinarow.py` (363 lines) - Four-in-a-Row game (missing assets)
 - `readme.md` - Basic documentation and game rules
 - `DebugNotes.txt` - Debugging notes and known issues
-- **Total Python code:** 1,079 lines across main files
+- **Total Python code:** 1,080 lines across main files
 
 ### Key Functions in aggravation.py
 - `main()` - Game initialization and main loop
