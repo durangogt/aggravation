@@ -330,89 +330,96 @@ def main():
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
-def isValidMove(moves,P1marbles,P1END):
-    # isValidMove() fn below...breakout when showing works
-    # A valid move is defined as:
-    #   1. doesn't have another marble in that position (for now just check if a p1 marble exists)
-    #   2. ...
-    coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
-    # 5/22/20: when at this pt and at 1,15 coords equal 1,17 :( which isn't what we want
-    for move in range(0,moves):
-        if ((coords in P1marbles) == True):     # if next move has a marble already stop, eventually will look for other players marbles
-            return False # no need to continue, can't jump your own marbles
+def isValidMove(moves, P1marbles, P1END):
+    """
+    Check if a move is valid for Player 1's marble.
+    Returns True if move is valid, False otherwise.
+    """
+    p1homeStretch = [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)]
+    p1FinalHome = [(15, 2), (15, 3), (15, 4), (15, 5)]
+    
+    # Can't move if marble position is None
+    if P1END is None or P1END == (None, None):
+        return False
+    
+    coords = P1END
+    inFinalHome = coords in p1FinalHome
+    
+    for move in range(moves):
+        # Determine next position based on whether we're in/entering home
+        if inFinalHome or coords in p1homeStretch:
+            # Use home path
+            try:
+                coords = getNextHomeMove(coords[0], coords[1])
+                inFinalHome = coords in p1FinalHome
+            except:
+                # Can't move past end of home - invalid move (overshot)
+                return False
         else:
-            p1homeStretch = [(11, 3), (11,2), (11,1), (13,1), (15,1)] # valid p1 home stretch starting positions limits
-            #
-            # if this single move's coords are between 11,3 & 15,1 then check if valid home move is possible...
-            if ( (coords in p1homeStretch) == True ):
-            # goInSafeHome = isValidHomeMove(coords, (moves-move) ) - given current location (coords) and moves left (moves - move) can we go into home?
-            # 5/22/20: the above comment about coords is wrong, its not the current location, its the current spot to move to
-              goInSafeHome = isValidHomeMove(coords, (moves-move),P1marbles )
-              # 5/22/20: isValidHomeMove needs to evaluate not just where to move to but where you are..specifically if you are right outside the safeHome at
-              #   15,1 and you roll a 1 and now coords is 17,1. So maybe isValideHomeMove(P1END,coords,(moves-move),P1marbles)
-              if (goInSafeHome == False):
-                  return False # can't move into home due to marbles in the way
-              else:
-                  print("move is able to go into home...now what? don't return yet")
-                  #return True
-            else:
-                # coords are not even able to possibly go into their home safe spots
-                coords = getNextMove(coords[0], coords[1])
-
-    return True # if made it through the all the moves without a collision then valid move
+            coords = getNextMove(coords[0], coords[1])
+            # Check if we just entered home stretch
+            if coords in p1homeStretch:
+                inFinalHome = False
+        
+        # Check if this position is occupied by player's own marble
+        if coords in P1marbles:
+            return False  # Can't jump own marbles
+    
+    return True
 
 def isValidHomeMove(coords, movesLeft, P1marbles):
-    # isValidHomeMove()
-    # A valid home move is defined as:
-    #   1. current spot is between [(11, 3), (11,2), (11,1), (13,1), (15,1)] --- p1 marbles can never be in 17, 1 (good assert statement)
-    #   2. 6 spaces before the first home position is the furthest out you can be and still get into home (limit) (i.e. 11,3 )
-    #   3. 6 spaces all the way to the end of the home safe position
-    #   4. fits in safe home exactly
-    # p1homeStretch = [(11, 3), (11,2), (11,1), (13,1), (15,1)] # valid p1 home stretch starting positions limits
-    # validRolls =    [(6..9), (5..8), (4..7), (3..6), (2..5)] <-- rolls if home safe is empty
-    tempP1EndHome = [ (15,2) , (15,3) , (15,4) , (15,5) ]
-    for move in range(0,movesLeft):
-        # check if any moves between here and p1 safe home is in p1marbles - if so stop here, return false
-        # check if roll can get into home
-        if ((coords in P1marbles) == True):     # if next move has a marble already stop, eventually will look for other players marbles
+    """
+    Validate home stretch moves. Returns True if move into home is valid.
+    """
+    p1FinalHome = [(15, 2), (15, 3), (15, 4), (15, 5)]
+    
+    for move in range(movesLeft):
+        # Check if position occupied by own marble
+        if coords in P1marbles:
             return False
-        else:
-            # test to see if this move is landing on a home safe spot & that there is not a marble already there
-            # TODO This is where I left off (Mon., 4/23) - - - if moves allow you not to collide with any marbles then prepare
-            # to go into home safe place, check here if roll will get you into home...getNextMove() will bypass the home so need something
-            # similar maybe like a getNextHomeMove()...
-            #
-            # coords is the current player's turn to where they will land...
-            if(coords not in tempP1EndHome):
-                return True
-
-            if(getNextHomeMove(coords[0], coords[1]) in tempP1EndHome): # if true then this move can go into the safe home base
-                # TODO this exact move can go into but can the rest? if not then flag as can move until otherwise shown
-                print("Marble move able to go into home...")
-                P1marbles,P1END = animatePlayerHomeMove(movesLeft,P1marbles,coords) #5/22/20 - does this even work if we call it here??? test it by calling it from debug mode
-                #  when at 15,1 and a roll of one
-                break
-                #return True
-            else:
-                coords = getNextMove(coords[0], coords[1])
-
-    return True # if made it through the all the moves without a collision then valid move
+        
+        # Get next position in home path
+        try:
+            coords = getNextHomeMove(coords[0], coords[1])
+        except:
+            # Can't move past end of home
+            return False
+    
+    return True
 
 def displayStatus(passed_SURF, passed_RECT):
     DISPLAYSURF.blit(passed_SURF, passed_RECT)  # let user know they can't choose that marble
     pygame.display.update()
     pygame.time.wait(2000) # WAIT for player to see status message - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
 
-def animatePlayerMove(moves,P1marbles,P1END):
-    for move in range(0,moves):
-        coords = getNextMove(P1END[0],P1END[1]) # get next move from last ending point
-        print('Roll of %i to %s' % (move,coords))
-        drawPlayerBox(P1COLOR,coords) # animate player on their next position
+def animatePlayerMove(moves, P1marbles, P1END):
+    """
+    Animate player marble movement, switching to home path when appropriate.
+    """
+    p1homeStretch = [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)]
+    p1FinalHome = [(15, 2), (15, 3), (15, 4), (15, 5)]
+    
+    inFinalHome = P1END in p1FinalHome
+    
+    for move in range(moves):
+        # Determine next position based on whether we're in/entering home
+        if inFinalHome or P1END in p1homeStretch:
+            # Use home path
+            coords = getNextHomeMove(P1END[0], P1END[1])
+            inFinalHome = coords in p1FinalHome
+        else:
+            coords = getNextMove(P1END[0], P1END[1])
+            # Check if we just entered home stretch
+            if coords in p1homeStretch:
+                inFinalHome = False
+        
+        print('Roll of %i to %s' % (move, coords))
+        drawPlayerBox(P1COLOR, coords)
         pygame.time.wait(SIMSPEED)
         drawBoardBox(P1END)
         oldLocation = P1END
-        P1END = coords # reset last spot to new spot
-        P1marbles[P1marbles.index(oldLocation)] = P1END #keep track of P1marble_1 (rememeber the index of a marble in the home array is the marbles id)
+        P1END = coords
+        P1marbles[P1marbles.index(oldLocation)] = P1END
         print('P1marbles marble coords tracking: %s' % (P1marbles))
 
     return P1marbles, P1END

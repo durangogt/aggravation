@@ -202,70 +202,41 @@ class AggravationGame:
         """
         if player == 1:
             marbles = self.p1_marbles
-            end = marbles[marble_idx] if marble_idx < len(marbles) else self.p1_end
+            end_home = self.p1_end_home
+            start_pos = marbles[marble_idx] if marble_idx < len(marbles) else self.p1_end
+            p1_home_stretch = [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)]
+            p1_final_home = [(15, 2), (15, 3), (15, 4), (15, 5)]
         else:
             # TODO: Implement for other players
             return False
         
         # Can't move if marble position is None (not on board)
-        if end is None or end == (None, None):
+        if start_pos is None or start_pos == (None, None):
             return False
         
-        # Check each step of the move
-        coords = self.get_next_position(end[0], end[1])
+        # Check if marble is already in final home - can still move within home
+        in_final_home = start_pos in p1_final_home
         
+        coords = start_pos
         for move in range(dice_roll):
-            # Check if this position is occupied by player's own marble
-            if coords in marbles:
-                return False  # Can't jump own marbles
-            
-            # Check if entering home stretch
-            p1_home_stretch = [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)]
-            if player == 1 and coords in p1_home_stretch:
-                # Check if can validly enter home
-                moves_left = dice_roll - move
-                go_in_safe_home = self._is_valid_home_move(player, coords, moves_left, marbles)
-                if not go_in_safe_home:
+            # Determine next position based on whether we're in/entering home
+            if in_final_home or coords in p1_home_stretch:
+                # Use home path
+                try:
+                    coords = self.get_next_home_position(player, coords[0], coords[1])
+                    in_final_home = coords in p1_final_home
+                except (ValueError, AssertionError):
+                    # Can't move past end of home - invalid move (overshot)
                     return False
             else:
-                # Continue to next position
                 coords = self.get_next_position(coords[0], coords[1])
-        
-        return True
-    
-    def _is_valid_home_move(self, player: int, coords: Tuple[int, int], moves_left: int, 
-                           marbles: List[Tuple[int, int]]) -> bool:
-        """
-        Internal method to validate home stretch moves.
-        
-        Args:
-            player: Player number
-            coords: Current coordinates
-            moves_left: Number of moves remaining
-            marbles: List of player's marble positions
+                # Check if we just entered home stretch
+                if coords in p1_home_stretch:
+                    in_final_home = False  # Not in final home yet, but on home stretch
             
-        Returns:
-            True if can move into home, False otherwise
-        """
-        temp_end_home = [(15, 2), (15, 3), (15, 4), (15, 5)]  # Player 1 final positions
-        
-        for move in range(moves_left):
-            # Check if position occupied by own marble
-            if coords in marbles:
-                return False
-            
-            # Check if not in final home area
-            if coords not in temp_end_home:
-                return True
-            
-            # Check if can enter final home area
-            try:
-                next_pos = self.get_next_home_position(player, coords[0], coords[1])
-                if next_pos in temp_end_home:
-                    return True
-                coords = self.get_next_position(coords[0], coords[1])
-            except (ValueError, AssertionError):
-                coords = self.get_next_position(coords[0], coords[1])
+            # Check if this position is occupied by player's own marble
+            if coords in marbles or coords in end_home:
+                return False  # Can't jump own marbles or land on occupied home spot
         
         return True
     
@@ -305,6 +276,8 @@ class AggravationGame:
         
         marbles = self.p1_marbles
         old_pos = marbles[marble_idx]
+        p1_home_stretch = [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)]
+        p1_final_home = [(15, 2), (15, 3), (15, 4), (15, 5)]
         
         if old_pos is None or old_pos == (None, None):
             result['message'] = 'Marble not on board'
@@ -315,14 +288,34 @@ class AggravationGame:
             result['message'] = "Invalid move - can't jump own marbles"
             return result
         
-        # Execute the move
+        # Execute the move - track if we're in/entering home
         coords = old_pos
+        in_final_home = coords in p1_final_home
+        
         for move in range(dice_roll):
-            coords = self.get_next_position(coords[0], coords[1])
+            # Determine next position based on whether we're in/entering home
+            if in_final_home or coords in p1_home_stretch:
+                # Use home path
+                coords = self.get_next_home_position(player, coords[0], coords[1])
+                in_final_home = coords in p1_final_home
+            else:
+                coords = self.get_next_position(coords[0], coords[1])
+                # Check if we just entered home stretch
+                if coords in p1_home_stretch:
+                    in_final_home = False
         
         # Update marble position
         marbles[marble_idx] = coords
         self.p1_end = coords
+        
+        # Track if marble entered final home
+        if coords in p1_final_home:
+            result['entered_home'] = True
+            # Update end_home tracking
+            for i, pos in enumerate(self.p1_end_home):
+                if pos == (None, None):
+                    self.p1_end_home[i] = coords
+                    break
         
         # Check if marble is on start position
         if coords == P1START:
