@@ -116,11 +116,11 @@ export DISPLAY=:99 && python aggravation.py
 
 ### Main Files
 - `aggravation.py` (717 lines) - Main Aggravation board game implementation
-- `fourinarow.py` (363 lines) - Four-in-a-Row game (missing assets)
+- `fourinarow.py` (364 lines) - Four-in-a-Row game (missing assets)
 - `README.md` - Comprehensive project documentation, game rules, and setup instructions
 - `DebugNotes.txt` - Debugging notes and known issues
 - `DecisionTables.xlsx` - Game rule decision tables
-- **Total Python code:** 1,080 lines across main files
+- **Total Python code:** 1,081 lines across main files
 
 ### Key Functions in aggravation.py
 - `main()` - Game initialization and main loop
