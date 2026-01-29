@@ -3,6 +3,8 @@ Aggravation is a Python-based board game implementation built with pygame. This 
 
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
 
+**For user-facing documentation, game rules, and general project information, refer to `README.md`.**
+
 ## Working Effectively
 
 ### Bootstrap and Setup Dependencies
@@ -115,8 +117,9 @@ export DISPLAY=:99 && python aggravation.py
 ### Main Files
 - `aggravation.py` (717 lines) - Main Aggravation board game implementation
 - `fourinarow.py` (363 lines) - Four-in-a-Row game (missing assets)
-- `readme.md` - Basic documentation and game rules
+- `README.md` - Comprehensive project documentation, game rules, and setup instructions
 - `DebugNotes.txt` - Debugging notes and known issues
+- `DecisionTables.xlsx` - Game rule decision tables
 - **Total Python code:** 1,080 lines across main files
 
 ### Key Functions in aggravation.py
