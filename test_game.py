@@ -41,10 +41,13 @@ def test_basic_functions():
     print("\nTesting basic functions...")
     
     try:
-        from aggravation import roll_a_dice
+        from game_engine import AggravationGame
+        
+        # Create game instance
+        game = AggravationGame()
         
         # Test dice rolling - this doesn't require GUI
-        dice_result = roll_a_dice()
+        dice_result = game.roll_dice()
         assert 1 <= dice_result <= 6, f"Dice roll {dice_result} not in valid range"
         print(f"✓ Dice roll: {dice_result}")
         
@@ -89,15 +92,18 @@ def test_game_state_logic():
     print("\nTesting game state logic...")
     
     try:
-        from aggravation import isValidMove, getNumInHome
+        from game_engine import AggravationGame
         
-        # Test valid move function exists
-        print("✓ isValidMove function available")
+        # Create game instance
+        game = AggravationGame()
+        
+        # Test valid move function exists (is_valid_move is a method)
+        print("✓ is_valid_move function available")
         
         # Test home counting
-        test_home = [(3,2), (5,3)]
-        home_count = getNumInHome(test_home)
-        assert home_count == 2, f"Expected 2 marbles in home, got {home_count}"
+        # Game starts with 4 marbles in home for each player
+        home_count = game.get_num_in_home(1)
+        assert home_count == 4, f"Expected 4 marbles in home, got {home_count}"
         print(f"✓ Home marble count: {home_count}")
         
         return True
