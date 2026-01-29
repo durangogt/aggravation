@@ -14,6 +14,7 @@ Run these commands in sequence to set up the development environment:
    ```
    - Installation takes ~10 seconds
    - Version 2.6.1 confirmed working
+   - Python 3.12.3 confirmed working
 
 2. **Verify pygame installation:**
    ```bash
@@ -38,7 +39,7 @@ Run these commands in sequence to set up the development environment:
 - **Status:** Code is functional but MISSING required image assets:
   - `4row_red.png`, `4row_black.png`, `4row_board.png`
   - `4row_humanwinner.png`, `4row_computerwinner.png`, `4row_tie.png`, `4row_arrow.png`
-- **Limitation:** Will crash immediately due to missing assets
+- **Limitation:** Will crash immediately due to missing assets with FileNotFoundError
 
 ### Virtual Display for Headless Testing
 When working in a headless environment (CI/CD, remote server), set up virtual display:
@@ -81,7 +82,7 @@ export DISPLAY=:99 && python aggravation.py
    ```bash
    export DISPLAY=:99 && python fourinarow.py
    ```
-   - Should fail with: `pygame.error: No such file or directory`
+   - Should fail with: `FileNotFoundError: No file '4row_red.png' found in working directory`
    - Error at line 49: `pygame.image.load('4row_red.png')`
    - This confirms missing assets are properly documented
 
@@ -113,7 +114,7 @@ export DISPLAY=:99 && python aggravation.py
 
 ### Main Files
 - `aggravation.py` (716 lines) - Main Aggravation board game implementation
-- `fourinarow.py` (362 lines) - Four-in-a-Row game (missing assets)
+- `fourinarow.py` (363 lines) - Four-in-a-Row game (missing assets)
 - `readme.md` - Basic documentation and game rules
 - `DebugNotes.txt` - Debugging notes and known issues
 - **Total Python code:** 1,079 lines across main files
