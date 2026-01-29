@@ -3,8 +3,9 @@
 #
 # Released under a "Simplified BSD" license
 
-import random, pygame, sys
+import random, pygame, sys, os
 from pygame.locals import *
+from game_engine import AggravationGame
 
 # How many spaces/pixels wide & tall is the board?
 # 27 spaces tall with one filled in every other
@@ -116,9 +117,19 @@ P3COLOR = GREEN
 P4COLOR = BLUE
 
 def main():
+    # Check for headless mode
+    headless = '--headless' in sys.argv
+    if headless:
+        os.environ['SDL_VIDEODRIVER'] = 'dummy'
+        os.environ['SDL_AUDIODRIVER'] = 'dummy'
+    
     global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT, CLEAR_SURF, CLEAR_RECT, ROLL6_SURF, ROLL6_RECT
     global PLAYERROR_SURF, PLAYERROR_RECT, CLEARERROR_SURF, CLEARERROR_RECT
     global TEST_SURF, TEST_RECT
+    
+    # Initialize game engine
+    game = AggravationGame()
+    
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -146,12 +157,7 @@ def main():
 
     DISPLAYSURF.fill(BGCOLOR)
 
-    P1HOME = [(3,2), (5,3), (7,4), (9,5)]  # not global cuz it changes so either in main and passed around or where?
-    P1marbles = [(None,None), (None,None), (None,None), (None,None)] # location of all player one's marbles at all times
-    # TODO would be great to name the P1marbles indexes like [('p1m1'),('p1m2'),('p1m3'),('p1m4')] = P1marbles
-    P1END = (None, None) # last location of player 1's marble (come up with a better name eventually)
-    P1EndHome = [(None,None), (None,None), (None,None), (None,None)] # if all marbles are in winning position then [ (15,2) , (15,3) , (15,4) , (15,5) ]
-    p1StartOccuppied = False # begin with nothing on the start position
+    # Use game engine state instead of local variables
     waitingForInput = False
 
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
@@ -176,13 +182,13 @@ def main():
                 if boxx == None and boxy == None:
                     # check if the user clicked on an option button
                     if ( TEST_RECT.collidepoint(event.pos) ): # if clicked the debug button setup marbles going home
-                        P1marbles = [(11,2), (11,3), (11,4), (11,5)]
-                        P1HOME = []
+                        game.p1_marbles = [(11,2), (11,3), (11,4), (11,5)]
+                        game.p1_home = []
                         waitingForInput = True
-                        drawPlayerBox(P1COLOR,P1marbles[0])
-                        drawPlayerBox(P1COLOR,P1marbles[1])
-                        drawPlayerBox(P1COLOR,P1marbles[2])
-                        drawPlayerBox(P1COLOR,P1marbles[3])
+                        drawPlayerBox(P1COLOR,game.p1_marbles[0])
+                        drawPlayerBox(P1COLOR,game.p1_marbles[1])
+                        drawPlayerBox(P1COLOR,game.p1_marbles[2])
+                        drawPlayerBox(P1COLOR,game.p1_marbles[3])
 
                     if (ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos) or ROLL6_RECT.collidepoint(event.pos)):
                         print("Clicked on the ROLL Button") # clicked on ROLL button
@@ -198,21 +204,21 @@ def main():
                             moves = displayDice()
                             print("A roll of %i has been rolled...." % moves)
 
-                        if ((p1StartOccuppied == True) and ((len(P1HOME) >= 0) and (len(P1HOME) < 3))): # if marble on start & 1 or more marbles in home
+                        if ((game.p1_start_occupied == True) and ((len(game.p1_home) >= 0) and (len(game.p1_home) < 3))): # if marble on start & 1 or more marbles in home
                             # display option to choose marble to move....
                             displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
                             break
 
-                        elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and (len(P1HOME) == 4)): #
-                            P1HOME = removeFromHome(P1HOME) # remove one from home, still need to check if any are left like we do in removeFromHome()
+                        elif ((game.p1_start_occupied == False) and (moves == 1 or moves == 6) and (len(game.p1_home) == 4)): #
+                            game.p1_home = removeFromHome(game.p1_home) # remove one from home, still need to check if any are left like we do in removeFromHome()
                             drawPlayerBox(P1COLOR,P1START) # draw player on their start position
-                            P1END = P1START # set end of turn locator
-                            P1marbles[len(P1HOME)] = P1END #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
-                            print('P1marbles marble coords tracking: %s' % (P1marbles))
-                            p1StartOccuppied = True
+                            game.p1_end = P1START # set end of turn locator
+                            game.p1_marbles[len(game.p1_home)] = game.p1_end #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
+                            print('P1marbles marble coords tracking: %s' % (game.p1_marbles))
+                            game.p1_start_occupied = True
 
-                        elif ((p1StartOccuppied == False) and (moves == 1 or moves == 6) and ((len(P1HOME) >= 1) and (len(P1HOME) < 4))):
+                        elif ((game.p1_start_occupied == False) and (moves == 1 or moves == 6) and ((len(game.p1_home) >= 1) and (len(game.p1_home) < 4))):
                             # choose to move out of home or move a marble on the table...
                             displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
