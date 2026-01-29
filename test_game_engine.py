@@ -399,5 +399,131 @@ class TestEdgeCases:
         assert isinstance(state['player1'], dict)
 
 
+class TestHomeEntry:
+    """Test marble home entry logic - the main bug fix."""
+    
+    def test_marble_enters_home_from_15_1(self):
+        """Test that marble at (15,1) enters home with roll of 1."""
+        game = AggravationGame()
+        
+        # Place marble just outside home entry
+        game.p1_marbles[0] = (15, 1)
+        
+        # Should be valid to move 1 space into home
+        assert game.is_valid_move(1, 0, 1) == True
+        
+        # Execute the move
+        result = game.execute_move(1, 0, 1)
+        
+        # Should land at (15, 2) - first home position
+        assert result['success'] == True
+        assert result['new_position'] == (15, 2)
+        assert result['entered_home'] == True
+    
+    def test_marble_enters_home_from_13_1(self):
+        """Test that marble at (13,1) enters home with roll of 2."""
+        game = AggravationGame()
+        
+        # Place marble 2 spots from home entry
+        game.p1_marbles[0] = (13, 1)
+        
+        # Should be valid to move 2 spaces into home
+        assert game.is_valid_move(1, 0, 2) == True
+        
+        # Execute the move
+        result = game.execute_move(1, 0, 2)
+        
+        # Path: (13,1) -> (15,1) -> (15,2)
+        assert result['success'] == True
+        assert result['new_position'] == (15, 2)
+        assert result['entered_home'] == True
+    
+    def test_marble_moves_through_home(self):
+        """Test that marble can move multiple spaces into home."""
+        game = AggravationGame()
+        
+        # Place marble at home entry
+        game.p1_marbles[0] = (15, 1)
+        
+        # Move 3 spaces into home
+        result = game.execute_move(1, 0, 3)
+        
+        # Path: (15,1) -> (15,2) -> (15,3) -> (15,4)
+        assert result['success'] == True
+        assert result['new_position'] == (15, 4)
+        assert result['entered_home'] == True
+    
+    def test_marble_enters_home_from_11_1(self):
+        """Test marble entering home from (11,1) with roll of 4."""
+        game = AggravationGame()
+        
+        # Place marble further back on home stretch
+        game.p1_marbles[0] = (11, 1)
+        
+        # Move 4 spaces: (11,1) -> (13,1) -> (15,1) -> (15,2) -> (15,3)
+        result = game.execute_move(1, 0, 4)
+        
+        assert result['success'] == True
+        assert result['new_position'] == (15, 3)
+        assert result['entered_home'] == True
+    
+    def test_marble_cannot_overshoot_home(self):
+        """Test that marble cannot move past the end of home."""
+        game = AggravationGame()
+        
+        # Place marble at last home position
+        game.p1_marbles[0] = (15, 5)
+        
+        # Should NOT be able to move (nowhere to go)
+        assert game.is_valid_move(1, 0, 1) == False
+    
+    def test_marble_at_15_4_can_move_1(self):
+        """Test marble at (15,4) can move 1 to (15,5)."""
+        game = AggravationGame()
+        
+        game.p1_marbles[0] = (15, 4)
+        
+        assert game.is_valid_move(1, 0, 1) == True
+        
+        result = game.execute_move(1, 0, 1)
+        assert result['success'] == True
+        assert result['new_position'] == (15, 5)
+    
+    def test_marble_at_15_4_cannot_move_2(self):
+        """Test marble at (15,4) cannot move 2 (would overshoot)."""
+        game = AggravationGame()
+        
+        game.p1_marbles[0] = (15, 4)
+        
+        # Can't move 2 - would go past (15,5)
+        assert game.is_valid_move(1, 0, 2) == False
+    
+    def test_cannot_land_on_own_marble_in_home(self):
+        """Test that player cannot land on their own marble in home."""
+        game = AggravationGame()
+        
+        # Place one marble in home, one approaching
+        game.p1_marbles[0] = (15, 2)  # Already in home
+        game.p1_marbles[1] = (15, 1)  # About to enter
+        
+        # Should NOT be able to move onto occupied space
+        assert game.is_valid_move(1, 1, 1) == False
+    
+    def test_home_stretch_entry_from_11_3(self):
+        """Test entering home stretch from furthest valid point."""
+        game = AggravationGame()
+        
+        # (11,3) is the furthest point that can still reach home
+        game.p1_marbles[0] = (11, 3)
+        
+        # Move 6 spaces should get to (15,3)
+        # Path: (11,3)->(11,2)->(11,1)->(13,1)->(15,1)->(15,2)->(15,3)
+        result = game.execute_move(1, 0, 6)
+        
+        assert result['success'] == True
+        assert result['new_position'] == (15, 3)
+        assert result['entered_home'] == True
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
