@@ -224,36 +224,36 @@ def main():
                             waitingForInput = True
                             break
 
-                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 4)):
+                        elif ((game.p1_start_occupied == False) and (moves != 1 or moves != 6) and (len(game.p1_home) == 4)):
                             displayStatus(TURNOVER_SURF, TURNOVER_RECT)
                             waitingForInput = True
                             break
 
-                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and (len(P1HOME) == 3)):
-                            if (isValidMove(moves,P1marbles,P1END) == True):
-                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END)
+                        elif ((game.p1_start_occupied == False) and (moves != 1 or moves != 6) and (len(game.p1_home) == 3)):
+                            if (isValidMove(moves,game.p1_marbles,game.p1_end) == True):
+                                game.p1_marbles,game.p1_end = animatePlayerMove(moves,game.p1_marbles,game.p1_end)
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
+                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
 
-                        elif ((p1StartOccuppied == False) and (moves != 1 or moves != 6) and ((len(P1HOME) == 2) or (len(P1HOME) == 1) or (len(P1HOME) == 0))):
+                        elif ((game.p1_start_occupied == False) and (moves != 1 or moves != 6) and ((len(game.p1_home) == 2) or (len(game.p1_home) == 1) or (len(game.p1_home) == 0))):
                             # display option to choose marble to move....
                             displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
                             break
 
-                        elif ((p1StartOccuppied == True) and (len(P1HOME) == 3)):
-                            if (isValidMove(moves,P1marbles,P1END) == True):
-                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END)
-                                p1StartOccuppied = False
+                        elif ((game.p1_start_occupied == True) and (len(game.p1_home) == 3)):
+                            if (isValidMove(moves,game.p1_marbles,game.p1_end) == True):
+                                game.p1_marbles,game.p1_end = animatePlayerMove(moves,game.p1_marbles,game.p1_end)
+                                game.p1_start_occupied = False
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
+                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
 
                         else:
-                            print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
+                            print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
 
                     elif ROLL1_RECT.collidepoint(event.pos):
                         print("Clicked on the ROLL 1 Button") # clicked on New Game button
@@ -274,57 +274,57 @@ def main():
                     # Start can be occuppied by 1 marble and another marble elsewhere
                     # so a user can click on a non start marble & then we don't reset startOccuppied
                     # or a user can click on a start marble and thus reset start
-                    if (p1StartOccuppied == True and waitingForInput == True):
+                    if (game.p1_start_occupied == True and waitingForInput == True):
 
-                        if (tempP1END == P1START and tempP1END in P1marbles):    # player clicked on a marble on the start position & its in this players marble tracking array
-                            if (isValidMove(moves,P1marbles,tempP1END) == True): # no marbles of its own in the way
-                                P1END = tempP1END                                # update actual variable with temporary
-                                print('P1END is now: %s ' % str(P1END))          # debug
-                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END) # move player to new position
-                                p1StartOccuppied = False   # reset start position is now unoccuppied
+                        if (tempP1END == P1START and tempP1END in game.p1_marbles):    # player clicked on a marble on the start position & its in this players marble tracking array
+                            if (isValidMove(moves,game.p1_marbles,tempP1END) == True): # no marbles of its own in the way
+                                game.p1_end = tempP1END                                # update actual variable with temporary
+                                print('P1END is now: %s ' % str(game.p1_end))          # debug
+                                game.p1_marbles,game.p1_end = animatePlayerMove(moves,game.p1_marbles,game.p1_end) # move player to new position
+                                game.p1_start_occupied = False   # reset start position is now unoccuppied
                                 waitingForInput = False    # reset waiting for input flag
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
+                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
 
-                        elif (tempP1END != P1START and tempP1END in P1marbles):  # this means the player clicked on a marble NOT in the start position to move forward & its this players marble
-                            if (isValidMove(moves,P1marbles,tempP1END) == True): # no marbles of its own in the way
-                                P1END = tempP1END                                # update actual variable with temporary
-                                print('P1END is now: %s ' % str(P1END))          # debug
-                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END) # move player to new position
-                                p1StartOccuppied = True   # don't reset startOccuppied flag due to not moving the marble on start
+                        elif (tempP1END != P1START and tempP1END in game.p1_marbles):  # this means the player clicked on a marble NOT in the start position to move forward & its this players marble
+                            if (isValidMove(moves,game.p1_marbles,tempP1END) == True): # no marbles of its own in the way
+                                game.p1_end = tempP1END                                # update actual variable with temporary
+                                print('P1END is now: %s ' % str(game.p1_end))          # debug
+                                game.p1_marbles,game.p1_end = animatePlayerMove(moves,game.p1_marbles,game.p1_end) # move player to new position
+                                game.p1_start_occupied = True   # don't reset startOccuppied flag due to not moving the marble on start
                                 waitingForInput = False   # reset waiting for input flag
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
+                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
 
-                    elif(p1StartOccuppied == False and waitingForInput == True):
+                    elif(game.p1_start_occupied == False and waitingForInput == True):
                         # check if the spot clicked on is a board spot or home spot (i.e. is P1END a # or integer)
-                        if (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] != SPOT and len(P1HOME) > 0): # this means the player clicked on a marble in the home spot and there is at least one marble there
-                            P1HOME = removeFromHome(P1HOME)                          # remove one from home, doesn't matter which marble in home they clicked on - it will pull out the last one
+                        if (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] != SPOT and len(game.p1_home) > 0): # this means the player clicked on a marble in the home spot and there is at least one marble there
+                            game.p1_home = removeFromHome(game.p1_home)                          # remove one from home, doesn't matter which marble in home they clicked on - it will pull out the last one
                             drawPlayerBox(P1COLOR,P1START)                           # draw player on their start position
-                            P1END = P1START                                          # set end of turn locator
-                            P1marbles[len(P1HOME)] = P1END #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
-                            print('P1marbles marble coords tracking: %s' % (P1marbles))
-                            p1StartOccuppied = True
+                            game.p1_end = P1START                                          # set end of turn locator
+                            game.p1_marbles[len(game.p1_home)] = game.p1_end #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
+                            print('P1marbles marble coords tracking: %s' % (game.p1_marbles))
+                            game.p1_start_occupied = True
                             waitingForInput = False
 
                         elif (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] == SPOT): # this means the player clicked on a marble not on the home position
-                            if (isValidMove(moves,P1marbles,tempP1END) == True):
-                                P1END = tempP1END
-                                P1marbles,P1END = animatePlayerMove(moves,P1marbles,P1END)
+                            if (isValidMove(moves,game.p1_marbles,tempP1END) == True):
+                                game.p1_end = tempP1END
+                                game.p1_marbles,game.p1_end = animatePlayerMove(moves,game.p1_marbles,game.p1_end)
                                 waitingForInput = False
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
+                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
 
-                        elif (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] != SPOT and len(P1HOME) == 0):
+                        elif (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] != SPOT and len(game.p1_home) == 0):
                             # this means the player clicked on a position in the home base but no marbles exist TODO asset this further up instead of here
                             displayStatus(PLAYERROR2_SURF, PLAYERROR2_RECT)
-                            print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(P1HOME)),P1marbles))
+                            print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
