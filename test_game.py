@@ -27,6 +27,13 @@ def test_imports():
         print(f"✗ aggravation import failed: {e}")
         return False
     
+    try:
+        import game_engine
+        print("✓ game_engine module imported successfully")
+    except ImportError as e:
+        print(f"✗ game_engine import failed: {e}")
+        return False
+    
     return True
 
 def test_basic_functions():
@@ -99,6 +106,38 @@ def test_game_state_logic():
         print(f"✗ Game state logic test failed: {e}")
         return False
 
+def test_game_engine():
+    """Test game engine module"""
+    print("\nTesting game engine...")
+    
+    try:
+        from game_engine import AggravationGame
+        
+        # Create game instance
+        game = AggravationGame()
+        print("✓ Game engine initialized")
+        
+        # Test dice rolling
+        dice_roll = game.roll_dice()
+        assert 1 <= dice_roll <= 6, f"Dice roll {dice_roll} out of range"
+        print(f"✓ Dice roll: {dice_roll}")
+        
+        # Test game state
+        state = game.get_game_state()
+        assert state is not None, "Game state is None"
+        print("✓ Game state accessible")
+        
+        # Test marble count
+        num_in_home = game.get_num_in_home(1)
+        assert num_in_home == 4, f"Expected 4 marbles in home, got {num_in_home}"
+        print(f"✓ Marble count: {num_in_home}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"✗ Game engine test failed: {e}")
+        return False
+
 def run_manual_test():
     """Instructions for manual testing"""
     print("\nManual Testing Instructions:")
@@ -126,7 +165,7 @@ def main():
     print("=" * 30)
     
     tests_passed = 0
-    total_tests = 4
+    total_tests = 5
     
     if test_imports():
         tests_passed += 1
@@ -138,6 +177,9 @@ def main():
         tests_passed += 1
     
     if test_game_state_logic():
+        tests_passed += 1
+    
+    if test_game_engine():
         tests_passed += 1
     
     print(f"\nTest Results: {tests_passed}/{total_tests} tests passed")
