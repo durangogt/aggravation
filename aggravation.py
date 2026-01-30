@@ -61,9 +61,35 @@ BOARD_TEMPLATE =    ['...............................',
                      '...............................']
 
 P1START = (19,1)
-P2START = (29,8)
-P3START = (15,15)
-P4START = (1,8)
+P2START = (29,10)
+P3START = (11,15)
+P4START = (1,6)
+
+# Player start positions and colors indexed by player number
+PLAYER_STARTS = {1: P1START, 2: P2START, 3: P3START, 4: P4START}
+PLAYER_COLORS = {1: None, 2: None, 3: None, 4: None}  # Set after color definitions
+
+# Home positions for each player
+PLAYER_STARTING_HOMES = {
+    1: [(3, 2), (5, 3), (7, 4), (9, 5)],
+    2: [(27, 2), (25, 3), (23, 4), (21, 5)],
+    3: [(21, 11), (23, 12), (25, 13), (27, 14)],
+    4: [(9, 11), (7, 12), (5, 13), (3, 14)]
+}
+
+PLAYER_FINAL_HOMES = {
+    1: [(15, 2), (15, 3), (15, 4), (15, 5)],
+    2: [(27, 8), (25, 8), (23, 8), (21, 8)],
+    3: [(15, 14), (15, 13), (15, 12), (15, 11)],
+    4: [(3, 8), (5, 8), (7, 8), (9, 8)]
+}
+
+PLAYER_HOME_STRETCHES = {
+    1: [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)],
+    2: [(25, 6), (27, 6), (29, 6), (29, 7), (29, 8)],
+    3: [(19, 13), (19, 14), (19, 15), (17, 15), (15, 15)],
+    4: [(5, 10), (3, 10), (1, 10), (1, 9), (1, 8)]
+}
 
 P1END = None # stores the (x, y) of the last board spot per turn
 P2END = None # stores the (x, y) of the last board spot per turn
@@ -116,6 +142,90 @@ P2COLOR = BLACK
 P3COLOR = GREEN
 P4COLOR = BLUE
 
+# Set player colors dict after color definitions
+PLAYER_COLORS = {1: RED, 2: BLACK, 3: GREEN, 4: BLUE}
+
+def get_player_marbles(game, player):
+    """Get marble positions for the specified player."""
+    if player == 1:
+        return game.p1_marbles
+    elif player == 2:
+        return game.p2_marbles
+    elif player == 3:
+        return game.p3_marbles
+    elif player == 4:
+        return game.p4_marbles
+
+def get_player_home(game, player):
+    """Get home base marbles for the specified player."""
+    if player == 1:
+        return game.p1_home
+    elif player == 2:
+        return game.p2_home
+    elif player == 3:
+        return game.p3_home
+    elif player == 4:
+        return game.p4_home
+
+def set_player_home(game, player, home):
+    """Set home base marbles for the specified player."""
+    if player == 1:
+        game.p1_home = home
+    elif player == 2:
+        game.p2_home = home
+    elif player == 3:
+        game.p3_home = home
+    elif player == 4:
+        game.p4_home = home
+
+def get_player_start_occupied(game, player):
+    """Get start_occupied flag for the specified player."""
+    if player == 1:
+        return game.p1_start_occupied
+    elif player == 2:
+        return game.p2_start_occupied
+    elif player == 3:
+        return game.p3_start_occupied
+    elif player == 4:
+        return game.p4_start_occupied
+
+def set_player_start_occupied(game, player, occupied):
+    """Set start_occupied flag for the specified player."""
+    if player == 1:
+        game.p1_start_occupied = occupied
+    elif player == 2:
+        game.p2_start_occupied = occupied
+    elif player == 3:
+        game.p3_start_occupied = occupied
+    elif player == 4:
+        game.p4_start_occupied = occupied
+
+def get_player_end(game, player):
+    """Get end position for the specified player."""
+    if player == 1:
+        return game.p1_end
+    elif player == 2:
+        return game.p2_end
+    elif player == 3:
+        return game.p3_end
+    elif player == 4:
+        return game.p4_end
+
+def set_player_end(game, player, pos):
+    """Set end position for the specified player."""
+    if player == 1:
+        game.p1_end = pos
+    elif player == 2:
+        game.p2_end = pos
+    elif player == 3:
+        game.p3_end = pos
+    elif player == 4:
+        game.p4_end = pos
+
+def next_player(current_player, num_players=4):
+    """Get the next player in turn order."""
+    return (current_player % num_players) + 1
+
 def main():
     # Check for headless mode
     headless = '--headless' in sys.argv
@@ -129,6 +239,7 @@ def main():
     
     # Initialize game engine
     game = AggravationGame()
+    current_player = 1  # Track whose turn it is
     
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -155,24 +266,55 @@ def main():
 
     TEST_SURF, TEST_RECT = makeText('DEBUG', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 30)
 
-    # Winner message - displayed in center of screen
-    WINNER_SURF, WINNER_RECT = makeText('PLAYER 1 WINS!', GREEN, BGCOLOR, WINDOWWIDTH // 2 - 80, WINDOWHEIGHT // 2)
+    # Winner messages for each player
+    WINNER_SURFS = {
+        1: makeText('PLAYER 1 WINS!', P1COLOR, BGCOLOR, WINDOWWIDTH // 2 - 80, WINDOWHEIGHT // 2),
+        2: makeText('PLAYER 2 WINS!', WHITE, BGCOLOR, WINDOWWIDTH // 2 - 80, WINDOWHEIGHT // 2),  # Black text on navy is hard to read
+        3: makeText('PLAYER 3 WINS!', P3COLOR, BGCOLOR, WINDOWWIDTH // 2 - 80, WINDOWHEIGHT // 2),
+        4: makeText('PLAYER 4 WINS!', P4COLOR, BGCOLOR, WINDOWWIDTH // 2 - 80, WINDOWHEIGHT // 2)
+    }
+    
+    # Current player indicator position
+    PLAYER_TURN_POS = (10, 10)
 
     DISPLAYSURF.fill(BGCOLOR)
 
     # Use game engine state instead of local variables
     waitingForInput = False
     gameWon = False
+    winner = None
+    moves = 0  # Track current dice roll
 
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
     drawBoard()
+    
+    def drawCurrentPlayerIndicator():
+        """Draw indicator showing whose turn it is."""
+        # Clear previous indicator
+        pygame.draw.rect(DISPLAYSURF, BGCOLOR, (PLAYER_TURN_POS[0], PLAYER_TURN_POS[1], 200, 25))
+        # Draw new indicator
+        player_text = f"Player {current_player}'s Turn"
+        text_surf = BASICFONT.render(player_text, True, PLAYER_COLORS[current_player])
+        DISPLAYSURF.blit(text_surf, PLAYER_TURN_POS)
+    
+    drawCurrentPlayerIndicator()
 
     while True: # main game loop
         mouseClicked = False
+        
+        # Get current player's data
+        player_marbles = get_player_marbles(game, current_player)
+        player_home = get_player_home(game, current_player)
+        player_start = PLAYER_STARTS[current_player]
+        player_color = PLAYER_COLORS[current_player]
+        player_start_occupied = get_player_start_occupied(game, current_player)
+        starting_home = PLAYER_STARTING_HOMES[current_player]
+        final_home = PLAYER_FINAL_HOMES[current_player]
 
         # If game is won, just display winner and wait for exit
         if gameWon:
-            DISPLAYSURF.blit(WINNER_SURF, WINNER_RECT)
+            winner_surf, winner_rect = WINNER_SURFS[winner]
+            DISPLAYSURF.blit(winner_surf, winner_rect)
             pygame.display.update()
             checkForQuit()
             for event in pygame.event.get():
@@ -198,16 +340,28 @@ def main():
                 if boxx == None and boxy == None:
                     # check if the user clicked on an option button
                     if ( TEST_RECT.collidepoint(event.pos) ): # if clicked the debug button setup marbles going home
-                        game.p1_marbles = [(11,2), (11,3), (11,4), (11,5)]
-                        game.p1_home = []
+                        # Debug: set up current player's marbles near home
+                        home_stretch = PLAYER_HOME_STRETCHES[current_player]
+                        if current_player == 1:
+                            game.p1_marbles = [(11,2), (11,3), (11,4), (11,5)]
+                            game.p1_home = []
+                        elif current_player == 2:
+                            game.p2_marbles = [(27,10), (25,10), (23,10), (21,10)]
+                            game.p2_home = []
+                        elif current_player == 3:
+                            game.p3_marbles = [(19,12), (19,13), (19,14), (19,15)]
+                            game.p3_home = []
+                        elif current_player == 4:
+                            game.p4_marbles = [(5,6), (7,6), (9,6), (11,6)]
+                            game.p4_home = []
                         waitingForInput = True
-                        drawPlayerBox(P1COLOR,game.p1_marbles[0])
-                        drawPlayerBox(P1COLOR,game.p1_marbles[1])
-                        drawPlayerBox(P1COLOR,game.p1_marbles[2])
-                        drawPlayerBox(P1COLOR,game.p1_marbles[3])
+                        player_marbles = get_player_marbles(game, current_player)
+                        for marble in player_marbles:
+                            if marble and marble != (None, None):
+                                drawPlayerBox(player_color, marble)
 
                     if (ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos) or ROLL6_RECT.collidepoint(event.pos)):
-                        print("Clicked on the ROLL Button") # clicked on ROLL button
+                        print(f"Player {current_player} clicked on the ROLL Button")
 
                         # for debug purposes putting in a roll 1 & 6 button to speed up testing
                         if ROLL1_RECT.collidepoint(event.pos):
@@ -220,56 +374,79 @@ def main():
                             moves = displayDice(game)
                             print("A roll of %i has been rolled...." % moves)
 
-                        if ((game.p1_start_occupied == True) and ((len(game.p1_home) >= 0) and (len(game.p1_home) < 3))): # if marble on start & 1 or more marbles in home
+                        # Refresh player data after roll
+                        player_marbles = get_player_marbles(game, current_player)
+                        player_home = get_player_home(game, current_player)
+                        player_start_occupied = get_player_start_occupied(game, current_player)
+                        player_end = get_player_end(game, current_player)
+
+                        if ((player_start_occupied == True) and ((len(player_home) >= 0) and (len(player_home) < 3))): # if marble on start & 1 or more marbles in home
                             # display option to choose marble to move....
                             displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
                             break
 
-                        elif ((game.p1_start_occupied == False) and (moves == 1 or moves == 6) and (len(game.p1_home) == 4)): #
-                            game.p1_home = removeFromHome(game.p1_home) # remove one from home, still need to check if any are left like we do in removeFromHome()
-                            drawPlayerBox(P1COLOR,P1START) # draw player on their start position
-                            game.p1_end = P1START # set end of turn locator
-                            game.p1_marbles[len(game.p1_home)] = game.p1_end #keep track of P1marbles - since we pull out the last one in P1HOME, thats the index
-                            print('P1marbles marble coords tracking: %s' % (game.p1_marbles))
-                            game.p1_start_occupied = True
+                        elif ((player_start_occupied == False) and (moves == 1 or moves == 6) and (len(player_home) == 4)): #
+                            new_home = removeFromHome(player_home)
+                            set_player_home(game, current_player, new_home)
+                            drawPlayerBox(player_color, player_start) # draw player on their start position
+                            set_player_end(game, current_player, player_start) # set end of turn locator
+                            player_marbles = get_player_marbles(game, current_player)
+                            player_home = get_player_home(game, current_player)
+                            player_marbles[len(player_home)] = player_start
+                            print(f'Player {current_player} marbles tracking: {player_marbles}')
+                            set_player_start_occupied(game, current_player, True)
+                            # Switch to next player after moving out
+                            current_player = next_player(current_player)
+                            drawCurrentPlayerIndicator()
 
-                        elif ((game.p1_start_occupied == False) and (moves == 1 or moves == 6) and ((len(game.p1_home) >= 1) and (len(game.p1_home) < 4))):
+                        elif ((player_start_occupied == False) and (moves == 1 or moves == 6) and ((len(player_home) >= 1) and (len(player_home) < 4))):
                             # choose to move out of home or move a marble on the table...
                             displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
                             break
 
-                        elif ((game.p1_start_occupied == False) and (moves != 1 or moves != 6) and (len(game.p1_home) == 4)):
+                        elif ((player_start_occupied == False) and (moves != 1 or moves != 6) and (len(player_home) == 4)):
                             displayStatus(TURNOVER_SURF, TURNOVER_RECT)
-                            waitingForInput = True
+                            # No valid moves - switch to next player
+                            current_player = next_player(current_player)
+                            drawCurrentPlayerIndicator()
+                            waitingForInput = False
                             break
 
-                        elif ((game.p1_start_occupied == False) and (moves != 1 or moves != 6) and (len(game.p1_home) == 3)):
-                            if (isValidMove(moves,game.p1_marbles,game.p1_end,game) == True):
-                                game.p1_marbles,game.p1_end,gameWon = animatePlayerMove(moves,game.p1_marbles,game.p1_end,game)
+                        elif ((player_start_occupied == False) and (moves != 1 or moves != 6) and (len(player_home) == 3)):
+                            if (isValidMoveForPlayer(moves, player_marbles, player_end, game, current_player) == True):
+                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, player_end, game, current_player)
+                                set_player_end(game, current_player, new_end)
+                                # Switch to next player after move
+                                current_player = next_player(current_player)
+                                drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
+                                print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
-                        elif ((game.p1_start_occupied == False) and (moves != 1 or moves != 6) and ((len(game.p1_home) == 2) or (len(game.p1_home) == 1) or (len(game.p1_home) == 0))):
+                        elif ((player_start_occupied == False) and (moves != 1 or moves != 6) and ((len(player_home) == 2) or (len(player_home) == 1) or (len(player_home) == 0))):
                             # display option to choose marble to move....
                             displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
                             break
 
-                        elif ((game.p1_start_occupied == True) and (len(game.p1_home) == 3)):
-                            if (isValidMove(moves,game.p1_marbles,game.p1_end,game) == True):
-                                game.p1_marbles,game.p1_end,gameWon = animatePlayerMove(moves,game.p1_marbles,game.p1_end,game)
-                                game.p1_start_occupied = False
+                        elif ((player_start_occupied == True) and (len(player_home) == 3)):
+                            if (isValidMoveForPlayer(moves, player_marbles, player_end, game, current_player) == True):
+                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, player_end, game, current_player)
+                                set_player_end(game, current_player, new_end)
+                                set_player_start_occupied(game, current_player, False)
+                                # Switch to next player after move
+                                current_player = next_player(current_player)
+                                drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
+                                print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                         else:
-                            print("DEBUG: missing a marble decision option: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
+                            print(f"DEBUG: missing a marble decision option: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                     elif ROLL1_RECT.collidepoint(event.pos):
                         print("Clicked on the ROLL 1 Button") # clicked on New Game button
@@ -284,81 +461,108 @@ def main():
                     # This else is executed when the code breaks above...and thus really when waitingForInput is activated
                     print("clicked on a board spot...") # even if you click on a horizonal clear space it picks up...TODO need to fix this
 
-                    # Need to check if its in p1marble but for now we will click the right one
-                    tempP1END = getBoxAtPixel(mousex,mousey) # grab where user clicked - might need a getMarbleAtPixel() due to circle vs square pixel coverage
+                    # Need to check if its in player's marbles
+                    clickedPos = getBoxAtPixel(mousex,mousey) # grab where user clicked
+                    
+                    # Refresh player data
+                    player_marbles = get_player_marbles(game, current_player)
+                    player_home = get_player_home(game, current_player)
+                    player_start_occupied = get_player_start_occupied(game, current_player)
 
-                    # Start can be occuppied by 1 marble and another marble elsewhere
-                    # so a user can click on a non start marble & then we don't reset startOccuppied
+                    # Start can be occupied by 1 marble and another marble elsewhere
+                    # so a user can click on a non start marble & then we don't reset startOccupied
                     # or a user can click on a start marble and thus reset start
-                    if (game.p1_start_occupied == True and waitingForInput == True):
+                    if (player_start_occupied == True and waitingForInput == True):
 
-                        if (tempP1END == P1START and tempP1END in game.p1_marbles):    # player clicked on a marble on the start position & its in this players marble tracking array
-                            if (isValidMove(moves,game.p1_marbles,tempP1END,game) == True): # no marbles of its own in the way
-                                game.p1_end = tempP1END                                # update actual variable with temporary
-                                print('P1END is now: %s ' % str(game.p1_end))          # debug
-                                game.p1_marbles,game.p1_end,gameWon = animatePlayerMove(moves,game.p1_marbles,game.p1_end,game) # move player to new position
-                                game.p1_start_occupied = False   # reset start position is now unoccuppied
-                                waitingForInput = False    # reset waiting for input flag
+                        if (clickedPos == player_start and clickedPos in player_marbles):    # player clicked on a marble on the start position
+                            if (isValidMoveForPlayer(moves, player_marbles, clickedPos, game, current_player) == True):
+                                set_player_end(game, current_player, clickedPos)
+                                print(f'Player {current_player} END is now: {clickedPos}')
+                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
+                                set_player_end(game, current_player, new_end)
+                                set_player_start_occupied(game, current_player, False)
+                                waitingForInput = False
+                                # Switch to next player
+                                current_player = next_player(current_player)
+                                drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
+                                print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
-                        elif (tempP1END != P1START and tempP1END in game.p1_marbles):  # this means the player clicked on a marble NOT in the start position to move forward & its this players marble
-                            if (isValidMove(moves,game.p1_marbles,tempP1END,game) == True): # no marbles of its own in the way
-                                game.p1_end = tempP1END                                # update actual variable with temporary
-                                print('P1END is now: %s ' % str(game.p1_end))          # debug
-                                game.p1_marbles,game.p1_end,gameWon = animatePlayerMove(moves,game.p1_marbles,game.p1_end,game) # move player to new position
-                                game.p1_start_occupied = True   # don't reset startOccuppied flag due to not moving the marble on start
-                                waitingForInput = False   # reset waiting for input flag
+                        elif (clickedPos != player_start and clickedPos in player_marbles):  # clicked on a marble NOT on start
+                            if (isValidMoveForPlayer(moves, player_marbles, clickedPos, game, current_player) == True):
+                                set_player_end(game, current_player, clickedPos)
+                                print(f'Player {current_player} END is now: {clickedPos}')
+                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
+                                set_player_end(game, current_player, new_end)
+                                set_player_start_occupied(game, current_player, True)  # don't reset, we didn't move start marble
+                                waitingForInput = False
+                                # Switch to next player
+                                current_player = next_player(current_player)
+                                drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
+                                print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
-                    elif(game.p1_start_occupied == False and waitingForInput == True):
-                        # Define starting home positions vs final home positions
-                        p1StartingHome = [(3, 2), (5, 3), (7, 4), (9, 5)]  # Where marbles wait before entering board
-                        p1FinalHome = [(15, 2), (15, 3), (15, 4), (15, 5)]  # Winning positions
+                    elif(player_start_occupied == False and waitingForInput == True):
+                        # Use player-specific home positions
+                        playerStartingHome = starting_home
+                        playerFinalHome = final_home
                         
                         # Check if clicked on a marble in FINAL home (can move within final home)
-                        if tempP1END in p1FinalHome and tempP1END in game.p1_marbles:
-                            if (isValidMove(moves,game.p1_marbles,tempP1END,game) == True):
-                                game.p1_end = tempP1END
-                                game.p1_marbles,game.p1_end,gameWon = animatePlayerMove(moves,game.p1_marbles,game.p1_end,game)
+                        if clickedPos in playerFinalHome and clickedPos in player_marbles:
+                            if (isValidMoveForPlayer(moves, player_marbles, clickedPos, game, current_player) == True):
+                                set_player_end(game, current_player, clickedPos)
+                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
+                                set_player_end(game, current_player, new_end)
                                 waitingForInput = False
+                                # Switch to next player
+                                current_player = next_player(current_player)
+                                drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
+                                print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
                         
                         # Check if clicked on STARTING home (remove marble and place on start)
-                        elif tempP1END in p1StartingHome and len(game.p1_home) > 0:
-                            game.p1_home = removeFromHome(game.p1_home)                          # remove one from home
-                            drawPlayerBox(P1COLOR,P1START)                           # draw player on their start position
-                            game.p1_end = P1START                                          # set end of turn locator
-                            game.p1_marbles[len(game.p1_home)] = game.p1_end #keep track of P1marbles
-                            print('P1marbles marble coords tracking: %s' % (game.p1_marbles))
-                            game.p1_start_occupied = True
+                        elif clickedPos in playerStartingHome and len(player_home) > 0:
+                            new_home = removeFromHome(player_home)
+                            set_player_home(game, current_player, new_home)
+                            drawPlayerBox(player_color, player_start)
+                            set_player_end(game, current_player, player_start)
+                            player_marbles = get_player_marbles(game, current_player)
+                            player_home = get_player_home(game, current_player)
+                            player_marbles[len(player_home)] = player_start
+                            print(f'Player {current_player} marbles tracking: {player_marbles}')
+                            set_player_start_occupied(game, current_player, True)
                             waitingForInput = False
+                            # Switch to next player after moving out of home
+                            current_player = next_player(current_player)
+                            drawCurrentPlayerIndicator()
 
-                        elif (BOARD_TEMPLATE[ tempP1END[1] ][ tempP1END[0] ] == SPOT): # clicked on a marble on the board track
-                            print("DEBUG: Clicked on board spot %s, checking if valid move..." % str(tempP1END))
-                            if tempP1END not in game.p1_marbles:
-                                print("DEBUG: %s is not in p1_marbles, ignoring click" % str(tempP1END))
-                            elif (isValidMove(moves,game.p1_marbles,tempP1END,game) == True):
-                                game.p1_end = tempP1END
-                                game.p1_marbles,game.p1_end,gameWon = animatePlayerMove(moves,game.p1_marbles,game.p1_end,game)
+                        elif (BOARD_TEMPLATE[ clickedPos[1] ][ clickedPos[0] ] == SPOT): # clicked on a marble on the board track
+                            print(f"DEBUG: Clicked on board spot {clickedPos}, checking if valid move...")
+                            if clickedPos not in player_marbles:
+                                print(f"DEBUG: {clickedPos} is not in player {current_player}'s marbles, ignoring click")
+                            elif (isValidMoveForPlayer(moves, player_marbles, clickedPos, game, current_player) == True):
+                                set_player_end(game, current_player, clickedPos)
+                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
+                                set_player_end(game, current_player, new_end)
                                 waitingForInput = False
+                                # Switch to next player
+                                current_player = next_player(current_player)
+                                drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
                                 displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
+                                print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
-                        elif tempP1END in p1StartingHome and len(game.p1_home) == 0:
+                        elif clickedPos in playerStartingHome and len(player_home) == 0:
                             # clicked on starting home but no marbles there
                             displayStatus(PLAYERROR2_SURF, PLAYERROR2_RECT)
-                            print("DEBUG: Roll: %i  NumInHome: %i  Marbles: %s" % (moves,(len(game.p1_home)),game.p1_marbles))
+                            print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
@@ -373,6 +577,16 @@ def isValidMove(moves, P1marbles, P1END, game):
     if P1END in game.p1_marbles:
         marble_idx = game.p1_marbles.index(P1END)
         return game.is_valid_move(1, marble_idx, moves)
+    return False
+
+def isValidMoveForPlayer(moves, player_marbles, marble_pos, game, player):
+    """
+    Check if a move is valid for any player's marble.
+    Delegates to game engine for validation.
+    """
+    if marble_pos in player_marbles:
+        marble_idx = player_marbles.index(marble_pos)
+        return game.is_valid_move(player, marble_idx, moves)
     return False
 
 def displayStatus(passed_SURF, passed_RECT):
@@ -439,6 +653,46 @@ def animatePlayerHomeMove(moves, P1marbles, P1END, game):
         print('PLAYER 1 WINS!')
     
     return P1marbles, P1END, won
+
+
+def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
+    """
+    Animate any player's marble movement using game engine for position calculations.
+    Returns (player_marbles, new_pos, won, winner) where won is True if any player won.
+    """
+    homeStretch = PLAYER_HOME_STRETCHES[player]
+    finalHome = PLAYER_FINAL_HOMES[player]
+    player_color = PLAYER_COLORS[player]
+    
+    inFinalHome = marble_pos in finalHome
+    current_pos = marble_pos
+    
+    for move in range(moves):
+        # Use game engine methods for position calculation
+        if inFinalHome or current_pos in homeStretch:
+            coords = game.get_next_home_position(player, current_pos[0], current_pos[1])
+            inFinalHome = coords in finalHome
+        else:
+            coords = game.get_next_position(current_pos[0], current_pos[1])
+            if coords in homeStretch:
+                inFinalHome = False
+        
+        print(f'Player {player} move {move} to {coords}')
+        drawPlayerBox(player_color, coords)
+        pygame.time.wait(SIMSPEED)
+        drawBoardBox(current_pos)
+        oldLocation = current_pos
+        current_pos = coords
+        player_marbles[player_marbles.index(oldLocation)] = current_pos
+        print(f'Player {player} marbles tracking: {player_marbles}')
+
+    # Check for win condition
+    won = game.check_win_condition(player)
+    winner = player if won else None
+    if won:
+        print(f'PLAYER {player} WINS!')
+    
+    return player_marbles, current_pos, won, winner
 
 
 def drawBoard():

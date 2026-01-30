@@ -137,6 +137,17 @@ The game includes complex decision logic for marble movement. See `DecisionTable
 | 2-5       | No             | 4               | Turn over (must roll 1 or 6) |
 | 1-6       | Yes            | 0               | Move any marble on board |
 
+### Player Starting Positions and Final Home
+
+| Player | Color | Start Position | Final Home Entry | Final Home Positions |
+|--------|-------|---------------|------------------|---------------------|
+| P1 | Red | (19, 1) | (15, 1) → (15, 2) | (15, 2), (15, 3), (15, 4), (15, 5) |
+| P2 | Black | (29, 10) | (29, 8) → (27, 8) | (27, 8), (25, 8), (23, 8), (21, 8) |
+| P3 | Green | (11, 15) | (15, 15) → (15, 14) | (15, 14), (15, 13), (15, 12), (15, 11) |
+| P4 | Blue | (1, 6) | (1, 8) → (3, 8) | (3, 8), (5, 8), (7, 8), (9, 8) |
+
+For complete movement tracking details, see `.github/copilot-instructions.md`.
+
 ## 📁 Project Structure
 
 ```

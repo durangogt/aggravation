@@ -140,6 +140,93 @@ export DISPLAY=:99 && python aggravation.py
 - Marble movement uses coordinate system with clockwise progression
 - Star hole and center hole shortcuts implemented
 
+## Player Movement Tracking (CRITICAL)
+
+This section documents the complete clockwise movement path for all players. Understanding this is essential for any game logic changes.
+
+### Board Layout Reference
+```
+                    0123456789012345678901234567890
+                  0[                               ]
+                  1[           # # # # # ← (19,1)  ] ← P1 START
+                  2[   1       #   1   #       2   ]
+                  3[     1     #   1   #     2     ]
+                  4[       1   #   1   #   2       ]
+                  5[         1 #   1   # 2         ]
+ P4 START (1,6) → 6[ # # # # # #       # # # # # # ]
+                  7[ #                           # ]
+  P4 Final Home → 8[ # 4 4 4 4     #     2 2 2 2 # ] ← P2 Final Home
+                  9[ #                           # ]
+                 10[ # # # # # #       # # # # # # ] ← P2 START (29,10)
+                 11[         4 #   3   # 3         ]
+                 12[       4   #   3   #   3       ]
+                 13[     4     #   3   #     3     ]
+                 14[   4       #   3   #       3   ]
+     P3 START →  15[  (11,15)→ # # # # #           ]
+                 16[                               ]
+```
+
+### Player 1 - starts at (19, 1)
+
+- **Beginning of game**: starts at (19, 1) then if next roll for p1 is a 1 it goes to (19, 2), then next p1 turn rolls a 5 it goes:
+  (19, 3) → (19, 4) → (19, 5) → (19, 6) → (21, 6)
+
+- **Clockwise approach** (as P1 gets closer to its final home to win): comes from (11, 6) → (11, 5) → (11, 4) → (11, 3) → (11, 2) → (11, 1) → (13, 1) → (15, 1) → (15, 2) ← and this is the first spot in the final home
+
+- **Home stretch**: [(11, 3)] entry, then (11, 3) → (11, 2) → (11, 1) → (13, 1) → (15, 1), then into final home
+
+- **Final home at column 15**: (15, 2), (15, 3), (15, 4), (15, 5)
+
+---
+
+### Player 2 - starts at (29, 10)
+
+- **Beginning of game**: starts at (29, 10) then if next roll for p2 is a 1 it goes to (27, 10), then next p2 turn rolls a 5 it goes:
+  (25, 10) → (23, 10) → (21, 10) → (19, 10) → (19, 11)
+
+- **Clockwise approach** (as P2 gets closer to its final home to win): comes from (19, 6) → (21, 6) → (23, 6) → (25, 6) → (27, 6) → (29, 6) → (29, 7) → (29, 8) → (27, 8) ← and this is the first spot in the final home
+
+- **Home stretch**: [(25, 6)] entry, then (27, 6) → (29, 6) → (29, 7) → (29, 8), then into final home
+
+- **Final home at row 8**: (27, 8), (25, 8), (23, 8), (21, 8)
+
+---
+
+### Player 3 - starts at (11, 15)
+
+- **Beginning of game**: starts at (11, 15) then if next roll for p3 is a 1 it goes to (11, 14), then next p3 turn rolls a 5 it goes:
+  (11, 13) → (11, 12) → (11, 11) → (11, 10) → (9, 10)
+
+- **Clockwise approach** (as P3 gets closer to its final home to win): comes from (19, 10) → (19, 11) → (19, 12) → (19, 13) → (19, 14) → (19, 15) → (17, 15) → (15, 15) → (15, 14) ← and this is the first spot in the final home
+
+- **Home stretch**: [(19, 13)] entry, then (19, 14) → (19, 15) → (17, 15) → (15, 15), then into final home
+
+- **Final home at column 15**: (15, 14), (15, 13), (15, 12), (15, 11)
+
+---
+
+### Player 4 - starts at (1, 6)
+
+- **Beginning of game**: starts at (1, 6) then if next roll for p4 is a 1 it goes to (3, 6), then next p4 turn rolls a 5 it goes:
+  (5, 6) → (7, 6) → (9, 6) → (11, 6) → (11, 5)
+
+- **Clockwise approach** (as P4 gets closer to its final home to win): comes from (11, 10) → (9, 10) → (7, 10) → (5, 10) → (3, 10) → (1, 10) → (1, 9) → (1, 8) → (3, 8) ← and this is the first spot in the final home
+
+- **Home stretch**: [(5, 10)] entry, then (3, 10) → (1, 10) → (1, 9) → (1, 8), then into final home
+
+- **Final home at row 8**: (3, 8), (5, 8), (7, 8), (9, 8)
+
+---
+
+### Key Movement Rules Summary
+
+| Player | Start Position | Home Stretch Entry | Final Home Positions |
+|--------|---------------|-------------------|---------------------|
+| P1 | (19, 1) | (11, 3) | (15, 2), (15, 3), (15, 4), (15, 5) |
+| P2 | (29, 10) | (25, 6) | (27, 8), (25, 8), (23, 8), (21, 8) |
+| P3 | (11, 15) | (19, 13) | (15, 14), (15, 13), (15, 12), (15, 11) |
+| P4 | (1, 6) | (5, 10) | (3, 8), (5, 8), (7, 8), (9, 8) |
+
 ## Troubleshooting
 
 ### Common Issues

@@ -29,10 +29,10 @@ BOARD_TEMPLATE = [
 ]
 
 # Player starting positions on the board
-P1START = (19, 1)
-P2START = (29, 8)
-P3START = (15, 15)
-P4START = (1, 8)
+P1START = (19,1)
+P2START = (29,10)
+P3START = (11,15)
+P4START = (1,6)
 
 # Board markers
 BLANK = '.'
@@ -62,21 +62,21 @@ class AggravationGame:
         self.p1_start_occupied = False
         
         # Player 2 state
-        self.p2_home = [(25, 2), (27, 3), (29, 4), (31, 5)]
+        self.p2_home = [(27, 2), (25, 3), (23, 4), (21, 5)]
         self.p2_marbles = [(None, None), (None, None), (None, None), (None, None)]
         self.p2_end = (None, None)
         self.p2_end_home = [(None, None), (None, None), (None, None), (None, None)]
         self.p2_start_occupied = False
         
         # Player 3 state
-        self.p3_home = [(15, 14), (17, 13), (19, 12), (21, 11)]
+        self.p3_home = [(21, 11), (23, 12), (25, 13), (27, 14)]
         self.p3_marbles = [(None, None), (None, None), (None, None), (None, None)]
         self.p3_end = (None, None)
         self.p3_end_home = [(None, None), (None, None), (None, None), (None, None)]
         self.p3_start_occupied = False
         
         # Player 4 state
-        self.p4_home = [(5, 14), (3, 13), (1, 12), (1, 11)]
+        self.p4_home = [(9, 11), (7, 12), (5, 13), (3, 14)]
         self.p4_marbles = [(None, None), (None, None), (None, None), (None, None)]
         self.p4_end = (None, None)
         self.p4_end_home = [(None, None), (None, None), (None, None), (None, None)]
@@ -165,8 +165,8 @@ class AggravationGame:
         assert BOARD_TEMPLATE[y][x] in [SPOT, '1', '2', '3', '4'], 'Current spot must be a valid board position'
         
         # Player 1 home stretch path
-        # p1homeStretch = [(11, 3), (11,2), (11,1), (13,1), (15,1)] # valid p1 home stretch starting positions
-        # p1EndHome = [(15,2), (15,3), (15,4), (15,5)] # winning positions
+        # Home stretch: (11,3) -> (11,2) -> (11,1) -> (13,1) -> (15,1)
+        # Final home: (15,2), (15,3), (15,4), (15,5)
         if player == 1:
             if (x, y) == (11, 3):
                 return (11, 2)
@@ -185,8 +185,157 @@ class AggravationGame:
             elif (x, y) == (15, 4):
                 return (15, 5)
         
-        # TODO: Implement home stretches for players 2-4
+        # Player 2 home stretch path
+        # Home stretch: (25,6) -> (27,6) -> (29,6) -> (29,7) -> (29,8) -> into final home
+        # Final home: (27,8), (25,8), (23,8), (21,8)
+        elif player == 2:
+            if (x, y) == (25, 6):
+                return (27, 6)
+            elif (x, y) == (27, 6):
+                return (29, 6)
+            elif (x, y) == (29, 6):
+                return (29, 7)
+            elif (x, y) == (29, 7):
+                return (29, 8)
+            elif (x, y) == (29, 8):
+                return (27, 8)
+            elif (x, y) == (27, 8):
+                return (25, 8)
+            elif (x, y) == (25, 8):
+                return (23, 8)
+            elif (x, y) == (23, 8):
+                return (21, 8)
+        
+        # Player 3 home stretch path  
+        # Home stretch: (19,13) -> (19,14) -> (19,15) -> (17,15) -> (15,15) -> into final home
+        # Final home: (15,14), (15,13), (15,12), (15,11)
+        elif player == 3:
+            if (x, y) == (19, 13):
+                return (19, 14)
+            elif (x, y) == (19, 14):
+                return (19, 15)
+            elif (x, y) == (19, 15):
+                return (17, 15)
+            elif (x, y) == (17, 15):
+                return (15, 15)
+            elif (x, y) == (15, 15):
+                return (15, 14)
+            elif (x, y) == (15, 14):
+                return (15, 13)
+            elif (x, y) == (15, 13):
+                return (15, 12)
+            elif (x, y) == (15, 12):
+                return (15, 11)
+        
+        # Player 4 home stretch path
+        # Home stretch: (5,10) -> (3,10) -> (1,10) -> (1,9) -> (1,8) -> into final home
+        # Final home: (3,8), (5,8), (7,8), (9,8)
+        elif player == 4:
+            if (x, y) == (5, 10):
+                return (3, 10)
+            elif (x, y) == (3, 10):
+                return (1, 10)
+            elif (x, y) == (1, 10):
+                return (1, 9)
+            elif (x, y) == (1, 9):
+                return (1, 8)
+            elif (x, y) == (1, 8):
+                return (3, 8)
+            elif (x, y) == (3, 8):
+                return (5, 8)
+            elif (x, y) == (5, 8):
+                return (7, 8)
+            elif (x, y) == (7, 8):
+                return (9, 8)
+        
         raise ValueError(f"Home position not implemented for player {player} at ({x}, {y})")
+    
+    def _get_player_data(self, player: int) -> Dict:
+        """
+        Get player-specific data (marbles, home stretch, final home, etc.)
+        
+        Args:
+            player: Player number (1-4)
+            
+        Returns:
+            Dictionary with player data
+        """
+        if player == 1:
+            return {
+                'marbles': self.p1_marbles,
+                'home': self.p1_home,
+                'end_home': self.p1_end_home,
+                'start_pos': P1START,
+                'start_occupied': self.p1_start_occupied,
+                'home_stretch': [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)],
+                'final_home': [(15, 2), (15, 3), (15, 4), (15, 5)]
+            }
+        elif player == 2:
+            return {
+                'marbles': self.p2_marbles,
+                'home': self.p2_home,
+                'end_home': self.p2_end_home,
+                'start_pos': P2START,
+                'start_occupied': self.p2_start_occupied,
+                'home_stretch': [(25, 6), (27, 6), (29, 6), (29, 7), (29, 8)],
+                'final_home': [(27, 8), (25, 8), (23, 8), (21, 8)]
+            }
+        elif player == 3:
+            return {
+                'marbles': self.p3_marbles,
+                'home': self.p3_home,
+                'end_home': self.p3_end_home,
+                'start_pos': P3START,
+                'start_occupied': self.p3_start_occupied,
+                'home_stretch': [(19, 13), (19, 14), (19, 15), (17, 15), (15, 15)],
+                'final_home': [(15, 14), (15, 13), (15, 12), (15, 11)]
+            }
+        elif player == 4:
+            return {
+                'marbles': self.p4_marbles,
+                'home': self.p4_home,
+                'end_home': self.p4_end_home,
+                'start_pos': P4START,
+                'start_occupied': self.p4_start_occupied,
+                'home_stretch': [(5, 10), (3, 10), (1, 10), (1, 9), (1, 8)],
+                'final_home': [(3, 8), (5, 8), (7, 8), (9, 8)]
+            }
+        else:
+            raise ValueError(f"Invalid player number: {player}")
+    
+    def _set_start_occupied(self, player: int, occupied: bool):
+        """Set the start_occupied flag for a player."""
+        if player == 1:
+            self.p1_start_occupied = occupied
+        elif player == 2:
+            self.p2_start_occupied = occupied
+        elif player == 3:
+            self.p3_start_occupied = occupied
+        elif player == 4:
+            self.p4_start_occupied = occupied
+    
+    def _set_end(self, player: int, pos: Tuple[int, int]):
+        """Set the end position for a player."""
+        if player == 1:
+            self.p1_end = pos
+        elif player == 2:
+            self.p2_end = pos
+        elif player == 3:
+            self.p3_end = pos
+        elif player == 4:
+            self.p4_end = pos
+    
+    def _get_end_home(self, player: int) -> List[Tuple[int, int]]:
+        """Get the end_home list for a player."""
+        if player == 1:
+            return self.p1_end_home
+        elif player == 2:
+            return self.p2_end_home
+        elif player == 3:
+            return self.p3_end_home
+        elif player == 4:
+            return self.p4_end_home
+        return []
     
     def is_valid_move(self, player: int, marble_idx: int, dice_roll: int) -> bool:
         """
@@ -200,38 +349,39 @@ class AggravationGame:
         Returns:
             True if move is valid, False otherwise
         """
-        if player == 1:
-            marbles = self.p1_marbles
-            end_home = self.p1_end_home
-            start_pos = marbles[marble_idx] if marble_idx < len(marbles) else self.p1_end
-            p1_home_stretch = [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)]
-            p1_final_home = [(15, 2), (15, 3), (15, 4), (15, 5)]
-        else:
-            # TODO: Implement for other players
+        try:
+            pdata = self._get_player_data(player)
+        except ValueError:
             return False
+        
+        marbles = pdata['marbles']
+        end_home = pdata['end_home']
+        home_stretch = pdata['home_stretch']
+        final_home = pdata['final_home']
+        start_pos = marbles[marble_idx] if marble_idx < len(marbles) else None
         
         # Can't move if marble position is None (not on board)
         if start_pos is None or start_pos == (None, None):
             return False
         
         # Check if marble is already in final home - can still move within home
-        in_final_home = start_pos in p1_final_home
+        in_final_home = start_pos in final_home
         
         coords = start_pos
         for move in range(dice_roll):
             # Determine next position based on whether we're in/entering home
-            if in_final_home or coords in p1_home_stretch:
+            if in_final_home or coords in home_stretch:
                 # Use home path
                 try:
                     coords = self.get_next_home_position(player, coords[0], coords[1])
-                    in_final_home = coords in p1_final_home
+                    in_final_home = coords in final_home
                 except (ValueError, AssertionError):
                     # Can't move past end of home - invalid move (overshot)
                     return False
             else:
                 coords = self.get_next_position(coords[0], coords[1])
                 # Check if we just entered home stretch
-                if coords in p1_home_stretch:
+                if coords in home_stretch:
                     in_final_home = False  # Not in final home yet, but on home stretch
             
             # Check if this position is occupied by player's own marble
@@ -269,15 +419,17 @@ class AggravationGame:
             'message': ''
         }
         
-        # Only player 1 implemented for now
-        if player != 1:
-            result['message'] = f'Player {player} not implemented yet'
+        try:
+            pdata = self._get_player_data(player)
+        except ValueError:
+            result['message'] = f'Invalid player: {player}'
             return result
         
-        marbles = self.p1_marbles
+        marbles = pdata['marbles']
+        home_stretch = pdata['home_stretch']
+        final_home = pdata['final_home']
+        start_pos = pdata['start_pos']
         old_pos = marbles[marble_idx]
-        p1_home_stretch = [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)]
-        p1_final_home = [(15, 2), (15, 3), (15, 4), (15, 5)]
         
         if old_pos is None or old_pos == (None, None):
             result['message'] = 'Marble not on board'
@@ -290,38 +442,39 @@ class AggravationGame:
         
         # Execute the move - track if we're in/entering home
         coords = old_pos
-        in_final_home = coords in p1_final_home
+        in_final_home = coords in final_home
         
         for move in range(dice_roll):
             # Determine next position based on whether we're in/entering home
-            if in_final_home or coords in p1_home_stretch:
+            if in_final_home or coords in home_stretch:
                 # Use home path
                 coords = self.get_next_home_position(player, coords[0], coords[1])
-                in_final_home = coords in p1_final_home
+                in_final_home = coords in final_home
             else:
                 coords = self.get_next_position(coords[0], coords[1])
                 # Check if we just entered home stretch
-                if coords in p1_home_stretch:
+                if coords in home_stretch:
                     in_final_home = False
         
         # Update marble position
         marbles[marble_idx] = coords
-        self.p1_end = coords
+        self._set_end(player, coords)
         
         # Track if marble entered final home
-        if coords in p1_final_home:
+        if coords in final_home:
             result['entered_home'] = True
             # Update end_home tracking
-            for i, pos in enumerate(self.p1_end_home):
+            end_home = self._get_end_home(player)
+            for i, pos in enumerate(end_home):
                 if pos == (None, None):
-                    self.p1_end_home[i] = coords
+                    end_home[i] = coords
                     break
         
         # Check if marble is on start position
-        if coords == P1START:
-            self.p1_start_occupied = True
-        elif old_pos == P1START:
-            self.p1_start_occupied = False
+        if coords == start_pos:
+            self._set_start_occupied(player, True)
+        elif old_pos == start_pos:
+            self._set_start_occupied(player, False)
         
         result['success'] = True
         result['old_position'] = old_pos
@@ -343,21 +496,26 @@ class AggravationGame:
         """
         valid_moves = []
         
-        if player == 1:
-            marbles = self.p1_marbles
-            home = self.p1_home
-            
-            # Check if can move marble from home
-            if (dice_roll == 1 or dice_roll == 6) and len(home) > 0:
-                # Can move marble from home to start if start not occupied
-                if not self.p1_start_occupied:
-                    valid_moves.append(-1)  # Special index for moving from home
-            
-            # Check each marble on the board
-            for idx in range(4):
-                if marbles[idx] is not None and marbles[idx] != (None, None):
-                    if self.is_valid_move(player, idx, dice_roll):
-                        valid_moves.append(idx)
+        try:
+            pdata = self._get_player_data(player)
+        except ValueError:
+            return valid_moves
+        
+        marbles = pdata['marbles']
+        home = pdata['home']
+        start_occupied = pdata['start_occupied']
+        
+        # Check if can move marble from home
+        if (dice_roll == 1 or dice_roll == 6) and len(home) > 0:
+            # Can move marble from home to start if start not occupied
+            if not start_occupied:
+                valid_moves.append(-1)  # Special index for moving from home
+        
+        # Check each marble on the board
+        for idx in range(4):
+            if marbles[idx] is not None and marbles[idx] != (None, None):
+                if self.is_valid_move(player, idx, dice_roll):
+                    valid_moves.append(idx)
         
         return valid_moves
     
@@ -371,16 +529,17 @@ class AggravationGame:
         Returns:
             True if player has won, False otherwise
         """
-        # A player wins when all 4 marbles are in their final home positions
-        if player == 1:
-            end_home = [(15, 2), (15, 3), (15, 4), (15, 5)]
-            marbles = self.p1_marbles
-            # Check if all 4 marbles are in final home positions
-            marbles_in_home = [m for m in marbles if m in end_home]
-            return len(marbles_in_home) == 4
+        try:
+            pdata = self._get_player_data(player)
+        except ValueError:
+            return False
         
-        # TODO: Implement for other players
-        return False
+        # A player wins when all 4 marbles are in their final home positions
+        final_home = pdata['final_home']
+        marbles = pdata['marbles']
+        # Check if all 4 marbles are in final home positions
+        marbles_in_home = [m for m in marbles if m in final_home]
+        return len(marbles_in_home) == 4
     
     def is_game_over(self) -> bool:
         """
@@ -470,14 +629,35 @@ class AggravationGame:
         """
         if player == 1:
             if len(self.p1_home) >= 1:
-                # Remove last marble from home
                 self.p1_home = self.p1_home[:-1]
-                # Place on start position
-                marble_idx = len(self.p1_home)  # Index of marble just removed
+                marble_idx = len(self.p1_home)
                 self.p1_marbles[marble_idx] = P1START
                 self.p1_end = P1START
                 self.p1_start_occupied = True
                 return True
+        elif player == 2:
+            if len(self.p2_home) >= 1:
+                self.p2_home = self.p2_home[:-1]
+                marble_idx = len(self.p2_home)
+                self.p2_marbles[marble_idx] = P2START
+                self.p2_end = P2START
+                self.p2_start_occupied = True
+                return True
+        elif player == 3:
+            if len(self.p3_home) >= 1:
+                self.p3_home = self.p3_home[:-1]
+                marble_idx = len(self.p3_home)
+                self.p3_marbles[marble_idx] = P3START
+                self.p3_end = P3START
+                self.p3_start_occupied = True
+                return True
+        elif player == 4:
+            if len(self.p4_home) >= 1:
+                self.p4_home = self.p4_home[:-1]
+                marble_idx = len(self.p4_home)
+                self.p4_marbles[marble_idx] = P4START
+                self.p4_end = P4START
+                self.p4_start_occupied = True
+                return True
         
-        # TODO: Implement for other players
         return False

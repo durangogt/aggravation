@@ -525,5 +525,253 @@ class TestHomeEntry:
         assert result['entered_home'] == True
 
 
+class TestPlayer2:
+    """Test Player 2 specific functionality."""
+    
+    def test_player2_initial_state(self):
+        """Test Player 2 initial state is correct."""
+        game = AggravationGame()
+        
+        assert len(game.p2_home) == 4
+        assert game.p2_home == [(27, 2), (25, 3), (23, 4), (21, 5)]
+        assert game.p2_marbles == [(None, None), (None, None), (None, None), (None, None)]
+        assert game.p2_start_occupied == False
+    
+    def test_player2_remove_from_home(self):
+        """Test Player 2 can remove marble from home."""
+        game = AggravationGame()
+        
+        success = game.remove_from_home(2)
+        
+        assert success == True
+        assert len(game.p2_home) == 3
+        assert game.p2_marbles[3] == P2START
+        assert game.p2_start_occupied == True
+    
+    def test_player2_get_valid_moves(self):
+        """Test Player 2 valid moves with roll of 1 or 6."""
+        game = AggravationGame()
+        
+        # Roll of 6 should allow moving from home
+        valid_moves = game.get_valid_moves(2, 6)
+        assert -1 in valid_moves
+        
+        # Roll of 3 should NOT allow moving from home
+        valid_moves = game.get_valid_moves(2, 3)
+        assert -1 not in valid_moves
+    
+    def test_player2_basic_move(self):
+        """Test Player 2 can make basic moves."""
+        game = AggravationGame()
+        
+        # Place marble on board
+        game.p2_marbles[0] = P2START
+        
+        # Should be able to move
+        assert game.is_valid_move(2, 0, 3) == True
+        
+        result = game.execute_move(2, 0, 3)
+        assert result['success'] == True
+        assert result['old_position'] == P2START
+    
+    def test_player2_home_stretch_movement(self):
+        """Test Player 2 home stretch movement."""
+        game = AggravationGame()
+        
+        # Test home stretch path: (25,6) -> (27,6) -> (29,6) -> (29,7) -> (29,8) -> into final home
+        # Final home: (27,8), (25,8), (23,8), (21,8)
+        assert game.get_next_home_position(2, 25, 6) == (27, 6)
+        assert game.get_next_home_position(2, 27, 6) == (29, 6)
+        assert game.get_next_home_position(2, 29, 6) == (29, 7)
+        assert game.get_next_home_position(2, 29, 7) == (29, 8)
+        assert game.get_next_home_position(2, 29, 8) == (27, 8)
+        assert game.get_next_home_position(2, 27, 8) == (25, 8)
+        assert game.get_next_home_position(2, 25, 8) == (23, 8)
+        assert game.get_next_home_position(2, 23, 8) == (21, 8)
+    
+    def test_player2_win_condition(self):
+        """Test Player 2 win condition."""
+        game = AggravationGame()
+        
+        # Place all 4 marbles in final home positions
+        game.p2_marbles = [(21, 8), (23, 8), (25, 8), (27, 8)]
+        
+        assert game.check_win_condition(2) == True
+        assert game.is_game_over() == True
+        assert game.winner == 2
+    
+    def test_player2_no_win_partial(self):
+        """Test Player 2 doesn't win with partial home."""
+        game = AggravationGame()
+        
+        game.p2_marbles = [(21, 8), (23, 8), (25, 8), P2START]
+        
+        assert game.check_win_condition(2) == False
+
+
+class TestPlayer3:
+    """Test Player 3 specific functionality."""
+    
+    def test_player3_initial_state(self):
+        """Test Player 3 initial state is correct."""
+        game = AggravationGame()
+        
+        assert len(game.p3_home) == 4
+        assert game.p3_home == [(21, 11), (23, 12), (25, 13), (27, 14)]
+        assert game.p3_marbles == [(None, None), (None, None), (None, None), (None, None)]
+        assert game.p3_start_occupied == False
+    
+    def test_player3_remove_from_home(self):
+        """Test Player 3 can remove marble from home."""
+        game = AggravationGame()
+        
+        success = game.remove_from_home(3)
+        
+        assert success == True
+        assert len(game.p3_home) == 3
+        assert game.p3_marbles[3] == P3START
+        assert game.p3_start_occupied == True
+    
+    def test_player3_home_stretch_movement(self):
+        """Test Player 3 home stretch movement."""
+        game = AggravationGame()
+        
+        # Test home stretch path: (19,13) -> (19,14) -> (19,15) -> (17,15) -> (15,15) -> into final home
+        # Final home: (15,14), (15,13), (15,12), (15,11)
+        assert game.get_next_home_position(3, 19, 13) == (19, 14)
+        assert game.get_next_home_position(3, 19, 14) == (19, 15)
+        assert game.get_next_home_position(3, 19, 15) == (17, 15)
+        assert game.get_next_home_position(3, 17, 15) == (15, 15)
+        assert game.get_next_home_position(3, 15, 15) == (15, 14)
+        assert game.get_next_home_position(3, 15, 14) == (15, 13)
+        assert game.get_next_home_position(3, 15, 13) == (15, 12)
+        assert game.get_next_home_position(3, 15, 12) == (15, 11)
+    
+    def test_player3_win_condition(self):
+        """Test Player 3 win condition."""
+        game = AggravationGame()
+        
+        # Place all 4 marbles in final home positions
+        game.p3_marbles = [(15, 14), (15, 13), (15, 12), (15, 11)]
+        
+        assert game.check_win_condition(3) == True
+        assert game.is_game_over() == True
+        assert game.winner == 3
+    
+    def test_player3_basic_move(self):
+        """Test Player 3 can make basic moves."""
+        game = AggravationGame()
+        
+        # Place marble on board
+        game.p3_marbles[0] = P3START
+        
+        # Should be able to move
+        assert game.is_valid_move(3, 0, 2) == True
+        
+        result = game.execute_move(3, 0, 2)
+        assert result['success'] == True
+
+
+class TestPlayer4:
+    """Test Player 4 specific functionality."""
+    
+    def test_player4_initial_state(self):
+        """Test Player 4 initial state is correct."""
+        game = AggravationGame()
+        
+        assert len(game.p4_home) == 4
+        assert game.p4_home == [(9, 11), (7, 12), (5, 13), (3, 14)]
+        assert game.p4_marbles == [(None, None), (None, None), (None, None), (None, None)]
+        assert game.p4_start_occupied == False
+    
+    def test_player4_remove_from_home(self):
+        """Test Player 4 can remove marble from home."""
+        game = AggravationGame()
+        
+        success = game.remove_from_home(4)
+        
+        assert success == True
+        assert len(game.p4_home) == 3
+        assert game.p4_marbles[3] == P4START
+        assert game.p4_start_occupied == True
+    
+    def test_player4_home_stretch_movement(self):
+        """Test Player 4 home stretch movement."""
+        game = AggravationGame()
+        
+        # Test home stretch path: (5,10) -> (3,10) -> (1,10) -> (1,9) -> (1,8) -> into final home
+        # Final home: (3,8), (5,8), (7,8), (9,8)
+        assert game.get_next_home_position(4, 5, 10) == (3, 10)
+        assert game.get_next_home_position(4, 3, 10) == (1, 10)
+        assert game.get_next_home_position(4, 1, 10) == (1, 9)
+        assert game.get_next_home_position(4, 1, 9) == (1, 8)
+        assert game.get_next_home_position(4, 1, 8) == (3, 8)
+        assert game.get_next_home_position(4, 3, 8) == (5, 8)
+        assert game.get_next_home_position(4, 5, 8) == (7, 8)
+        assert game.get_next_home_position(4, 7, 8) == (9, 8)
+    
+    def test_player4_win_condition(self):
+        """Test Player 4 win condition."""
+        game = AggravationGame()
+        
+        # Place all 4 marbles in final home positions
+        game.p4_marbles = [(9, 8), (7, 8), (5, 8), (3, 8)]
+        
+        assert game.check_win_condition(4) == True
+        assert game.is_game_over() == True
+        assert game.winner == 4
+    
+    def test_player4_basic_move(self):
+        """Test Player 4 can make basic moves."""
+        game = AggravationGame()
+        
+        # Place marble on board
+        game.p4_marbles[0] = P4START
+        
+        # Should be able to move
+        assert game.is_valid_move(4, 0, 2) == True
+        
+        result = game.execute_move(4, 0, 2)
+        assert result['success'] == True
+
+
+class TestMultiPlayerIntegration:
+    """Integration tests for multi-player scenarios."""
+    
+    def test_all_players_can_start(self):
+        """Test all players can move from home."""
+        game = AggravationGame(num_players=4)
+        
+        for player in range(1, 5):
+            success = game.remove_from_home(player)
+            assert success == True, f"Player {player} failed to remove from home"
+    
+    def test_all_players_can_get_valid_moves(self):
+        """Test valid moves work for all players."""
+        game = AggravationGame(num_players=4)
+        
+        for player in range(1, 5):
+            valid_moves = game.get_valid_moves(player, 6)
+            assert -1 in valid_moves, f"Player {player} should be able to move from home"
+    
+    def test_game_detects_any_winner(self):
+        """Test game detects winner from any player."""
+        for winning_player in range(1, 5):
+            game = AggravationGame(num_players=4)
+            
+            # Set up winning condition for specific player
+            if winning_player == 1:
+                game.p1_marbles = [(15, 2), (15, 3), (15, 4), (15, 5)]
+            elif winning_player == 2:
+                game.p2_marbles = [(21, 8), (23, 8), (25, 8), (27, 8)]
+            elif winning_player == 3:
+                game.p3_marbles = [(15, 14), (15, 13), (15, 12), (15, 11)]
+            elif winning_player == 4:
+                game.p4_marbles = [(9, 8), (7, 8), (5, 8), (3, 8)]
+            
+            assert game.is_game_over() == True
+            assert game.winner == winning_player
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
