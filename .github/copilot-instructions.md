@@ -146,7 +146,7 @@ This section documents the complete clockwise movement path for all players. Und
 
 ### Board Layout Reference
 ```
-                     0123456789012345678901234567890
+                    0123456789012345678901234567890
                   0[                               ]
                   1[           # # # # # ← (19,1)  ] ← P1 START
                   2[   1       #   1   #       2   ]
