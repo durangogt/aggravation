@@ -578,16 +578,16 @@ class TestPlayer2:
         """Test Player 2 home stretch movement."""
         game = AggravationGame()
         
-        # Test home stretch path
-        assert game.get_next_home_position(2, 27, 10) == (25, 10)
-        assert game.get_next_home_position(2, 25, 10) == (23, 10)
-        assert game.get_next_home_position(2, 23, 10) == (21, 10)
-        assert game.get_next_home_position(2, 21, 10) == (19, 10)
-        # Jump directly from row 10 to final home in row 8
-        assert game.get_next_home_position(2, 19, 10) == (21, 8)
-        assert game.get_next_home_position(2, 21, 8) == (23, 8)
-        assert game.get_next_home_position(2, 23, 8) == (25, 8)
-        assert game.get_next_home_position(2, 25, 8) == (27, 8)
+        # Test home stretch path: (25,6) -> (27,6) -> (29,6) -> (29,7) -> (29,8) -> into final home
+        # Final home: (27,8), (25,8), (23,8), (21,8)
+        assert game.get_next_home_position(2, 25, 6) == (27, 6)
+        assert game.get_next_home_position(2, 27, 6) == (29, 6)
+        assert game.get_next_home_position(2, 29, 6) == (29, 7)
+        assert game.get_next_home_position(2, 29, 7) == (29, 8)
+        assert game.get_next_home_position(2, 29, 8) == (27, 8)
+        assert game.get_next_home_position(2, 27, 8) == (25, 8)
+        assert game.get_next_home_position(2, 25, 8) == (23, 8)
+        assert game.get_next_home_position(2, 23, 8) == (21, 8)
     
     def test_player2_win_condition(self):
         """Test Player 2 win condition."""
@@ -636,9 +636,8 @@ class TestPlayer3:
         """Test Player 3 home stretch movement."""
         game = AggravationGame()
         
-        # Test home stretch path
-        assert game.get_next_home_position(3, 19, 11) == (19, 12)
-        assert game.get_next_home_position(3, 19, 12) == (19, 13)
+        # Test home stretch path: (19,13) -> (19,14) -> (19,15) -> (17,15) -> (15,15) -> into final home
+        # Final home: (15,14), (15,13), (15,12), (15,11)
         assert game.get_next_home_position(3, 19, 13) == (19, 14)
         assert game.get_next_home_position(3, 19, 14) == (19, 15)
         assert game.get_next_home_position(3, 19, 15) == (17, 15)
@@ -700,16 +699,16 @@ class TestPlayer4:
         """Test Player 4 home stretch movement."""
         game = AggravationGame()
         
-        # Test home stretch path
-        assert game.get_next_home_position(4, 3, 6) == (5, 6)
-        assert game.get_next_home_position(4, 5, 6) == (7, 6)
-        assert game.get_next_home_position(4, 7, 6) == (9, 6)
-        assert game.get_next_home_position(4, 9, 6) == (11, 6)
-        # Jump directly from row 6 to final home in row 8
-        assert game.get_next_home_position(4, 11, 6) == (9, 8)
-        assert game.get_next_home_position(4, 9, 8) == (7, 8)
-        assert game.get_next_home_position(4, 7, 8) == (5, 8)
-        assert game.get_next_home_position(4, 5, 8) == (3, 8)
+        # Test home stretch path: (5,10) -> (3,10) -> (1,10) -> (1,9) -> (1,8) -> into final home
+        # Final home: (3,8), (5,8), (7,8), (9,8)
+        assert game.get_next_home_position(4, 5, 10) == (3, 10)
+        assert game.get_next_home_position(4, 3, 10) == (1, 10)
+        assert game.get_next_home_position(4, 1, 10) == (1, 9)
+        assert game.get_next_home_position(4, 1, 9) == (1, 8)
+        assert game.get_next_home_position(4, 1, 8) == (3, 8)
+        assert game.get_next_home_position(4, 3, 8) == (5, 8)
+        assert game.get_next_home_position(4, 5, 8) == (7, 8)
+        assert game.get_next_home_position(4, 7, 8) == (9, 8)
     
     def test_player4_win_condition(self):
         """Test Player 4 win condition."""
