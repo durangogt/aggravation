@@ -29,10 +29,10 @@ BOARD_TEMPLATE = [
 ]
 
 # Player starting positions on the board
-P1START = (19, 1)
-P2START = (29, 8)
-P3START = (15, 15)
-P4START = (1, 8)
+P1START = (19,1)
+P2START = (29,10)
+P3START = (11,15)
+P4START = (1,6)
 
 # Board markers
 BLANK = '.'
@@ -186,35 +186,31 @@ class AggravationGame:
                 return (15, 5)
         
         # Player 2 home stretch path
-        # Home stretch: Enters at (29,10), goes left through row 10, then into final home
-        # Final home: (21,8), (23,8), (25,8), (27,8) - accessed directly from row 10
+        # Home stretch: (25,6) -> (27,6) -> (29,6) -> (29,7) -> (29,8) -> into final home
+        # Final home: (27,8), (25,8), (23,8), (21,8)
         elif player == 2:
-            if (x, y) == (27, 10):
-                return (25, 10)
-            elif (x, y) == (25, 10):
-                return (23, 10)
-            elif (x, y) == (23, 10):
-                return (21, 10)
-            elif (x, y) == (21, 10):
-                return (19, 10)
-            elif (x, y) == (19, 10):
-                return (21, 8)
-            elif (x, y) == (21, 8):
-                return (23, 8)
-            elif (x, y) == (23, 8):
+            if (x, y) == (25, 6):
+                return (27, 6)
+            elif (x, y) == (27, 6):
+                return (29, 6)
+            elif (x, y) == (29, 6):
+                return (29, 7)
+            elif (x, y) == (29, 7):
+                return (29, 8)
+            elif (x, y) == (29, 8):
+                return (27, 8)
+            elif (x, y) == (27, 8):
                 return (25, 8)
             elif (x, y) == (25, 8):
-                return (27, 8)
+                return (23, 8)
+            elif (x, y) == (23, 8):
+                return (21, 8)
         
         # Player 3 home stretch path  
-        # Home stretch: (19,11) -> (19,12) -> (19,13) -> (19,14) -> (19,15) -> ...
-        # Final home: (15,11), (15,12), (15,13), (15,14)
+        # Home stretch: (19,13) -> (19,14) -> (19,15) -> (17,15) -> (15,15) -> into final home
+        # Final home: (15,14), (15,13), (15,12), (15,11)
         elif player == 3:
-            if (x, y) == (19, 11):
-                return (19, 12)
-            elif (x, y) == (19, 12):
-                return (19, 13)
-            elif (x, y) == (19, 13):
+            if (x, y) == (19, 13):
                 return (19, 14)
             elif (x, y) == (19, 14):
                 return (19, 15)
@@ -232,25 +228,25 @@ class AggravationGame:
                 return (15, 11)
         
         # Player 4 home stretch path
-        # Home stretch: Enters at (1,6), goes right through row 6, then into final home
-        # Final home: (9,8), (7,8), (5,8), (3,8) - accessed directly from row 6
+        # Home stretch: (5,10) -> (3,10) -> (1,10) -> (1,9) -> (1,8) -> into final home
+        # Final home: (3,8), (5,8), (7,8), (9,8)
         elif player == 4:
-            if (x, y) == (3, 6):
-                return (5, 6)
-            elif (x, y) == (5, 6):
-                return (7, 6)
-            elif (x, y) == (7, 6):
-                return (9, 6)
-            elif (x, y) == (9, 6):
-                return (11, 6)
-            elif (x, y) == (11, 6):
-                return (9, 8)
-            elif (x, y) == (9, 8):
-                return (7, 8)
-            elif (x, y) == (7, 8):
+            if (x, y) == (5, 10):
+                return (3, 10)
+            elif (x, y) == (3, 10):
+                return (1, 10)
+            elif (x, y) == (1, 10):
+                return (1, 9)
+            elif (x, y) == (1, 9):
+                return (1, 8)
+            elif (x, y) == (1, 8):
+                return (3, 8)
+            elif (x, y) == (3, 8):
                 return (5, 8)
             elif (x, y) == (5, 8):
-                return (3, 8)
+                return (7, 8)
+            elif (x, y) == (7, 8):
+                return (9, 8)
         
         raise ValueError(f"Home position not implemented for player {player} at ({x}, {y})")
     
@@ -281,8 +277,8 @@ class AggravationGame:
                 'end_home': self.p2_end_home,
                 'start_pos': P2START,
                 'start_occupied': self.p2_start_occupied,
-                'home_stretch': [(27, 10), (25, 10), (23, 10), (21, 10), (19, 10)],
-                'final_home': [(21, 8), (23, 8), (25, 8), (27, 8)]
+                'home_stretch': [(25, 6), (27, 6), (29, 6), (29, 7), (29, 8)],
+                'final_home': [(27, 8), (25, 8), (23, 8), (21, 8)]
             }
         elif player == 3:
             return {
@@ -291,7 +287,7 @@ class AggravationGame:
                 'end_home': self.p3_end_home,
                 'start_pos': P3START,
                 'start_occupied': self.p3_start_occupied,
-                'home_stretch': [(19, 11), (19, 12), (19, 13), (19, 14), (19, 15), (17, 15), (15, 15)],
+                'home_stretch': [(19, 13), (19, 14), (19, 15), (17, 15), (15, 15)],
                 'final_home': [(15, 14), (15, 13), (15, 12), (15, 11)]
             }
         elif player == 4:
@@ -301,8 +297,8 @@ class AggravationGame:
                 'end_home': self.p4_end_home,
                 'start_pos': P4START,
                 'start_occupied': self.p4_start_occupied,
-                'home_stretch': [(3, 6), (5, 6), (7, 6), (9, 6), (11, 6)],
-                'final_home': [(9, 8), (7, 8), (5, 8), (3, 8)]
+                'home_stretch': [(5, 10), (3, 10), (1, 10), (1, 9), (1, 8)],
+                'final_home': [(3, 8), (5, 8), (7, 8), (9, 8)]
             }
         else:
             raise ValueError(f"Invalid player number: {player}")
