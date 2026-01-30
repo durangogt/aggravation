@@ -5,7 +5,11 @@
 
 import random, pygame, sys, os
 from pygame.locals import *
-from game_engine import AggravationGame
+from game_engine import (
+    AggravationGame, 
+    P1START, P2START, P3START, P4START,
+    PLAYER_STARTS, PLAYER_STARTING_HOMES, PLAYER_FINAL_HOMES, PLAYER_HOME_STRETCHES
+)
 
 # How many spaces/pixels wide & tall is the board?
 # 27 spaces tall with one filled in every other
@@ -60,36 +64,8 @@ BOARD_TEMPLATE =    ['...............................',
                      '...........#.#.#.#.#...........',
                      '...............................']
 
-P1START = (19,1)
-P2START = (29,10)
-P3START = (11,15)
-P4START = (1,6)
-
-# Player start positions and colors indexed by player number
-PLAYER_STARTS = {1: P1START, 2: P2START, 3: P3START, 4: P4START}
-PLAYER_COLORS = {1: None, 2: None, 3: None, 4: None}  # Set after color definitions
-
-# Home positions for each player
-PLAYER_STARTING_HOMES = {
-    1: [(3, 2), (5, 3), (7, 4), (9, 5)],
-    2: [(27, 2), (25, 3), (23, 4), (21, 5)],
-    3: [(21, 11), (23, 12), (25, 13), (27, 14)],
-    4: [(9, 11), (7, 12), (5, 13), (3, 14)]
-}
-
-PLAYER_FINAL_HOMES = {
-    1: [(15, 2), (15, 3), (15, 4), (15, 5)],
-    2: [(27, 8), (25, 8), (23, 8), (21, 8)],
-    3: [(15, 14), (15, 13), (15, 12), (15, 11)],
-    4: [(3, 8), (5, 8), (7, 8), (9, 8)]
-}
-
-PLAYER_HOME_STRETCHES = {
-    1: [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)],
-    2: [(25, 6), (27, 6), (29, 6), (29, 7), (29, 8)],
-    3: [(19, 13), (19, 14), (19, 15), (17, 15), (15, 15)],
-    4: [(5, 10), (3, 10), (1, 10), (1, 9), (1, 8)]
-}
+# Player colors indexed by player number (set after color definitions)
+PLAYER_COLORS = {1: None, 2: None, 3: None, 4: None}
 
 P1END = None # stores the (x, y) of the last board spot per turn
 P2END = None # stores the (x, y) of the last board spot per turn
