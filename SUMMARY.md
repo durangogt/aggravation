@@ -171,7 +171,8 @@ python test_game.py
 ## Limitations & Future Work
 
 ### Current Limitations
-- Game engine only fully implements Player 1
+- ✅ Player 1 home stretch logic fully working
+- ✅ Win detection implemented for Player 1
 - Players 2-4 need home stretch implementation
 - Aggravation (capturing) not implemented
 - Shortcuts (center/star holes) not implemented

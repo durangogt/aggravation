@@ -147,14 +147,15 @@ if game.is_game_over():
 ## Current Limitations
 
 ### Game Engine (game_engine.py)
-- ✅ Player 1 fully implemented
+- ✅ Player 1 fully implemented with working home stretch logic
+- ✅ Win condition detection working for Player 1
 - ⚠️  Players 2-4 partially implemented (home areas need work)
-- ⚠️  Home stretch logic needs refinement for edge cases
 - ⚠️  Aggravation (capturing) not implemented
 - ⚠️  Shortcuts (center hole, star hole) not implemented
 
 ### Original Game (aggravation.py)
-- Still uses original game logic for GUI
+- ✅ Home stretch logic working correctly
+- ✅ Win detection - displays "PLAYER 1 WINS!" when all marbles reach home
 - Has known bugs (see DebugNotes.txt)
 - Could be gradually migrated to use game engine
 

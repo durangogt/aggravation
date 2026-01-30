@@ -155,14 +155,14 @@ grep -n "P1END.*=" aggravation.py
 
 ## Game Rule Implementation Checklist
 
-- [ ] **Basic Movement**: ✓ Implemented (dice roll + position update)
-- [ ] **Start Position Rules**: ✓ Partially (1 or 6 to exit home)
-- [ ] **Home Area Entry**: ⚠️ Partially (exact count needed)
+- [x] **Basic Movement**: ✓ Implemented (dice roll + position update)
+- [x] **Start Position Rules**: ✓ Implemented (1 or 6 to exit home)
+- [x] **Home Area Entry**: ✅ Working - marbles enter home stretch correctly
+- [x] **Win Condition**: ✅ Implemented - Player 1 win announced when all marbles home
 - [ ] **Marble Aggravation**: ❌ Not implemented
 - [ ] **Center Hole Shortcut**: ❌ Not implemented  
 - [ ] **Star Hole Shortcut**: ❌ Not implemented
 - [ ] **Multi-player Support**: ❌ Only Player 1 works
-- [ ] **Win Condition**: ❌ Not implemented
 - [ ] **Turn Management**: ❌ Single player only
 
 ## Simulation Strategy Examples
