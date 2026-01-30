@@ -130,7 +130,16 @@ class TestGameInitialization:
 
 
 class TestMoveValidation:
-    """Test move validation logic."""
+    """Test move validation logic.
+    
+    Includes comprehensive tests for the edge case where a player has all 4 marbles
+    in home and rolls 2-5 (can't get out). This addresses the test coverage question
+    raised in issue: "Test case: 4 marbles in home and rolls 2-5 (can't get out)"
+    
+    The game rules state that a player can only move a marble from home to the
+    start position by rolling a 1 or 6. If all marbles are in home and the player
+    rolls 2, 3, 4, or 5, they have no valid moves and their turn is over.
+    """
     
     def test_cannot_move_marble_not_on_board(self):
         """Test that marbles not on board can't be moved."""
