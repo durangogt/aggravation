@@ -38,10 +38,9 @@ Run these commands in sequence to set up the development environment:
 
 #### Four-in-a-Row Game  
 - **Command:** `python fourinarow.py`
-- **Status:** Code is functional but MISSING required image assets:
-  - `4row_red.png`, `4row_black.png`, `4row_board.png`
-  - `4row_humanwinner.png`, `4row_computerwinner.png`, `4row_tie.png`, `4row_arrow.png`
-- **Limitation:** Will crash immediately due to missing assets with FileNotFoundError
+- **Status:** All image assets now included, game runs but has some minor bugs
+- **Purpose:** Included as a learning reference for pygame development
+- **Assets:** `4row_red.png`, `4row_black.png`, `4row_board.png`, `4row_humanwinner.png`, `4row_computerwinner.png`, `4row_tie.png`, `4row_arrow.png`
 
 ### Virtual Display for Headless Testing
 When working in a headless environment (CI/CD, remote server), set up virtual display:
@@ -80,13 +79,13 @@ export DISPLAY=:99 && python aggravation.py
    ```
    - Tests pygame initialization and game module compatibility
 
-4. **Verify Four-in-a-Row Expected Failure:**
+4. **Test Four-in-a-Row:**
    ```bash
    export DISPLAY=:99 && python fourinarow.py
    ```
-   - Should fail with: `FileNotFoundError: No file '4row_red.png' found in working directory`
-   - Error at line 49: `pygame.image.load('4row_red.png')`
-   - This confirms missing assets are properly documented
+   - Should start and display the game board
+   - Game has some minor bugs but runs correctly
+   - Included as a pygame learning reference
 
 ### Game Logic Validation
 - The main game includes comprehensive marble movement logic
@@ -116,7 +115,7 @@ export DISPLAY=:99 && python aggravation.py
 
 ### Main Files
 - `aggravation.py` (717 lines) - Main Aggravation board game implementation
-- `fourinarow.py` (364 lines) - Four-in-a-Row game (missing assets)
+- `fourinarow.py` (364 lines) - Four-in-a-Row game (pygame learning reference)
 - `README.md` - Comprehensive project documentation, game rules, and setup instructions
 - `DebugNotes.txt` - Debugging notes and known issues
 - `DecisionTables.xlsx` - Game rule decision tables
@@ -131,7 +130,7 @@ export DISPLAY=:99 && python aggravation.py
 - `getBoxAtPixel()` - Maps screen coordinates to board positions
 
 ### Key Directories
-- `thorpy/` - Complete GUI library (third-party, included in repo)
+- `thorpy/` - ThorPy GUI library (third-party, included but NOT currently used in the game code - kept for potential future use)
 - `thorpy.zip` - Backup of thorpy library
 - `.vscode/` - VSCode configuration
 
@@ -146,7 +145,7 @@ export DISPLAY=:99 && python aggravation.py
 ### Common Issues
 1. **"No module named 'pygame'"** - Run `pip install pygame`
 2. **Display errors in headless environment** - Set up virtual display with Xvfb
-3. **fourinarow.py crashes** - Missing image assets (expected behavior)
+3. **fourinarow.py has minor bugs** - Expected, included as learning reference
 4. **Audio warnings (ALSA)** - Normal in headless environment, can be ignored
 
 ### Audio Warnings
@@ -185,10 +184,10 @@ These do not affect game functionality and can be safely ignored.
 ## Development Tasks and Areas for Improvement
 
 ### High Priority
-- [ ] Fix marble tracking bugs (documented in DebugNotes.txt)
+- [x] ~~Fix marble tracking bugs~~ - Home stretch logic now working
+- [x] ~~Add win condition detection~~ - Player 1 win announcement implemented
 - [ ] Complete multi-player support (Players 2-4)
 - [ ] Implement complete game rules (shortcuts, aggravation mechanics)
-- [ ] Add win condition detection
 - [ ] Create automated simulation interface
 
 ### Medium Priority

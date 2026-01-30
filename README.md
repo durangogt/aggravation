@@ -37,12 +37,15 @@ Aggravation is a classic marble race board game where players compete to move al
 - ✅ Marble movement animation
 - ✅ Star hole and center hole shortcuts
 - ✅ Home zone safe spots
-- ✅ Interactive GUI with thorpy library
+- ✅ Home stretch logic working with win detection for Player 1
+- ✅ Interactive GUI built with pygame
 - ✅ All game assets included
 
 ### Four-in-a-Row Game (`fourinarow.py`)
 - 🎯 Connect Four clone implementation
-- ⚠️ Missing image assets (incomplete)
+- ✅ All image assets now included
+- ⚠️ Game still has some minor bugs
+- 📚 Included primarily as a learning reference for pygame development
 
 ## 🔧 Prerequisites
 
@@ -144,7 +147,7 @@ aggravation/
 ├── DebugNotes.txt          # Development debugging notes
 ├── DecisionTables.xlsx     # Game rule decision tables
 ├── board_coords.txt        # Board coordinate reference
-├── thorpy/                 # GUI library (included)
+├── thorpy/                 # ThorPy GUI library (included but not currently used)
 ├── .github/
 │   └── copilot-instructions.md  # GitHub Copilot agent instructions
 └── .vscode/
@@ -196,7 +199,7 @@ See `DebugNotes.txt` for detailed debugging information and known issues with ma
 
 Common issues:
 - Marble position tracking may desync in certain edge cases
-- Four-in-a-Row game missing image assets
+- Four-in-a-Row game has some minor bugs (assets now included)
 
 ## 📚 Resources
 
@@ -243,7 +246,7 @@ Released under a "Simplified BSD" license.
 
 - **Pygame Community** - For the excellent game development framework
 - **Invent with Python** - For educational resources and examples
-- **ThorPy** - For GUI components (included in `thorpy/` directory)
+- **ThorPy** - GUI library included in `thorpy/` directory for potential future use (not currently used in the game)
 
 ---
 
