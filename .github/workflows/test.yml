@@ -23,3 +23,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           pytest test_game_engine.py -v --cov=game_engine --cov-report=term-missing
+      
+      - name: Run integration tests
+        run: |
+          python test_game.py
