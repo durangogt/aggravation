@@ -34,6 +34,33 @@ P2START = (29,10)
 P3START = (11,15)
 P4START = (1,6)
 
+# Player start positions dictionary indexed by player number
+PLAYER_STARTS = {1: P1START, 2: P2START, 3: P3START, 4: P4START}
+
+# Home positions for each player (starting bases)
+PLAYER_STARTING_HOMES = {
+    1: [(3, 2), (5, 3), (7, 4), (9, 5)],
+    2: [(27, 2), (25, 3), (23, 4), (21, 5)],
+    3: [(21, 11), (23, 12), (25, 13), (27, 14)],
+    4: [(9, 11), (7, 12), (5, 13), (3, 14)]
+}
+
+# Final home positions for each player (winning positions)
+PLAYER_FINAL_HOMES = {
+    1: [(15, 2), (15, 3), (15, 4), (15, 5)],
+    2: [(27, 8), (25, 8), (23, 8), (21, 8)],
+    3: [(15, 14), (15, 13), (15, 12), (15, 11)],
+    4: [(3, 8), (5, 8), (7, 8), (9, 8)]
+}
+
+# Home stretch paths for each player (path from board to final home)
+PLAYER_HOME_STRETCHES = {
+    1: [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)],
+    2: [(25, 6), (27, 6), (29, 6), (29, 7), (29, 8)],
+    3: [(19, 13), (19, 14), (19, 15), (17, 15), (15, 15)],
+    4: [(5, 10), (3, 10), (1, 10), (1, 9), (1, 8)]
+}
+
 # Board markers
 BLANK = '.'
 SPOT = '#'
@@ -55,28 +82,28 @@ class AggravationGame:
         self.num_players = num_players
         
         # Player 1 state
-        self.p1_home = [(3, 2), (5, 3), (7, 4), (9, 5)]  # Marbles in home base
+        self.p1_home = PLAYER_STARTING_HOMES[1].copy()  # Marbles in home base
         self.p1_marbles = [(None, None), (None, None), (None, None), (None, None)]  # Marble positions on board
         self.p1_end = (None, None)  # Last position of player 1's marble
         self.p1_end_home = [(None, None), (None, None), (None, None), (None, None)]  # Final home positions
         self.p1_start_occupied = False
         
         # Player 2 state
-        self.p2_home = [(27, 2), (25, 3), (23, 4), (21, 5)]
+        self.p2_home = PLAYER_STARTING_HOMES[2].copy()
         self.p2_marbles = [(None, None), (None, None), (None, None), (None, None)]
         self.p2_end = (None, None)
         self.p2_end_home = [(None, None), (None, None), (None, None), (None, None)]
         self.p2_start_occupied = False
         
         # Player 3 state
-        self.p3_home = [(21, 11), (23, 12), (25, 13), (27, 14)]
+        self.p3_home = PLAYER_STARTING_HOMES[3].copy()
         self.p3_marbles = [(None, None), (None, None), (None, None), (None, None)]
         self.p3_end = (None, None)
         self.p3_end_home = [(None, None), (None, None), (None, None), (None, None)]
         self.p3_start_occupied = False
         
         # Player 4 state
-        self.p4_home = [(9, 11), (7, 12), (5, 13), (3, 14)]
+        self.p4_home = PLAYER_STARTING_HOMES[4].copy()
         self.p4_marbles = [(None, None), (None, None), (None, None), (None, None)]
         self.p4_end = (None, None)
         self.p4_end_home = [(None, None), (None, None), (None, None), (None, None)]
@@ -265,40 +292,40 @@ class AggravationGame:
                 'marbles': self.p1_marbles,
                 'home': self.p1_home,
                 'end_home': self.p1_end_home,
-                'start_pos': P1START,
+                'start_pos': PLAYER_STARTS[1],
                 'start_occupied': self.p1_start_occupied,
-                'home_stretch': [(11, 3), (11, 2), (11, 1), (13, 1), (15, 1)],
-                'final_home': [(15, 2), (15, 3), (15, 4), (15, 5)]
+                'home_stretch': PLAYER_HOME_STRETCHES[1],
+                'final_home': PLAYER_FINAL_HOMES[1]
             }
         elif player == 2:
             return {
                 'marbles': self.p2_marbles,
                 'home': self.p2_home,
                 'end_home': self.p2_end_home,
-                'start_pos': P2START,
+                'start_pos': PLAYER_STARTS[2],
                 'start_occupied': self.p2_start_occupied,
-                'home_stretch': [(25, 6), (27, 6), (29, 6), (29, 7), (29, 8)],
-                'final_home': [(27, 8), (25, 8), (23, 8), (21, 8)]
+                'home_stretch': PLAYER_HOME_STRETCHES[2],
+                'final_home': PLAYER_FINAL_HOMES[2]
             }
         elif player == 3:
             return {
                 'marbles': self.p3_marbles,
                 'home': self.p3_home,
                 'end_home': self.p3_end_home,
-                'start_pos': P3START,
+                'start_pos': PLAYER_STARTS[3],
                 'start_occupied': self.p3_start_occupied,
-                'home_stretch': [(19, 13), (19, 14), (19, 15), (17, 15), (15, 15)],
-                'final_home': [(15, 14), (15, 13), (15, 12), (15, 11)]
+                'home_stretch': PLAYER_HOME_STRETCHES[3],
+                'final_home': PLAYER_FINAL_HOMES[3]
             }
         elif player == 4:
             return {
                 'marbles': self.p4_marbles,
                 'home': self.p4_home,
                 'end_home': self.p4_end_home,
-                'start_pos': P4START,
+                'start_pos': PLAYER_STARTS[4],
                 'start_occupied': self.p4_start_occupied,
-                'home_stretch': [(5, 10), (3, 10), (1, 10), (1, 9), (1, 8)],
-                'final_home': [(3, 8), (5, 8), (7, 8), (9, 8)]
+                'home_stretch': PLAYER_HOME_STRETCHES[4],
+                'final_home': PLAYER_FINAL_HOMES[4]
             }
         else:
             raise ValueError(f"Invalid player number: {player}")
@@ -631,32 +658,32 @@ class AggravationGame:
             if len(self.p1_home) >= 1:
                 self.p1_home = self.p1_home[:-1]
                 marble_idx = len(self.p1_home)
-                self.p1_marbles[marble_idx] = P1START
-                self.p1_end = P1START
+                self.p1_marbles[marble_idx] = PLAYER_STARTS[1]
+                self.p1_end = PLAYER_STARTS[1]
                 self.p1_start_occupied = True
                 return True
         elif player == 2:
             if len(self.p2_home) >= 1:
                 self.p2_home = self.p2_home[:-1]
                 marble_idx = len(self.p2_home)
-                self.p2_marbles[marble_idx] = P2START
-                self.p2_end = P2START
+                self.p2_marbles[marble_idx] = PLAYER_STARTS[2]
+                self.p2_end = PLAYER_STARTS[2]
                 self.p2_start_occupied = True
                 return True
         elif player == 3:
             if len(self.p3_home) >= 1:
                 self.p3_home = self.p3_home[:-1]
                 marble_idx = len(self.p3_home)
-                self.p3_marbles[marble_idx] = P3START
-                self.p3_end = P3START
+                self.p3_marbles[marble_idx] = PLAYER_STARTS[3]
+                self.p3_end = PLAYER_STARTS[3]
                 self.p3_start_occupied = True
                 return True
         elif player == 4:
             if len(self.p4_home) >= 1:
                 self.p4_home = self.p4_home[:-1]
                 marble_idx = len(self.p4_home)
-                self.p4_marbles[marble_idx] = P4START
-                self.p4_end = P4START
+                self.p4_marbles[marble_idx] = PLAYER_STARTS[4]
+                self.p4_end = PLAYER_STARTS[4]
                 self.p4_start_occupied = True
                 return True
         
