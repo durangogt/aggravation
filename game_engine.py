@@ -66,10 +66,18 @@ BLANK = '.'
 SPOT = '#'
 
 # Shortcut positions
+# ====================
 # Star holes (corner shortcuts) - the 4 corner positions of the board
+# When a marble lands exactly on a star hole, on the next turn it can:
+# 1. Move clockwise to the next star hole
+# 2. Exit toward its home base (if it's the player's preferred star)
+# Star hole sequence (clockwise): (11,1) -> (29,6) -> (19,15) -> (1,10) -> (11,1)
 STAR_HOLES = [(11, 1), (29, 6), (19, 15), (1, 10)]
 
 # Center hole (middle shortcut) - the center position of the board
+# A marble in the center hole can only exit by rolling exactly 1.
+# With a roll of 1, it can jump to any star hole (typically the player's preferred one).
+# This is the fastest route to home but risky (need exact roll).
 CENTER_HOLE = (15, 8)
 
 
@@ -117,9 +125,13 @@ class AggravationGame:
         self.p4_start_occupied = False
         
         # Shortcut state tracking for each player
-        # Each player has 4 marbles that can be on star holes or in center hole
-        self.p1_on_star_hole = [False, False, False, False]  # Track which marbles are on star holes
-        self.p1_in_center_hole = [False, False, False, False]  # Track which marbles are in center hole
+        # ========================================
+        # Track which marbles (0-3) are currently on shortcuts.
+        # - on_star_hole: True if marble landed on a star hole and can use shortcut next turn
+        # - in_center_hole: True if marble is in center hole and needs roll of 1 to exit
+        # These flags are automatically set/cleared by execute_move() based on marble position.
+        self.p1_on_star_hole = [False, False, False, False]
+        self.p1_in_center_hole = [False, False, False, False]
         
         self.p2_on_star_hole = [False, False, False, False]
         self.p2_in_center_hole = [False, False, False, False]
