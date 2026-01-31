@@ -570,6 +570,74 @@ def displayStatus(passed_SURF, passed_RECT):
     pygame.display.update()
     pygame.time.wait(2000) # WAIT for player to see status message - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
 
+def displayAggravationMessage(aggressor_player, victim_player):
+    """Display aggravation message when a player sends opponent home."""
+    aggressor_color = PLAYER_COLORS[aggressor_player]
+    victim_color = PLAYER_COLORS[victim_player]
+    
+    # Create aggravation message
+    msg = f"Player {aggressor_player} AGGRAVATED Player {victim_player}!"
+    msg_surf = BASICFONT.render(msg, True, aggressor_color, BGCOLOR)
+    msg_rect = msg_surf.get_rect()
+    msg_rect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    
+    # Flash the message with visual effect
+    for _ in range(3):
+        # Draw message
+        DISPLAYSURF.blit(msg_surf, msg_rect)
+        pygame.display.update()
+        pygame.time.wait(200)
+        
+        # Clear message
+        pygame.draw.rect(DISPLAYSURF, BGCOLOR, msg_rect)
+        pygame.display.update()
+        pygame.time.wait(100)
+    
+    # Show final message for a moment
+    DISPLAYSURF.blit(msg_surf, msg_rect)
+    pygame.display.update()
+    pygame.time.wait(500)
+    
+    # Clear the message
+    pygame.draw.rect(DISPLAYSURF, BGCOLOR, msg_rect)
+    pygame.display.update()
+
+def animateAggravation(victim_player, from_pos):
+    """Animate opponent marble returning to home after aggravation."""
+    victim_color = PLAYER_COLORS[victim_player]
+    starting_home = PLAYER_STARTING_HOMES[victim_player]
+    
+    # Flash the marble at its current position before removing
+    for _ in range(3):
+        drawPlayerBox(victim_color, from_pos)
+        pygame.time.wait(100)
+        drawBoardBox(from_pos)
+        pygame.time.wait(100)
+    
+    # Clear the position where marble was
+    drawBoardBox(from_pos)
+    
+    # Draw marble appearing back in home (first available home spot)
+    if len(starting_home) > 0:
+        home_pos = starting_home[-1]  # Last home position (most recently vacated)
+        for _ in range(3):
+            pygame.draw.circle(DISPLAYSURF, victim_color, 
+                             (leftTopCoordsOfBox(home_pos[0], home_pos[1])[0] + 5,
+                              leftTopCoordsOfBox(home_pos[0], home_pos[1])[1] + 5), 5, 0)
+            pygame.display.update()
+            pygame.time.wait(100)
+            pygame.draw.circle(DISPLAYSURF, BGCOLOR,
+                             (leftTopCoordsOfBox(home_pos[0], home_pos[1])[0] + 5,
+                              leftTopCoordsOfBox(home_pos[0], home_pos[1])[1] + 5), 5, 0)
+            pygame.display.update()
+            pygame.time.wait(100)
+        
+        # Final draw of marble in home
+        pygame.draw.circle(DISPLAYSURF, victim_color,
+                         (leftTopCoordsOfBox(home_pos[0], home_pos[1])[0] + 5,
+                          leftTopCoordsOfBox(home_pos[0], home_pos[1])[1] + 5), 5, 0)
+        pygame.display.update()
+
 def animatePlayerMove(moves, P1marbles, P1END, game):
     """
     Animate player marble movement using game engine for position calculations.
@@ -661,6 +729,23 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
         current_pos = coords
         player_marbles[player_marbles.index(oldLocation)] = current_pos
         print(f'Player {player} marbles tracking: {player_marbles}')
+
+    # Check for aggravation - did we land on an opponent's marble?
+    final_pos = current_pos
+    if final_pos not in finalHome:  # Can't aggravate in safe zone
+        opponent = game.find_marble_at_position(final_pos)
+        if opponent is not None and opponent[0] != player:
+            opp_player, opp_marble_idx = opponent
+            # Send opponent marble home using game engine
+            opp_old_pos = game.send_marble_home(opp_player, opp_marble_idx)
+            
+            # Visual feedback - flash aggravation message
+            displayAggravationMessage(player, opp_player)
+            
+            # Animate opponent marble returning to home
+            animateAggravation(opp_player, opp_old_pos)
+            
+            print(f'AGGRAVATION! Player {player} sent Player {opp_player} marble back to home from {opp_old_pos}')
 
     # Check for win condition
     won = game.check_win_condition(player)
