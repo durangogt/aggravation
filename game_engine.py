@@ -173,7 +173,7 @@ class AggravationGame:
         # Special handling for center hole - can only exit with special rules
         # (implemented separately in shortcut logic)
         if (x, y) == CENTER_HOLE:
-            raise ValueError(f"Center hole position requires special shortcut handling")
+            raise ValueError(f"Cannot calculate next position from center hole ({x}, {y}) - use shortcut-aware movement methods instead")
         
         # Corner positions - hard coded for the 12 corners
         if (x, y) == (19, 1):     # p1 outside corner

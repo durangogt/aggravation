@@ -116,9 +116,9 @@ The `execute_move()` method now:
 ## Testing
 
 ### Test Coverage
-**Total Tests**: 76 tests
+**Total Tests**: 78 tests
 - **Existing tests**: 58 (all passing)
-- **New shortcut tests**: 18 (all passing)
+- **New shortcut tests**: 20 (all passing)
 
 ### Test Categories
 
