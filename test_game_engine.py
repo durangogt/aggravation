@@ -130,7 +130,16 @@ class TestGameInitialization:
 
 
 class TestMoveValidation:
-    """Test move validation logic."""
+    """Test move validation logic.
+    
+    Includes comprehensive tests for the edge case where a player has all 4 marbles
+    in home and rolls 2-5 (can't get out). This addresses the test coverage question
+    raised in issue: "Test case: 4 marbles in home and rolls 2-5 (can't get out)"
+    
+    The game rules state that a player can only move a marble from home to the
+    start position by rolling a 1 or 6. If all marbles are in home and the player
+    rolls 2, 3, 4, or 5, they have no valid moves and their turn is over.
+    """
     
     def test_cannot_move_marble_not_on_board(self):
         """Test that marbles not on board can't be moved."""
@@ -176,6 +185,49 @@ class TestMoveValidation:
         # Roll of 3 should NOT allow moving from home when no marbles on board
         valid_moves = game.get_valid_moves(1, 3)
         assert -1 not in valid_moves
+    
+    def test_all_marbles_home_cannot_move_with_2_to_5(self):
+        """Test that player with 4 marbles in home and rolls 2-5 has no valid moves."""
+        game = AggravationGame()
+        
+        # Verify initial state: 4 marbles in home, none on board
+        assert len(game.p1_home) == 4
+        assert game.p1_marbles == [(None, None), (None, None), (None, None), (None, None)]
+        assert game.p1_start_occupied == False
+        
+        # Test rolls 2, 3, 4, 5 - should have NO valid moves
+        for roll in [2, 3, 4, 5]:
+            valid_moves = game.get_valid_moves(1, roll)
+            assert valid_moves == [], f"Player with 4 marbles in home and roll {roll} should have no valid moves, but got {valid_moves}"
+    
+    def test_all_marbles_home_can_move_with_1_or_6(self):
+        """Test that player with 4 marbles in home CAN move with rolls 1 or 6."""
+        game = AggravationGame()
+        
+        # Verify initial state: 4 marbles in home, none on board
+        assert len(game.p1_home) == 4
+        assert game.p1_marbles == [(None, None), (None, None), (None, None), (None, None)]
+        assert game.p1_start_occupied == False
+        
+        # Test rolls 1 and 6 - should have valid move (from home)
+        for roll in [1, 6]:
+            valid_moves = game.get_valid_moves(1, roll)
+            assert -1 in valid_moves, f"Player with 4 marbles in home and roll {roll} should be able to move from home"
+            assert len(valid_moves) == 1, f"Expected exactly 1 valid move (from home), got {len(valid_moves)}"
+    
+    def test_all_players_stuck_with_4_marbles_home_and_bad_roll(self):
+        """Test that all players (1-4) with 4 marbles in home and rolls 2-5 have no valid moves."""
+        game = AggravationGame(num_players=4)
+        
+        for player in range(1, 5):
+            # Verify each player has 4 marbles in home
+            num_in_home = game.get_num_in_home(player)
+            assert num_in_home == 4, f"Player {player} should have 4 marbles in home"
+            
+            # Test each roll 2-5
+            for roll in [2, 3, 4, 5]:
+                valid_moves = game.get_valid_moves(player, roll)
+                assert valid_moves == [], f"Player {player} with 4 marbles in home and roll {roll} should have no valid moves, but got {valid_moves}"
 
 
 class TestGameState:
