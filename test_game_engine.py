@@ -825,5 +825,203 @@ class TestMultiPlayerIntegration:
             assert game.winner == winning_player
 
 
+class TestSaveLoad:
+    """Test game state persistence (save/load functionality)."""
+    
+    def test_to_dict_serialization(self):
+        """Test that to_dict() produces valid structure."""
+        game = AggravationGame(num_players=4)
+        game.current_player = 2
+        
+        data = game.to_dict(name="Test Save")
+        
+        # Check top-level structure
+        assert 'version' in data
+        assert data['version'] == '1.0'
+        assert 'timestamp' in data
+        assert data['name'] == "Test Save"
+        assert 'game_state' in data
+        
+        # Check game state structure
+        gs = data['game_state']
+        assert gs['num_players'] == 4
+        assert gs['current_player'] == 2
+        assert gs['game_over'] == False
+        assert gs['winner'] is None
+        assert 'players' in gs
+        
+        # Check all 4 players are present
+        for player_num in ['1', '2', '3', '4']:
+            assert player_num in gs['players']
+            player = gs['players'][player_num]
+            assert 'home' in player
+            assert 'marbles' in player
+            assert 'end' in player
+            assert 'end_home' in player
+            assert 'start_occupied' in player
+    
+    def test_from_dict_restore(self):
+        """Test that from_dict() restores all state correctly."""
+        # Create game with specific state
+        game1 = AggravationGame(num_players=4)
+        game1.current_player = 3
+        game1.p1_home = [(3, 2), (5, 3)]
+        game1.p1_marbles = [(19, 2), (15, 3), (None, None), (None, None)]
+        game1.p1_end = (15, 3)
+        game1.p1_start_occupied = False
+        
+        # Serialize and deserialize
+        data = game1.to_dict()
+        game2 = AggravationGame.from_dict(data)
+        
+        # Verify state matches
+        assert game2.num_players == game1.num_players
+        assert game2.current_player == game1.current_player
+        assert game2.game_over == game1.game_over
+        assert game2.winner == game1.winner
+        
+        # Verify player 1 state
+        assert game2.p1_home == game1.p1_home
+        assert game2.p1_marbles == game1.p1_marbles
+        assert game2.p1_end == game1.p1_end
+        assert game2.p1_start_occupied == game1.p1_start_occupied
+    
+    def test_round_trip_save_load(self):
+        """Test that save → load → state matches."""
+        import tempfile
+        import os
+        
+        # Create game with specific state
+        game1 = AggravationGame(num_players=2)
+        game1.current_player = 2
+        game1.p1_marbles = [(19, 2), (None, None), (None, None), (None, None)]
+        game1.p2_marbles = [(27, 10), (25, 10), (None, None), (None, None)]
+        
+        # Save to temporary file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            temp_path = f.name
+        
+        try:
+            game1.save_to_file(temp_path, name="Round Trip Test")
+            
+            # Load from file
+            game2 = AggravationGame.load_from_file(temp_path)
+            
+            # Verify complete state matches
+            assert game2.num_players == 2
+            assert game2.current_player == 2
+            assert game2.p1_marbles == [(19, 2), (None, None), (None, None), (None, None)]
+            assert game2.p2_marbles == [(27, 10), (25, 10), (None, None), (None, None)]
+        finally:
+            # Clean up
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+    
+    def test_save_file_io(self):
+        """Test file I/O with actual files."""
+        import tempfile
+        import os
+        
+        game = AggravationGame(num_players=4)
+        
+        # Test saving to file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            temp_path = f.name
+        
+        try:
+            game.save_to_file(temp_path, name="I/O Test")
+            assert os.path.exists(temp_path)
+            
+            # Verify file contains valid JSON
+            import json
+            with open(temp_path, 'r') as f:
+                data = json.load(f)
+            
+            assert data['name'] == "I/O Test"
+            assert 'game_state' in data
+        finally:
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+    
+    def test_error_handling_missing_file(self):
+        """Test error handling for missing file."""
+        with pytest.raises(FileNotFoundError):
+            AggravationGame.load_from_file("/nonexistent/path/to/save.json")
+    
+    def test_error_handling_wrong_version(self):
+        """Test error handling for wrong version."""
+        data = {
+            'version': '2.0',  # Incompatible version
+            'game_state': {}
+        }
+        
+        with pytest.raises(ValueError, match="Incompatible save file version"):
+            AggravationGame.from_dict(data)
+    
+    def test_list_saves(self):
+        """Test save file listing."""
+        from game_engine import list_saves, generate_save_filename, delete_save
+        import os
+        
+        # Create a temporary save
+        game = AggravationGame(num_players=4)
+        filepath = generate_save_filename("Test List")
+        
+        try:
+            game.save_to_file(filepath, name="Test List")
+            
+            # List saves
+            saves = list_saves()
+            
+            # Should find our save
+            assert any(s['name'] == "Test List" for s in saves)
+        finally:
+            # Clean up
+            if os.path.exists(filepath):
+                delete_save(filepath)
+    
+    def test_delete_save(self):
+        """Test save file deletion."""
+        from game_engine import generate_save_filename, delete_save
+        import os
+        
+        # Create a temporary save
+        game = AggravationGame(num_players=4)
+        filepath = generate_save_filename("Test Delete")
+        game.save_to_file(filepath, name="Test Delete")
+        
+        assert os.path.exists(filepath)
+        
+        # Delete it
+        result = delete_save(filepath)
+        assert result == True
+        assert not os.path.exists(filepath)
+    
+    def test_get_save_info(self):
+        """Test reading save metadata."""
+        from game_engine import generate_save_filename, get_save_info, delete_save
+        import os
+        
+        # Create a save with specific metadata
+        game = AggravationGame(num_players=3)
+        game.current_player = 2
+        filepath = generate_save_filename("Metadata Test")
+        
+        try:
+            game.save_to_file(filepath, name="Metadata Test")
+            
+            # Read metadata
+            info = get_save_info(filepath)
+            
+            assert info is not None
+            assert info['name'] == "Metadata Test"
+            assert info['num_players'] == 3
+            assert info['current_player'] == 2
+            assert info['version'] == '1.0'
+        finally:
+            if os.path.exists(filepath):
+                delete_save(filepath)
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
