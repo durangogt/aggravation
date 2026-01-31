@@ -846,7 +846,7 @@ class TestSaveLoad:
         gs = data['game_state']
         assert gs['num_players'] == 4
         assert gs['current_player'] == 2
-        assert gs['game_over'] == False
+        assert gs['game_over'] is False
         assert gs['winner'] is None
         assert 'players' in gs
         
@@ -1041,12 +1041,10 @@ class TestSaveLoad:
         
         for name in dangerous_names:
             filepath = generate_save_filename(name)
-            # Verify the file is always in the save directory
-            assert filepath.startswith(save_dir), f"Path traversal detected for: {name}"
-            # Verify no path separators in filename
-            filename = os.path.basename(filepath)
-            assert '/' not in filename, f"Slash found in filename for: {name}"
-            assert '\\' not in filename, f"Backslash found in filename for: {name}"
+            # Verify the file is always in the save directory (no path traversal)
+            assert os.path.dirname(filepath) == save_dir, f"Path traversal detected for: {name} -> {filepath}"
+            # Verify the filepath starts with save_dir
+            assert filepath.startswith(save_dir), f"Path not in save directory for: {name}"
 
 
 if __name__ == '__main__':

@@ -766,7 +766,10 @@ class AggravationGame:
                 return item
             if isinstance(item, list):
                 if len(item) == 2:
-                    # Convert [x, y] to (x, y), handling None values
+                    # Handle [None, None] which represents empty position
+                    if all(x is None for x in item):
+                        return (None, None)
+                    # Convert [x, y] to (x, y)
                     return tuple(item)
                 else:
                     # For lists of different lengths, return as-is
