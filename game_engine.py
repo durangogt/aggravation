@@ -158,6 +158,11 @@ class AggravationGame:
         # Validate current position is on the board
         assert BOARD_TEMPLATE[y][x] == SPOT, 'Current spot must be a valid board position (#)'
         
+        # Special handling for center hole - can only exit with special rules
+        # (implemented separately in shortcut logic)
+        if (x, y) == CENTER_HOLE:
+            raise ValueError(f"Center hole position requires special shortcut handling")
+        
         # Corner positions - hard coded for the 12 corners
         if (x, y) == (19, 1):     # p1 outside corner
             return (19, 2)
@@ -394,6 +399,62 @@ class AggravationGame:
         }
         
         return exit_positions.get(player)
+    
+    def get_next_position_with_shortcuts(self, player: int, marble_idx: int, x: int, y: int, 
+                                          dice_roll: int, move_number: int) -> Tuple[int, int]:
+        """
+        Get the next board position considering shortcut rules.
+        
+        Args:
+            player: Player number (1-4)
+            marble_idx: Index of marble (0-3)
+            x: Current x coordinate
+            y: Current y coordinate
+            dice_roll: Total dice roll for this turn
+            move_number: Which move in the sequence (0 to dice_roll-1)
+            
+        Returns:
+            Tuple of (next_x, next_y) coordinates
+        """
+        current_pos = (x, y)
+        pdata = self._get_player_data(player)
+        on_star_hole = pdata['on_star_hole']
+        in_center_hole = pdata['in_center_hole']
+        
+        # Special handling for center hole
+        if in_center_hole[marble_idx] and current_pos == CENTER_HOLE:
+            # In center hole: can only exit with roll of 1 to any star hole
+            if dice_roll == 1 and move_number == 0:
+                # Exit to player's preferred star hole (closest to their home)
+                preferred_stars = {
+                    1: (11, 1),
+                    2: (29, 6),
+                    3: (19, 15),
+                    4: (1, 10)
+                }
+                return preferred_stars[player]
+            else:
+                # Cannot move with other rolls - stuck in center
+                raise ValueError("Cannot move from center hole except with roll of 1")
+        
+        # Special handling for star holes
+        if on_star_hole[marble_idx] and current_pos in STAR_HOLES:
+            # On star hole: player chooses to either:
+            # 1. Move clockwise to next star hole
+            # 2. Exit toward home (if it's their preferred star)
+            
+            # For simplicity, automatically choose the best move:
+            # - If on preferred star, exit toward home
+            # - Otherwise, move to next star hole
+            if self.can_exit_to_home_from_star(player, current_pos):
+                # Exit toward home
+                return self.get_star_hole_exit_position(player, current_pos)
+            else:
+                # Move to next star hole clockwise
+                return self.get_next_star_hole_clockwise(current_pos)
+        
+        # Normal movement - use regular get_next_position
+        return self.get_next_position(x, y)
     
     def _get_player_data(self, player: int) -> Dict:
         """
