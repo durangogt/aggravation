@@ -235,7 +235,7 @@ def save_game_dialog(game, current_player):
         game.save_to_file(filename, name=f"Game_{current_player}")
         
         # Show success message
-        show_message(f"Game saved successfully!", TEXTCOLOR)
+        show_message("Game saved successfully", TEXTCOLOR)
         return True
     except Exception as e:
         # Show error message

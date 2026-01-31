@@ -760,8 +760,17 @@ class AggravationGame:
         """
         # Helper to convert list to tuple (JSON doesn't preserve tuples)
         def to_tuple(item):
-            if isinstance(item, list) and len(item) == 2:
-                return tuple(item)
+            if item is None:
+                return None
+            if isinstance(item, tuple):
+                return item
+            if isinstance(item, list):
+                if len(item) == 2:
+                    # Convert [x, y] to (x, y), handling None values
+                    return tuple(item)
+                else:
+                    # For lists of different lengths, return as-is
+                    return item
             return item
         
         # Version checking
@@ -970,8 +979,15 @@ def generate_save_filename(name: str = None) -> str:
     
     if name:
         # Sanitize the name to be filesystem-safe
+        # Remove path separators and dangerous characters
         safe_name = "".join(c for c in name if c.isalnum() or c in (' ', '-', '_')).strip()
+        # Replace spaces with underscores
         safe_name = safe_name.replace(' ', '_')
+        # Prevent path traversal by removing any remaining separators
+        safe_name = safe_name.replace('/', '').replace('\\', '').replace('..', '')
+        # Ensure we have a valid name
+        if not safe_name:
+            safe_name = "unnamed"
         filename = f"{safe_name}.json"
     else:
         # Generate timestamp-based filename

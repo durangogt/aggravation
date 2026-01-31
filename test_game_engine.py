@@ -994,7 +994,7 @@ class TestSaveLoad:
         
         # Delete it
         result = delete_save(filepath)
-        assert result == True
+        assert result is True
         assert not os.path.exists(filepath)
     
     def test_get_save_info(self):
@@ -1021,6 +1021,32 @@ class TestSaveLoad:
         finally:
             if os.path.exists(filepath):
                 delete_save(filepath)
+    
+    def test_filename_sanitization(self):
+        """Test that filename sanitization prevents path traversal."""
+        from game_engine import generate_save_filename, get_save_directory
+        import os
+        
+        # Test various malicious inputs
+        dangerous_names = [
+            "../../../etc/passwd",
+            "../../evil",
+            "test/../../../bad",
+            "test/../../bad",
+            "a/b/c",
+            "valid name with spaces"
+        ]
+        
+        save_dir = str(get_save_directory())
+        
+        for name in dangerous_names:
+            filepath = generate_save_filename(name)
+            # Verify the file is always in the save directory
+            assert filepath.startswith(save_dir), f"Path traversal detected for: {name}"
+            # Verify no path separators in filename
+            filename = os.path.basename(filepath)
+            assert '/' not in filename, f"Slash found in filename for: {name}"
+            assert '\\' not in filename, f"Backslash found in filename for: {name}"
 
 
 if __name__ == '__main__':
