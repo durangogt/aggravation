@@ -77,25 +77,45 @@ class BoardRenderer:
                     board_lines[y][x] = str(player_num)
         
         # Convert to ASCII art with colors
+        # Target visual width is 42 (to match the header which has 2 emojis)
+        # Header: "║         🎲 AGGRAVATION 🎲              ║" = 40 chars + 2 emoji = 42 visual width
+        TARGET_VISUAL_WIDTH = 42
+        
         output_lines = []
         output_lines.append("╔═══════════════════════════════════════╗")
         output_lines.append("║         🎲 AGGRAVATION 🎲              ║")
         output_lines.append("╠═══════════════════════════════════════╣")
         
         for y, line in enumerate(board_lines):
-            row = "║ "
+            # Build the row content
+            row_chars = []
             for x, char in enumerate(line):
                 if char == '.':
-                    row += " "
+                    row_chars.append(" ")
                 elif char == '#':
-                    row += "·"
+                    row_chars.append("·")
                 elif char in ['1', '2', '3', '4']:
-                    # Show colored marble
+                    # Show colored marble - emoji takes 2 display columns
                     player_num = int(char)
-                    row += MARBLE_SYMBOLS.get(player_num, char)
+                    row_chars.append(MARBLE_SYMBOLS.get(player_num, char))
                 else:
-                    row += char
-            row += " ║"
+                    row_chars.append(char)
+            
+            # Join the characters
+            row_content = "".join(row_chars)
+            
+            # Calculate visual width (emoji = 2 columns, regular chars = 1 column)
+            visual_width = sum(2 if c in MARBLE_SYMBOLS.values() else 1 for c in row_chars)
+            
+            # Add left border (2 visual columns: "║ ")
+            # Add right border (2 visual columns: " ║")
+            # Current visual width including borders: visual_width + 4
+            # Padding needed: TARGET_VISUAL_WIDTH - (visual_width + 4)
+            padding_needed = TARGET_VISUAL_WIDTH - (visual_width + 4)
+            row_content += " " * padding_needed
+            
+            # Add borders
+            row = "║ " + row_content + " ║"
             output_lines.append(row)
         
         output_lines.append("╚═══════════════════════════════════════╝")
