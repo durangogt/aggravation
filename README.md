@@ -41,6 +41,13 @@ Aggravation is a classic marble race board game where players compete to move al
 - ✅ Interactive GUI built with pygame
 - ✅ All game assets included
 
+### Web Version (`web/`)
+- 🌐 **Browser-playable version** using Pygbag (WebAssembly)
+- 📱 **Mobile-friendly** - works on iPhone/iOS Safari
+- ☁️ **No installation required** - play directly in browser
+- ⚡ **Auto-deployed** to GitHub Pages via GitHub Actions
+- 🎮 **Same gameplay** as desktop version
+
 ### Four-in-a-Row Game (`fourinarow.py`)
 - 🎯 Connect Four clone implementation
 - ✅ All image assets now included
@@ -101,6 +108,30 @@ Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 python aggravation.py
 ```
 
+### 🌐 Playing the Web Version
+
+The game is also available as a **browser-based version** that works on any device, including iPhone/iOS:
+
+**🔗 Play Online**: [https://durangogt.github.io/aggravation/](https://durangogt.github.io/aggravation/)
+
+**Features**:
+- ✅ Works on iPhone Safari and all modern browsers
+- ✅ No installation required
+- ✅ Same gameplay as desktop version
+- ✅ Powered by WebAssembly (Pygbag)
+
+**Local Development/Testing**:
+```bash
+# Install pygbag
+pip install pygbag
+
+# Run web version locally
+cd web
+pygbag .
+
+# Open http://localhost:8000 in your browser
+```
+
 ## 🎲 Game Rules
 
 ### Objective
@@ -152,14 +183,21 @@ For complete movement tracking details, see `.github/copilot-instructions.md`.
 
 ```
 aggravation/
-├── aggravation.py          # Main game (717 lines)
+├── aggravation.py          # Main game (desktop version)
+├── game_engine.py          # Core game logic (headless, no pygame)
 ├── fourinarow.py           # Four-in-a-Row game (364 lines)
+├── web/                    # Web version for Pygbag
+│   ├── main.py            # Pygbag entry point
+│   ├── aggravation_web.py # Web-adapted game (async)
+│   └── game_engine.py     # Copy of core game logic
 ├── README.md               # This file
 ├── DebugNotes.txt          # Development debugging notes
 ├── DecisionTables.xlsx     # Game rule decision tables
 ├── board_coords.txt        # Board coordinate reference
 ├── thorpy/                 # ThorPy GUI library (included but not currently used)
 ├── .github/
+│   ├── workflows/
+│   │   └── deploy-web.yml  # GitHub Pages deployment workflow
 │   └── copilot-instructions.md  # GitHub Copilot agent instructions
 └── .vscode/
     └── launch.json         # VSCode debug configurations
