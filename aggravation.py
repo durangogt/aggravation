@@ -738,6 +738,7 @@ def drawBoard():
     DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)
     DISPLAYSURF.blit(ROLL6_SURF, ROLL6_RECT)
     DISPLAYSURF.blit(TEST_SURF, TEST_RECT)
+    DISPLAYSURF.blit(TEST_AGGRO_SURF, TEST_AGGRO_RECT)
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates
