@@ -40,6 +40,11 @@ The game is automatically deployed to GitHub Pages when changes are pushed to th
 
 **Deployment workflow**: `.github/workflows/deploy-web.yml`
 
+**How it works**:
+1. GitHub Actions builds the web version using Pygbag
+2. The build output (`index.html`, `web.apk`, etc.) is deployed to the `gh-pages` branch
+3. GitHub Pages serves the content from the `gh-pages` branch at the root path
+
 **Live URL**: https://durangogt.github.io/aggravation/
 
 ## Key Differences from Desktop Version

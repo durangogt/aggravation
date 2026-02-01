@@ -120,6 +120,12 @@ The game is also available as a **browser-based version** that works on any devi
 - ✅ Same gameplay as desktop version
 - ✅ Powered by WebAssembly (Pygbag)
 
+**How It Works**:
+The web version is automatically built and deployed to GitHub Pages via GitHub Actions. When changes are pushed to the main branch, the workflow:
+1. Builds the web version from the `web/` directory using Pygbag
+2. Deploys the built files to the `gh-pages` branch
+3. GitHub Pages serves the game from the `gh-pages` branch
+
 **Local Development/Testing**:
 ```bash
 # Install pygbag
