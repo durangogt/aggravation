@@ -236,7 +236,7 @@ The modular architecture makes it easy to extend:
 
 ## Requirements ⚙️
 
-- **Python 3.12.3** or higher
+- **Python 3.8+** (tested with 3.12.3)
 - **rich 13.7.0** or higher
 - **textual 0.47.0** or higher (optional, for future features)
 

@@ -13,7 +13,7 @@ from rich.panel import Panel
 from rich import box
 
 
-# Dice face Unicode characters
+# Dice face Unicode characters (0-indexed: DICE_FACES[0] = die showing 1, DICE_FACES[5] = die showing 6)
 DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
 
 # Color gradient for title animation

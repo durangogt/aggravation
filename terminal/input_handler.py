@@ -24,10 +24,13 @@ class InputHandler:
         Get user's marble selection.
         
         Args:
-            valid_moves: List of valid marble indices (including -1 for "from home")
+            valid_moves: List of valid marble indices. Can include:
+                        - 0-3: Regular marble indices for marbles on board
+                        - -1: Special index for "move marble from home base to start"
+                              (only present when player rolled 1 or 6 and start is not occupied)
             
         Returns:
-            Selected marble index (0-based, or -1 for from home) or None to skip/quit
+            Selected marble index (0-3 for marbles on board, -1 for from home) or None to skip/quit
         """
         while True:
             try:
