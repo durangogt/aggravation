@@ -204,12 +204,7 @@ def next_player(current_player, num_players=4):
     return (current_player % num_players) + 1
 
 async def run():
-    # Pygbag runs in browser, no headless mode needed
-    # headless = '--headless' in sys.argv
-    # if headless:
-    #     os.environ['SDL_VIDEODRIVER'] = 'dummy'
-    #     os.environ['SDL_AUDIODRIVER'] = 'dummy'
-    
+    """Main async game loop for Pygbag web version."""
     global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT, CLEAR_SURF, CLEAR_RECT, ROLL6_SURF, ROLL6_RECT
     global PLAYERROR_SURF, PLAYERROR_RECT, CLEARERROR_SURF, CLEARERROR_RECT
     global TEST_SURF, TEST_RECT
@@ -790,9 +785,4 @@ def removeFromHome(PHOME):
         left, top = leftTopCoordsOfBox(remove[0],remove[1])
         pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE)) # animate marble removed
         pygame.display.update()
-        #return True
         return PHOME
-
-# Pygbag entry point - called from main.py
-# if __name__ == '__main__':
-#     asyncio.run(run())
