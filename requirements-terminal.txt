@@ -1,0 +1,8 @@
+# Terminal UI Dependencies for Aggravation CLI Version
+# Install with: pip install -r requirements-terminal.txt
+
+# Rich - Beautiful terminal formatting and animations
+rich>=13.7.0
+
+# Textual - Full TUI framework (optional, for future enhancements)
+textual>=0.47.0
