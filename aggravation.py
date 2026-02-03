@@ -863,14 +863,12 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
     # Check for aggravation BEFORE updating marble position
     # This is critical - we need to find opponent marble at destination before we overwrite it
     final_pos = current_pos
-    aggravation_occurred = False
     if final_pos not in finalHome:  # Can't aggravate in safe zone
         opponent = game.find_marble_at_position(final_pos)
         if opponent is not None and opponent[0] != player:
             opp_player, opp_marble_idx = opponent
             # Send opponent marble home using game engine
             opp_old_pos = game.send_marble_home(opp_player, opp_marble_idx)
-            aggravation_occurred = True
             
             # Visual feedback - flash aggravation message
             displayAggravationMessage(player, opp_player)
