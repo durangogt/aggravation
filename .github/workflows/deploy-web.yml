@@ -28,7 +28,8 @@ jobs:
       - name: Build Web Version
         run: |
           cd web
-          python -m pygbag --build .
+          chmod +x build.sh
+          ./build.sh --build
       
       - name: Add .nojekyll file
         run: |
