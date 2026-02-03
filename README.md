@@ -138,9 +138,9 @@ In your repository settings under "Pages", set:
 # Install pygbag
 pip install pygbag
 
-# Run web version locally
+# Run web version locally (build + serve)
 cd web
-pygbag .
+./build.sh --serve
 
 # Open http://localhost:8000 in your browser
 ```
@@ -202,7 +202,8 @@ aggravation/
 ├── web/                    # Web version for Pygbag
 │   ├── main.py            # Pygbag entry point
 │   ├── aggravation_web.py # Web-adapted game (async)
-│   └── game_engine.py     # Copy of core game logic
+│   ├── game_engine.py     # Generated copy of core logic (via web/build.sh; not tracked)
+│   └── build.sh           # Build script to copy game_engine.py and run pygbag
 ├── README.md               # This file
 ├── DebugNotes.txt          # Development debugging notes
 ├── DecisionTables.xlsx     # Game rule decision tables

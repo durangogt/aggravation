@@ -412,7 +412,7 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                         else:
@@ -473,7 +473,7 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                     elif(player_start_occupied == False and waitingForInput == True):
@@ -498,19 +498,24 @@ async def run():
                         
                         # Check if clicked on STARTING home (remove marble and place on start)
                         elif clickedPos in playerStartingHome and len(player_home) > 0:
-                            new_home = removeFromHome(player_home)
-                            set_player_home(game, current_player, new_home)
-                            drawPlayerBox(player_color, player_start)
-                            set_player_end(game, current_player, player_start)
-                            player_marbles = get_player_marbles(game, current_player)
-                            player_home = get_player_home(game, current_player)
-                            player_marbles[len(player_home)] = player_start
-                            print(f'Player {current_player} marbles tracking: {player_marbles}')
-                            set_player_start_occupied(game, current_player, True)
-                            waitingForInput = False
-                            # Switch to next player after moving out of home
-                            current_player = next_player(current_player)
-                            drawCurrentPlayerIndicator()
+                            # Only allow moving out of home on a 1 or 6
+                            if moves in (1, 6):
+                                new_home = removeFromHome(player_home)
+                                set_player_home(game, current_player, new_home)
+                                drawPlayerBox(player_color, player_start)
+                                set_player_end(game, current_player, player_start)
+                                player_marbles = get_player_marbles(game, current_player)
+                                player_home = get_player_home(game, current_player)
+                                player_marbles[len(player_home)] = player_start
+                                print(f'Player {current_player} marbles tracking: {player_marbles}')
+                                set_player_start_occupied(game, current_player, True)
+                                waitingForInput = False
+                                # Switch to next player after moving out of home
+                                current_player = next_player(current_player)
+                                drawCurrentPlayerIndicator()
+                            else:
+                                print(f"Cannot move out of home with a {moves} - need 1 or 6")
+                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
 
                         elif (BOARD_TEMPLATE[ clickedPos[1] ][ clickedPos[0] ] == SPOT): # clicked on a marble on the board track
                             print(f"DEBUG: Clicked on board spot {clickedPos}, checking if valid move...")
