@@ -1,0 +1,81 @@
+name: Deploy Web Version to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-pr:
+    name: Build Web Version (PR)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install Pygbag
+        run: pip install pygbag
+      
+      - name: Build Web Version
+        run: |
+          cd web
+          chmod +x build.sh
+          ./build.sh --build
+      
+      - name: Add .nojekyll file
+        run: |
+          # Add .nojekyll to prevent Jekyll processing on GitHub Pages
+          touch web/build/web/.nojekyll
+
+  build-and-deploy:
+    name: Build and Deploy Web Version
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install Pygbag
+        run: pip install pygbag
+      
+      - name: Build Web Version
+        run: |
+          cd web
+          chmod +x build.sh
+          ./build.sh --build
+      
+      - name: Add .nojekyll file
+        run: |
+          # Add .nojekyll to prevent Jekyll processing on GitHub Pages
+          touch web/build/web/.nojekyll
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web/build/web
+          publish_branch: gh-pages
+      
+      - name: Add deployment summary
+        run: |
+          echo "### Deployment Complete! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Production URL:** https://durangogt.github.io/aggravation/" >> $GITHUB_STEP_SUMMARY
