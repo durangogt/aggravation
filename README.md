@@ -1,6 +1,6 @@
 # Aggravation Board Game
 
-A Python implementation of the classic Aggravation board game built with Pygame. This educational project demonstrates game development principles, GUI programming, and Python best practices.
+A Python implementation of the classic Aggravation board game with **two versions**: a graphical GUI (Pygame) and a beautiful terminal CLI with rich animations.
 
 ![Python Version](https://img.shields.io/badge/python-3.12.3-blue.svg)
 ![Pygame Version](https://img.shields.io/badge/pygame-2.6.1-green.svg)
@@ -31,7 +31,7 @@ Aggravation is a classic marble race board game where players compete to move al
 
 ## ✨ Features
 
-### Main Aggravation Game (`aggravation.py`)
+### 🖥️ GUI Version (`aggravation.py`)
 - ✅ Complete 4-player board game implementation
 - ✅ Graphical dice rolling with pygame
 - ✅ Marble movement animation
@@ -40,6 +40,17 @@ Aggravation is a classic marble race board game where players compete to move al
 - ✅ Home stretch logic working with win detection for Player 1
 - ✅ Interactive GUI built with pygame
 - ✅ All game assets included
+
+### 🎲 Terminal CLI Version (`terminal_game.py`) **NEW!**
+- ✅ Beautiful terminal UI with Unicode art and colored marbles (🔴 ⚫ 🟢 🔵)
+- ✅ GitHub CLI-style animations (spinning dice, marble movement, victory)
+- ✅ Works over SSH - play from iPhone/iPad using terminal apps!
+- ✅ `--no-animation` mode for slow connections
+- ✅ Pure Python - no pygame required
+- ✅ Full gameplay with all core mechanics
+- 📱 Perfect for mobile play via Termius, Blink Shell, or a-Shell
+
+👉 **[See Terminal Version README](TERMINAL_README.md)** for detailed instructions and screenshots
 
 ### Four-in-a-Row Game (`fourinarow.py`)
 - 🎯 Connect Four clone implementation
@@ -80,13 +91,29 @@ Expected output: `pygame version: 2.6.1`
 
 ## 🚀 Quick Start
 
-### Running the Aggravation Game
+### Running the GUI Version
 
 ```bash
 python aggravation.py
 ```
 
 The game window will open immediately. Startup time is ~0.6 seconds.
+
+### Running the Terminal CLI Version
+
+```bash
+# Install terminal dependencies
+pip install -r requirements-terminal.txt
+
+# Play the terminal version
+python terminal_game.py
+
+# Or with options
+python terminal_game.py --players 2           # 2-player game
+python terminal_game.py --no-animation        # Disable animations for SSH
+```
+
+👉 **Play from iPhone/iPad via SSH!** See [TERMINAL_README.md](TERMINAL_README.md) for instructions.
 
 ### Running in Headless Environments
 
