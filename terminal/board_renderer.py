@@ -56,10 +56,17 @@ class BoardRenderer:
         Returns:
             Formatted board string
         """
-        # Create a copy of the board template for rendering
-        board_lines = [list(line) for line in BOARD_TEMPLATE]
+        # Create a clean copy of the board template for rendering
+        # Replace template player numbers with blanks - they're just position markers
+        board_lines = []
+        for line in BOARD_TEMPLATE:
+            # Replace player number markers (1,2,3,4) with dots
+            clean_line = line
+            for num in '1234':
+                clean_line = clean_line.replace(num, '.')
+            board_lines.append(list(clean_line))
         
-        # Place marbles on the board
+        # Now place actual marbles from game state
         for player_num in range(1, 5):
             player_key = f'player{player_num}'
             player_data = game_state[player_key]

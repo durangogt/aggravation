@@ -58,6 +58,19 @@ Play from iPhone via SSH:
         help='Number of players (default: 4)'
     )
     
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable debug mode with verbose output'
+    )
+    
+    parser.add_argument(
+        '--force-roll',
+        type=int,
+        choices=[1, 2, 3, 4, 5, 6],
+        help='Force all dice rolls to this value (debug mode)'
+    )
+    
     return parser.parse_args()
 
 
@@ -135,7 +148,9 @@ def play_turn(
     console: Console,
     renderer: BoardRenderer,
     animator: Animator,
-    input_handler: InputHandler
+    input_handler: InputHandler,
+    debug: bool = False,
+    force_roll: int = None
 ) -> bool:
     """
     Execute one player's turn.
@@ -146,6 +161,8 @@ def play_turn(
         renderer: Board renderer
         animator: Animator instance
         input_handler: Input handler
+        debug: Enable debug mode with verbose output
+        force_roll: Force dice to this value (None for random)
         
     Returns:
         False if game should exit, True to continue
@@ -157,18 +174,40 @@ def play_turn(
     # Show whose turn it is
     animator.turn_indicator(current_player, player_name, player_symbol)
     
-    # Roll dice
-    console.print("[dim]Press Enter to roll dice...[/]")
-    try:
-        input()
-    except (EOFError, KeyboardInterrupt):
-        return False
+    # Debug info
+    if debug:
+        game_state = game.get_game_state()
+        player_data = game_state[f'player{current_player}']
+        console.print(f"[dim]DEBUG: Player {current_player} state:[/]")
+        console.print(f"[dim]  Home marbles: {len(player_data['home'])}[/]")
+        console.print(f"[dim]  Marbles on board: {[m for m in player_data['marbles'] if m != (None, None)]}[/]")
+        console.print(f"[dim]  Final home: {[m for m in player_data['end_home'] if m != (None, None)]}[/]")
     
-    dice_roll = game.roll_dice()
-    animator.dice_roll_animation(dice_roll)
+    # Roll dice
+    if force_roll:
+        console.print(f"[yellow]DEBUG: Forcing dice roll to {force_roll}[/]")
+        dice_roll = force_roll
+        animator.dice_roll_animation(dice_roll)
+    else:
+        console.print("[dim]Press Enter to roll dice...[/]")
+        try:
+            input()
+        except (EOFError, KeyboardInterrupt):
+            return False
+        
+        dice_roll = game.roll_dice()
+        animator.dice_roll_animation(dice_roll)
+    
+    # Debug output
+    if debug:
+        console.print(f"[dim]DEBUG: Rolled {dice_roll}[/]")
     
     # Get valid moves for this roll
     valid_moves = game.get_valid_moves(current_player, dice_roll)
+    
+    # Debug output
+    if debug:
+        console.print(f"[dim]DEBUG: Valid moves: {valid_moves}[/]")
     
     # Display marble selection
     game_state = game.get_game_state()
@@ -192,22 +231,36 @@ def play_turn(
         else:
             return True
     
-    # Execute the move
-    result = game.execute_move(current_player, marble_idx, dice_roll)
-    
-    # Show move animation
+    # Player color for animations
     player_color = ["", "red", "black", "green", "blue"][current_player]
-    from_pos = result.get('from_position')
-    to_pos = result.get('to_position')
     
-    if to_pos:
-        animator.marble_movement_animation(player_symbol, from_pos, to_pos, player_color)
-    
-    # Check for aggravation
-    if result.get('aggravated_player'):
-        victim_player = result['aggravated_player']
-        victim_symbol = MARBLE_SYMBOLS[victim_player]
-        animator.aggravation_animation(player_symbol, victim_symbol)
+    # Execute the move
+    # Special case: -1 means move marble from home to start
+    if marble_idx == -1:
+        success = game.remove_from_home(current_player)
+        if success:
+            start_pos = game._get_player_data(current_player)['start_pos']
+            console.print(f"[green]Moved marble from home to start position {start_pos}[/]")
+            # Show animation
+            animator.marble_movement_animation(player_symbol, None, start_pos, player_color)
+        else:
+            console.print("[red]Failed to move marble from home[/]")
+    else:
+        # Regular move on the board
+        result = game.execute_move(current_player, marble_idx, dice_roll)
+        
+        # Show move animation
+        from_pos = result.get('from_position')
+        to_pos = result.get('to_position')
+        
+        if to_pos:
+            animator.marble_movement_animation(player_symbol, from_pos, to_pos, player_color)
+        
+        # Check for aggravation
+        if result.get('aggravated_player'):
+            victim_player = result['aggravated_player']
+            victim_symbol = MARBLE_SYMBOLS[victim_player]
+            animator.aggravation_animation(player_symbol, victim_symbol)
     
     # Check for win
     if game.check_win_condition(current_player):
@@ -245,8 +298,15 @@ def main():
         # Show welcome screen
         show_welcome(console, animator)
         
+        # Show debug mode if enabled
+        if args.debug:
+            console.print("\n[yellow]⚠️  DEBUG MODE ENABLED[/]")
+            console.print("[dim]Verbose output will be shown during gameplay[/]")
+        if args.force_roll:
+            console.print(f"\n[yellow]⚠️  FORCE ROLL MODE: All dice rolls = {args.force_roll}[/]")
+        
         # Show help option
-        console.print("[dim]Type 'h' for help or press Enter to start: [/]", end='')
+        console.print("\n[dim]Type 'h' for help or press Enter to start: [/]", end='')
         try:
             response = input().strip().lower()
             if response == 'h':
@@ -262,7 +322,11 @@ def main():
             display_game_state(console, renderer, game)
             
             # Play one turn
-            should_continue = play_turn(game, console, renderer, animator, input_handler)
+            should_continue = play_turn(
+                game, console, renderer, animator, input_handler,
+                debug=args.debug,
+                force_roll=args.force_roll
+            )
             
             if not should_continue:
                 console.print("\n[yellow]Game ended by user.[/]")
