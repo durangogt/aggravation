@@ -211,7 +211,7 @@ def main():
     
     global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT, CLEAR_SURF, CLEAR_RECT, ROLL6_SURF, ROLL6_RECT
     global PLAYERROR_SURF, PLAYERROR_RECT, CLEARERROR_SURF, CLEARERROR_RECT
-    global TEST_SURF, TEST_RECT
+    global TEST_SURF, TEST_RECT, TEST_AGGRO_SURF, TEST_AGGRO_RECT
     
     # Initialize game engine
     game = AggravationGame()
@@ -240,7 +240,8 @@ def main():
     TURNOVER_SURF, TURNOVER_RECT = makeText('TURN OVER',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEARTURNOVER_SURF, CLEARTURNOVER_RECT = makeText('TURN OVER',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
-    TEST_SURF, TEST_RECT = makeText('DEBUG', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 30)
+    TEST_SURF, TEST_RECT = makeText('Debug Home Stretch', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 350, WINDOWHEIGHT - 30)
+    TEST_AGGRO_SURF, TEST_AGGRO_RECT = makeText('Debug Aggravated', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 30)
 
     # Winner messages for each player
     WINNER_SURFS = {
@@ -335,6 +336,29 @@ def main():
                         for marble in player_marbles:
                             if marble and marble != (None, None):
                                 drawPlayerBox(player_color, marble)
+
+                    if ( TEST_AGGRO_RECT.collidepoint(event.pos) ): # if clicked the debug aggravated button
+                        # Debug: Set up each player with one marble positioned right behind an opponent
+                        # P1 at (29,9) - one space before P2's start at (29,10)
+                        # P2 at (13,15) - one space before P3's start at (11,15)
+                        # P3 at (1,7) - one space before P4's start at (1,6)
+                        # P4 at (17,1) - one space before P1's start at (19,1)
+                        game.p1_marbles = [(29,9), (None,None), (None,None), (None,None)]
+                        game.p1_home = []
+                        game.p2_marbles = [(13,15), (None,None), (None,None), (None,None)]
+                        game.p2_home = []
+                        game.p3_marbles = [(1,7), (None,None), (None,None), (None,None)]
+                        game.p3_home = []
+                        game.p4_marbles = [(17,1), (None,None), (None,None), (None,None)]
+                        game.p4_home = []
+                        waitingForInput = True
+                        # Draw all marbles
+                        for player_num in range(1, 5):
+                            player_marbles = get_player_marbles(game, player_num)
+                            player_color = PLAYER_COLORS[player_num]
+                            for marble in player_marbles:
+                                if marble and marble != (None, None):
+                                    drawPlayerBox(player_color, marble)
 
                     if (ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos) or ROLL6_RECT.collidepoint(event.pos)):
                         print(f"Player {current_player} clicked on the ROLL Button")
@@ -714,6 +738,7 @@ def drawBoard():
     DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)
     DISPLAYSURF.blit(ROLL6_SURF, ROLL6_RECT)
     DISPLAYSURF.blit(TEST_SURF, TEST_RECT)
+    DISPLAYSURF.blit(TEST_AGGRO_SURF, TEST_AGGRO_RECT)
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates
