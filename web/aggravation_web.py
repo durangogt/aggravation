@@ -341,7 +341,7 @@ async def run():
                             moves = 6
                             print("A roll of 6 has been rolled....manually")
                         else:
-                            moves = displayDice(game)
+                            moves = await displayDice(game)
                             print("A roll of %i has been rolled...." % moves)
 
                         # Refresh player data after roll
@@ -386,7 +386,7 @@ async def run():
 
                         elif ((player_start_occupied == False) and (moves not in (1, 6)) and (len(player_home) == 3)):
                             if (isValidMoveForPlayer(moves, player_marbles, player_end, game, current_player) == True):
-                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, player_end, game, current_player)
+                                player_marbles, new_end, gameWon, winner = await animatePlayerMoveGeneric(moves, player_marbles, player_end, game, current_player)
                                 set_player_end(game, current_player, new_end)
                                 # Switch to next player after move
                                 current_player = next_player(current_player)
@@ -404,7 +404,7 @@ async def run():
 
                         elif ((player_start_occupied == True) and (len(player_home) == 3)):
                             if (isValidMoveForPlayer(moves, player_marbles, player_end, game, current_player) == True):
-                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, player_end, game, current_player)
+                                player_marbles, new_end, gameWon, winner = await animatePlayerMoveGeneric(moves, player_marbles, player_end, game, current_player)
                                 set_player_end(game, current_player, new_end)
                                 set_player_start_occupied(game, current_player, False)
                                 # Switch to next player after move
@@ -448,7 +448,7 @@ async def run():
                             if (isValidMoveForPlayer(moves, player_marbles, clickedPos, game, current_player) == True):
                                 set_player_end(game, current_player, clickedPos)
                                 print(f'Player {current_player} END is now: {clickedPos}')
-                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
+                                player_marbles, new_end, gameWon, winner = await animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
                                 set_player_end(game, current_player, new_end)
                                 set_player_start_occupied(game, current_player, False)
                                 waitingForInput = False
@@ -464,7 +464,7 @@ async def run():
                             if (isValidMoveForPlayer(moves, player_marbles, clickedPos, game, current_player) == True):
                                 set_player_end(game, current_player, clickedPos)
                                 print(f'Player {current_player} END is now: {clickedPos}')
-                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
+                                player_marbles, new_end, gameWon, winner = await animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
                                 set_player_end(game, current_player, new_end)
                                 set_player_start_occupied(game, current_player, True)  # don't reset, we didn't move start marble
                                 waitingForInput = False
@@ -485,7 +485,7 @@ async def run():
                         if clickedPos in playerFinalHome and clickedPos in player_marbles:
                             if (isValidMoveForPlayer(moves, player_marbles, clickedPos, game, current_player) == True):
                                 set_player_end(game, current_player, clickedPos)
-                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
+                                player_marbles, new_end, gameWon, winner = await animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
                                 set_player_end(game, current_player, new_end)
                                 waitingForInput = False
                                 # Switch to next player
@@ -518,7 +518,7 @@ async def run():
                                 print(f"DEBUG: {clickedPos} is not in player {current_player}'s marbles, ignoring click")
                             elif (isValidMoveForPlayer(moves, player_marbles, clickedPos, game, current_player) == True):
                                 set_player_end(game, current_player, clickedPos)
-                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
+                                player_marbles, new_end, gameWon, winner = await animatePlayerMoveGeneric(moves, player_marbles, clickedPos, game, current_player)
                                 set_player_end(game, current_player, new_end)
                                 waitingForInput = False
                                 # Switch to next player
@@ -567,7 +567,7 @@ async def displayStatus(passed_SURF, passed_RECT):
     # Use async sleep instead of pygame.time.wait to avoid blocking
     await asyncio.sleep(2.0)
 
-def animatePlayerMove(moves, P1marbles, P1END, game):
+async def animatePlayerMove(moves, P1marbles, P1END, game):
     """
     Animate player marble movement using game engine for position calculations.
     Returns (P1marbles, P1END, won) where won is True if player won the game.
@@ -589,7 +589,7 @@ def animatePlayerMove(moves, P1marbles, P1END, game):
         
         print('Roll of %i to %s' % (move, coords))
         drawPlayerBox(P1COLOR, coords)
-        pygame.time.wait(SIMSPEED)
+        await asyncio.sleep(SIMSPEED / 1000.0)  # Convert ms to seconds for async sleep
         drawBoardBox(P1END)
         oldLocation = P1END
         P1END = coords
@@ -604,7 +604,7 @@ def animatePlayerMove(moves, P1marbles, P1END, game):
     return P1marbles, P1END, won
 
 
-def animatePlayerHomeMove(moves, P1marbles, P1END, game):
+async def animatePlayerHomeMove(moves, P1marbles, P1END, game):
     """
     Animate player marble movement within home stretch.
     Returns (P1marbles, P1END, won) where won is True if player won the game.
@@ -613,7 +613,7 @@ def animatePlayerHomeMove(moves, P1marbles, P1END, game):
         coords = game.get_next_home_position(1, P1END[0], P1END[1])
         print('Roll of %i to %s' % (move, coords))
         drawPlayerBox(P1COLOR, coords)
-        pygame.time.wait(SIMSPEED)
+        await asyncio.sleep(SIMSPEED / 1000.0)  # Convert ms to seconds for async sleep
         drawBoardBox(P1END)
         oldLocation = P1END
         P1END = coords
@@ -628,7 +628,7 @@ def animatePlayerHomeMove(moves, P1marbles, P1END, game):
     return P1marbles, P1END, won
 
 
-def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
+async def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
     """
     Animate any player's marble movement using game engine for position calculations.
     Returns (player_marbles, new_pos, won, winner) where won is True if any player won.
@@ -652,7 +652,7 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
         
         print(f'Player {player} move {move} to {coords}')
         drawPlayerBox(player_color, coords)
-        pygame.time.wait(SIMSPEED)
+        await asyncio.sleep(SIMSPEED / 1000.0)  # Convert ms to seconds for async sleep
         drawBoardBox(current_pos)
         oldLocation = current_pos
         current_pos = coords
@@ -739,7 +739,7 @@ def checkForQuit():
             terminate() # terminate if the KEYUP event was for the Esc key
         pygame.event.post(event) # put the other KEYUP event objects back
 
-def displayDice(game):
+async def displayDice(game):
     """
     Display a number representing 1 die roll & return the integer.
     Uses game engine for dice roll.
@@ -753,7 +753,7 @@ def displayDice(game):
     textRectObj.center = (175, 50) # top left corner
     DISPLAYSURF.blit(textSurfaceObj, textRectObj)
     pygame.display.update()
-    pygame.time.wait(500) # 1000 milliseconds = 1 sec
+    await asyncio.sleep(0.5)  # Convert 500ms to 0.5 seconds for async sleep
     return die1
 
 def makeText(text, color, bgcolor, top, left):
