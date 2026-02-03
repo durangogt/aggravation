@@ -4,11 +4,10 @@
 # Released under a "Simplified BSD" license
 
 import asyncio
-import random, pygame, sys, os
+import pygame, sys
 from pygame.locals import *
 from game_engine import (
-    AggravationGame, 
-    P1START, P2START, P3START, P4START,
+    AggravationGame,
     PLAYER_STARTS, PLAYER_STARTING_HOMES, PLAYER_FINAL_HOMES, PLAYER_HOME_STRETCHES
 )
 
@@ -36,14 +35,14 @@ from game_engine import (
 5[           # # # # #           ]
 6[                               ]
 
-PLAYER 1 STARTING POSITION IS BOARD_TEMPLATE[1][15]
-1st safe spot entry point 11, 3 (then 11,2 , 11, 1 , 13,1 , 15,1 )
-PLAYER 2 STARTING POSITION IS BOARD_TEMPLATE[8][29]
-1st safe spot entry point 25, 6
-PLAYER 3 STARTING POSITION IS BOARD_TEMPLATE[15][15]
-1st safe spot entry point 29, 3
-PLAYER 4 STARTING POSITION IS BOARD_TEMPLATE[8][1]
-1st safe spot entry point 5, 10
+PLAYER 1 STARTING POSITION IS (19, 1)  # per P1START
+1st safe spot (home stretch) entry point is (11, 3) (then (11, 2), (11, 1), (13, 1), (15, 1))
+PLAYER 2 STARTING POSITION IS (29, 10)  # per P2START
+1st safe spot (home stretch) entry point is (25, 6)
+PLAYER 3 STARTING POSITION IS (11, 15)  # per P3START
+1st safe spot (home stretch) entry point is (19, 13)
+PLAYER 4 STARTING POSITION IS (1, 6)    # per P4START
+1st safe spot (home stretch) entry point is (5, 10)
 
 '''
 
@@ -309,11 +308,10 @@ async def run():
                 mousex, mousey = event.pos
                 mouseClicked = True
                 boxx, boxy = getBoxAtPixel(mousex, mousey)
-                if boxx == None and boxy == None:
+                if boxx is None and boxy is None:
                     # check if the user clicked on an option button
                     if ( TEST_RECT.collidepoint(event.pos) ): # if clicked the debug button setup marbles going home
                         # Debug: set up current player's marbles near home
-                        home_stretch = PLAYER_HOME_STRETCHES[current_player]
                         if current_player == 1:
                             game.p1_marbles = [(11,2), (11,3), (11,4), (11,5)]
                             game.p1_home = []
@@ -354,7 +352,7 @@ async def run():
 
                         if ((player_start_occupied == True) and ((len(player_home) >= 0) and (len(player_home) < 3))): # if marble on start & 1 or more marbles in home
                             # display option to choose marble to move....
-                            displayStatus(OPTION_SURF, OPTION_RECT)
+                            await displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
                             break
 
@@ -374,19 +372,19 @@ async def run():
 
                         elif ((player_start_occupied == False) and (moves == 1 or moves == 6) and ((len(player_home) >= 1) and (len(player_home) < 4))):
                             # choose to move out of home or move a marble on the table...
-                            displayStatus(OPTION_SURF, OPTION_RECT)
+                            await displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
                             break
 
-                        elif ((player_start_occupied == False) and (moves != 1 or moves != 6) and (len(player_home) == 4)):
-                            displayStatus(TURNOVER_SURF, TURNOVER_RECT)
+                        elif ((player_start_occupied == False) and (moves not in (1, 6)) and (len(player_home) == 4)):
+                            await displayStatus(TURNOVER_SURF, TURNOVER_RECT)
                             # No valid moves - switch to next player
                             current_player = next_player(current_player)
                             drawCurrentPlayerIndicator()
                             waitingForInput = False
                             break
 
-                        elif ((player_start_occupied == False) and (moves != 1 or moves != 6) and (len(player_home) == 3)):
+                        elif ((player_start_occupied == False) and (moves not in (1, 6)) and (len(player_home) == 3)):
                             if (isValidMoveForPlayer(moves, player_marbles, player_end, game, current_player) == True):
                                 player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, player_end, game, current_player)
                                 set_player_end(game, current_player, new_end)
@@ -395,12 +393,12 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
-                        elif ((player_start_occupied == False) and (moves != 1 or moves != 6) and ((len(player_home) == 2) or (len(player_home) == 1) or (len(player_home) == 0))):
+                        elif ((player_start_occupied == False) and (moves not in (1, 6)) and ((len(player_home) == 2) or (len(player_home) == 1) or (len(player_home) == 0))):
                             # display option to choose marble to move....
-                            displayStatus(OPTION_SURF, OPTION_RECT)
+                            await displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
                             break
 
@@ -459,7 +457,7 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                         elif (clickedPos != player_start and clickedPos in player_marbles):  # clicked on a marble NOT on start
@@ -495,7 +493,7 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
                         
                         # Check if clicked on STARTING home (remove marble and place on start)
@@ -528,12 +526,12 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                         elif clickedPos in playerStartingHome and len(player_home) == 0:
                             # clicked on starting home but no marbles there
-                            displayStatus(PLAYERROR2_SURF, PLAYERROR2_RECT)
+                            await displayStatus(PLAYERROR2_SURF, PLAYERROR2_RECT)
                             print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
         # Redraw the screen and wait a clock tick.
@@ -562,10 +560,12 @@ def isValidMoveForPlayer(moves, player_marbles, marble_pos, game, player):
         return game.is_valid_move(player, marble_idx, moves)
     return False
 
-def displayStatus(passed_SURF, passed_RECT):
-    DISPLAYSURF.blit(passed_SURF, passed_RECT)  # let user know they can't choose that marble
+async def displayStatus(passed_SURF, passed_RECT):
+    """Display a status message for 2 seconds without blocking the async runtime."""
+    DISPLAYSURF.blit(passed_SURF, passed_RECT)
     pygame.display.update()
-    pygame.time.wait(2000) # WAIT for player to see status message - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
+    # Use async sleep instead of pygame.time.wait to avoid blocking
+    await asyncio.sleep(2.0)
 
 def animatePlayerMove(moves, P1marbles, P1END, game):
     """
@@ -732,7 +732,7 @@ def terminate():
     sys.exit()
 
 def checkForQuit():
-    for event in pygame.event.get(QUIT): # get all the QUIT events
+    for _ in pygame.event.get(QUIT): # get all the QUIT events
         terminate() # terminate if any QUIT events are present
     for event in pygame.event.get(KEYUP): # get all the KEYUP events
         if event.key == K_ESCAPE:

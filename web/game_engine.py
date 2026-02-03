@@ -5,7 +5,7 @@ with NO pygame dependencies to enable headless testing.
 """
 
 import random
-from typing import Tuple, List, Dict, Optional
+from typing import Tuple, List, Dict
 
 # Board Constants
 BOARD_TEMPLATE = [
