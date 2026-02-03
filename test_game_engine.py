@@ -888,7 +888,7 @@ class TestSaveLoad:
     
     def test_round_trip_save_load(self):
         """Test that save → load → state matches."""
-        import tempfile
+        from game_engine import get_save_directory
         import os
         
         # Create game with specific state
@@ -897,15 +897,15 @@ class TestSaveLoad:
         game1.p1_marbles = [(19, 2), (None, None), (None, None), (None, None)]
         game1.p2_marbles = [(27, 10), (25, 10), (None, None), (None, None)]
         
-        # Save to temporary file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            temp_path = f.name
+        # Save to file in save directory
+        save_dir = get_save_directory()
+        temp_path = save_dir / 'test_round_trip.json'
         
         try:
-            game1.save_to_file(temp_path, name="Round Trip Test")
+            game1.save_to_file(str(temp_path), name="Round Trip Test")
             
             # Load from file
-            game2 = AggravationGame.load_from_file(temp_path)
+            game2 = AggravationGame.load_from_file(str(temp_path))
             
             # Verify complete state matches
             assert game2.num_players == 2
@@ -914,23 +914,23 @@ class TestSaveLoad:
             assert game2.p2_marbles == [(27, 10), (25, 10), (None, None), (None, None)]
         finally:
             # Clean up
-            if os.path.exists(temp_path):
-                os.unlink(temp_path)
+            if temp_path.exists():
+                temp_path.unlink()
     
     def test_save_file_io(self):
         """Test file I/O with actual files."""
-        import tempfile
+        from game_engine import get_save_directory
         import os
         
         game = AggravationGame(num_players=4)
         
-        # Test saving to file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            temp_path = f.name
+        # Test saving to file in save directory
+        save_dir = get_save_directory()
+        temp_path = save_dir / 'test_io.json'
         
         try:
-            game.save_to_file(temp_path, name="I/O Test")
-            assert os.path.exists(temp_path)
+            game.save_to_file(str(temp_path), name="I/O Test")
+            assert temp_path.exists()
             
             # Verify file contains valid JSON
             import json
@@ -940,13 +940,19 @@ class TestSaveLoad:
             assert data['name'] == "I/O Test"
             assert 'game_state' in data
         finally:
-            if os.path.exists(temp_path):
-                os.unlink(temp_path)
+            if temp_path.exists():
+                temp_path.unlink()
     
     def test_error_handling_missing_file(self):
         """Test error handling for missing file."""
+        from game_engine import get_save_directory
+        
+        # Use a path within the save directory that doesn't exist
+        save_dir = get_save_directory()
+        nonexistent_path = save_dir / "nonexistent_save.json"
+        
         with pytest.raises(FileNotFoundError):
-            AggravationGame.load_from_file("/nonexistent/path/to/save.json")
+            AggravationGame.load_from_file(str(nonexistent_path))
     
     def test_error_handling_wrong_version(self):
         """Test error handling for wrong version."""
@@ -1045,6 +1051,49 @@ class TestSaveLoad:
             assert os.path.dirname(filepath) == save_dir, f"Path traversal detected for: {name} -> {filepath}"
             # Verify the filepath starts with save_dir
             assert filepath.startswith(save_dir), f"Path not in save directory for: {name}"
+    
+    def test_load_from_file_path_validation(self):
+        """Test that load_from_file rejects paths outside save directory."""
+        import tempfile
+        
+        # Create a temporary file outside the save directory
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            temp_path = f.name
+            import json
+            game = AggravationGame()
+            json.dump(game.to_dict(), f)
+        
+        try:
+            # Should raise ValueError because path is outside save directory
+            with pytest.raises(ValueError, match="Save file must be within save directory"):
+                AggravationGame.load_from_file(temp_path)
+        finally:
+            import os
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+    
+    def test_delete_save_path_validation(self):
+        """Test that delete_save rejects paths outside save directory."""
+        from game_engine import delete_save
+        import tempfile
+        
+        # Create a temporary file outside the save directory
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            temp_path = f.name
+            f.write("test content")
+        
+        try:
+            # Should return False (not delete) because path is outside save directory
+            result = delete_save(temp_path)
+            assert result is False, "delete_save should reject paths outside save directory"
+            
+            # File should still exist
+            import os
+            assert os.path.exists(temp_path), "File outside save directory should not be deleted"
+        finally:
+            import os
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
 
 
 if __name__ == '__main__':
