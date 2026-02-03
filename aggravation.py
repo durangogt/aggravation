@@ -8,7 +8,8 @@ from pygame.locals import *
 from game_engine import (
     AggravationGame, 
     P1START, P2START, P3START, P4START,
-    PLAYER_STARTS, PLAYER_STARTING_HOMES, PLAYER_FINAL_HOMES, PLAYER_HOME_STRETCHES
+    PLAYER_STARTS, PLAYER_STARTING_HOMES, PLAYER_FINAL_HOMES, PLAYER_HOME_STRETCHES,
+    list_saves, generate_save_filename, get_save_info
 )
 
 # How many spaces/pixels wide & tall is the board?
@@ -202,6 +203,74 @@ def next_player(current_player, num_players=4):
     """Get the next player in turn order."""
     return (current_player % num_players) + 1
 
+def show_message(message, color=None):
+    """Display a message on the screen for a short time."""
+    if color is None:
+        color = TEXTCOLOR
+    
+    # Create message surface
+    msg_surf = BASICFONT.render(message, True, color, BGCOLOR)
+    msg_rect = msg_surf.get_rect()
+    msg_rect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    
+    # Display message
+    DISPLAYSURF.blit(msg_surf, msg_rect)
+    pygame.display.update()
+    pygame.time.wait(2000)  # Show for 2 seconds
+    
+    # Clear message
+    pygame.draw.rect(DISPLAYSURF, BGCOLOR, msg_rect)
+    pygame.display.update()
+
+def save_game_dialog(game, current_player):
+    """
+    Simple save dialog - saves with auto-generated filename.
+    Returns True if saved successfully, False otherwise.
+    """
+    try:
+        # Generate filename with timestamp
+        filename = generate_save_filename()
+        
+        # Save the game
+        game.save_to_file(filename, name=f"Game_{current_player}")
+        
+        # Show success message
+        show_message("Game saved successfully", TEXTCOLOR)
+        return True
+    except Exception as e:
+        # Show error message
+        show_message(f"Save failed: {str(e)}", TEXTCOLOR)
+        return False
+
+def load_game_dialog():
+    """
+    Simple load dialog - loads the most recent save.
+    Returns loaded game and current_player, or (None, None) if failed.
+    """
+    try:
+        # Get list of saves
+        saves = list_saves()
+        
+        if not saves:
+            show_message("No save files found!", TEXTCOLOR)
+            return None, None
+        
+        # Load the most recent save
+        most_recent = saves[0]
+        filepath = most_recent['filepath']
+        
+        # Load the game
+        loaded_game = AggravationGame.load_from_file(filepath)
+        loaded_player = loaded_game.current_player
+        
+        # Show success message
+        show_message(f"Game loaded! Player {loaded_player}'s turn", TEXTCOLOR)
+        return loaded_game, loaded_player
+    except Exception as e:
+        # Show error message
+        show_message(f"Load failed: {str(e)}", TEXTCOLOR)
+        return None, None
+
 def main():
     # Check for headless mode
     headless = '--headless' in sys.argv
@@ -212,6 +281,7 @@ def main():
     global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT, CLEAR_SURF, CLEAR_RECT, ROLL6_SURF, ROLL6_RECT
     global PLAYERROR_SURF, PLAYERROR_RECT, CLEARERROR_SURF, CLEARERROR_RECT
     global TEST_SURF, TEST_RECT
+    global SAVE_SURF, SAVE_RECT, LOAD_SURF, LOAD_RECT
     
     # Initialize game engine
     game = AggravationGame()
@@ -241,6 +311,10 @@ def main():
     CLEARTURNOVER_SURF, CLEARTURNOVER_RECT = makeText('TURN OVER',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
     TEST_SURF, TEST_RECT = makeText('DEBUG', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 30)
+    
+    # Save/Load buttons  
+    SAVE_SURF, SAVE_RECT = makeText('SAVE', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 90)
+    LOAD_SURF, LOAD_RECT = makeText('LOAD', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 460, WINDOWHEIGHT - 90)
 
     # Winner messages for each player
     WINNER_SURFS = {
@@ -429,6 +503,63 @@ def main():
 
                     elif OPTION_RECT.collidepoint(event.pos):
                         print("Clicked on the OPTION Button") # clicked on New Game button
+
+                    elif SAVE_RECT.collidepoint(event.pos):
+                        print("Clicked on the SAVE Button")
+                        save_game_dialog(game, current_player)
+                        # Redraw the board after dialog
+                        DISPLAYSURF.fill(BGCOLOR)
+                        drawBoard()
+                        drawCurrentPlayerIndicator()
+                        pygame.display.update()
+
+                    elif LOAD_RECT.collidepoint(event.pos):
+                        print("Clicked on the LOAD Button")
+                        loaded_game, loaded_player = load_game_dialog()
+                        if loaded_game is not None:
+                            # Replace current game state
+                            game = loaded_game
+                            current_player = loaded_player
+                            gameWon = loaded_game.game_over
+                            winner = loaded_game.winner
+                            waitingForInput = False
+                            moves = 0
+                            # Redraw the entire board with new state
+                            DISPLAYSURF.fill(BGCOLOR)
+                            drawBoard()
+                            drawCurrentPlayerIndicator()
+                            
+                            # Draw all marbles from loaded game state
+                            for player_num in range(1, 5):
+                                player_color = PLAYER_COLORS[player_num]
+                                
+                                # Draw marbles on the board
+                                player_marbles = get_player_marbles(game, player_num)
+                                for marble in player_marbles:
+                                    if marble and marble != (None, None):
+                                        drawPlayerBox(player_color, marble)
+                                
+                                # Draw marbles in home base
+                                player_home = get_player_home(game, player_num)
+                                for home_pos in player_home:
+                                    if home_pos and home_pos != (None, None):
+                                        drawPlayerBox(player_color, home_pos)
+                                
+                                # Draw marbles in final home (end_home)
+                                if player_num == 1:
+                                    end_home = game.p1_end_home
+                                elif player_num == 2:
+                                    end_home = game.p2_end_home
+                                elif player_num == 3:
+                                    end_home = game.p3_end_home
+                                elif player_num == 4:
+                                    end_home = game.p4_end_home
+                                
+                                for end_pos in end_home:
+                                    if end_pos and end_pos != (None, None):
+                                        drawPlayerBox(player_color, end_pos)
+                            
+                            pygame.display.update()
 
                     elif EXIT_RECT.collidepoint(event.pos):
                         print("Clicked on the EXIT Button") # clicked on EXIT button
@@ -714,6 +845,8 @@ def drawBoard():
     DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)
     DISPLAYSURF.blit(ROLL6_SURF, ROLL6_RECT)
     DISPLAYSURF.blit(TEST_SURF, TEST_RECT)
+    DISPLAYSURF.blit(SAVE_SURF, SAVE_RECT)
+    DISPLAYSURF.blit(LOAD_SURF, LOAD_RECT)
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates

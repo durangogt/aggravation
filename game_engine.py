@@ -5,6 +5,9 @@ with NO pygame dependencies to enable headless testing.
 """
 
 import random
+import json
+from datetime import datetime
+from pathlib import Path
 from typing import Tuple, List, Dict, Optional
 
 # Board Constants
@@ -688,3 +691,338 @@ class AggravationGame:
                 return True
         
         return False
+    
+    def to_dict(self, name: str = "Unnamed Save") -> dict:
+        """
+        Serialize game state to dictionary for JSON export.
+        
+        Args:
+            name: Optional save game name
+            
+        Returns:
+            Dictionary containing complete game state
+        """
+        return {
+            'version': '1.0',
+            'timestamp': datetime.now().isoformat(),
+            'name': name,
+            'game_state': {
+                'num_players': self.num_players,
+                'current_player': self.current_player,
+                'game_over': self.game_over,
+                'winner': self.winner,
+                'players': {
+                    '1': {
+                        'home': self.p1_home,
+                        'marbles': self.p1_marbles,
+                        'end': self.p1_end,
+                        'end_home': self.p1_end_home,
+                        'start_occupied': self.p1_start_occupied
+                    },
+                    '2': {
+                        'home': self.p2_home,
+                        'marbles': self.p2_marbles,
+                        'end': self.p2_end,
+                        'end_home': self.p2_end_home,
+                        'start_occupied': self.p2_start_occupied
+                    },
+                    '3': {
+                        'home': self.p3_home,
+                        'marbles': self.p3_marbles,
+                        'end': self.p3_end,
+                        'end_home': self.p3_end_home,
+                        'start_occupied': self.p3_start_occupied
+                    },
+                    '4': {
+                        'home': self.p4_home,
+                        'marbles': self.p4_marbles,
+                        'end': self.p4_end,
+                        'end_home': self.p4_end_home,
+                        'start_occupied': self.p4_start_occupied
+                    }
+                }
+            }
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'AggravationGame':
+        """
+        Create game instance from saved state dictionary.
+        
+        Args:
+            data: Dictionary containing saved game state
+            
+        Returns:
+            New AggravationGame instance with restored state
+            
+        Raises:
+            ValueError: If data format is invalid or version incompatible
+        """
+        # Helper to convert list to tuple (JSON doesn't preserve tuples)
+        def to_tuple(item):
+            if item is None:
+                return None
+            if isinstance(item, tuple):
+                return item
+            if isinstance(item, list):
+                if len(item) == 2:
+                    # Handle [None, None] which represents empty position
+                    if all(x is None for x in item):
+                        return (None, None)
+                    # Convert [x, y] to (x, y)
+                    return tuple(item)
+                else:
+                    # For lists of different lengths, return as-is
+                    return item
+            return item
+        
+        # Version checking
+        version = data.get('version', '1.0')
+        if version != '1.0':
+            raise ValueError(f"Incompatible save file version: {version}")
+        
+        state = data['game_state']
+        game = cls(num_players=state['num_players'])
+        
+        # Restore global game state
+        game.current_player = state['current_player']
+        game.game_over = state['game_over']
+        game.winner = state['winner']
+        
+        # Restore player states
+        for player_num in range(1, 5):
+            pdata = state['players'].get(str(player_num), {})
+            
+            # Convert lists to tuples for positions
+            home = [to_tuple(pos) for pos in pdata.get('home', [])]
+            marbles = [to_tuple(pos) for pos in pdata.get('marbles', [(None, None)] * 4)]
+            end = to_tuple(pdata.get('end', (None, None)))
+            end_home = [to_tuple(pos) for pos in pdata.get('end_home', [(None, None)] * 4)]
+            start_occupied = pdata.get('start_occupied', False)
+            
+            if player_num == 1:
+                game.p1_home = home
+                game.p1_marbles = marbles
+                game.p1_end = end
+                game.p1_end_home = end_home
+                game.p1_start_occupied = start_occupied
+            elif player_num == 2:
+                game.p2_home = home
+                game.p2_marbles = marbles
+                game.p2_end = end
+                game.p2_end_home = end_home
+                game.p2_start_occupied = start_occupied
+            elif player_num == 3:
+                game.p3_home = home
+                game.p3_marbles = marbles
+                game.p3_end = end
+                game.p3_end_home = end_home
+                game.p3_start_occupied = start_occupied
+            elif player_num == 4:
+                game.p4_home = home
+                game.p4_marbles = marbles
+                game.p4_end = end
+                game.p4_end_home = end_home
+                game.p4_start_occupied = start_occupied
+        
+        return game
+    
+    def save_to_file(self, filepath: str, name: str = "Unnamed Save") -> None:
+        """
+        Save game state to JSON file.
+        
+        Args:
+            filepath: Path to save file
+            name: Optional save game name
+            
+        Raises:
+            IOError: If file cannot be written
+        """
+        filepath_obj = Path(filepath)
+        
+        # Ensure parent directory exists
+        filepath_obj.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Serialize and save
+        data = self.to_dict(name=name)
+        with open(filepath_obj, 'w') as f:
+            json.dump(data, f, indent=2)
+    
+    @classmethod
+    def load_from_file(cls, filepath: str) -> 'AggravationGame':
+        """
+        Load game state from JSON file.
+        
+        Args:
+            filepath: Path to save file
+            
+        Returns:
+            New AggravationGame instance with loaded state
+            
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            ValueError: If file is corrupted or incompatible version or if
+                       filepath is outside save directory
+            json.JSONDecodeError: If file contains invalid JSON
+        """
+        filepath_obj = Path(filepath).resolve()
+        save_dir = get_save_directory().resolve()
+        
+        # Ensure the filepath is within the save directory
+        try:
+            # Python 3.9+: use is_relative_to for a clear containment check
+            if not filepath_obj.is_relative_to(save_dir):
+                raise ValueError(f"Save file must be within save directory: {save_dir}")
+        except AttributeError:
+            # Fallback for environments without Path.is_relative_to
+            if save_dir not in filepath_obj.parents and filepath_obj != save_dir:
+                raise ValueError(f"Save file must be within save directory: {save_dir}")
+        
+        if not filepath_obj.exists():
+            raise FileNotFoundError(f"Save file not found: {filepath}")
+        
+        with open(filepath_obj, 'r') as f:
+            data = json.load(f)
+        
+        return cls.from_dict(data)
+
+
+# Save file management functions
+
+def get_save_directory() -> Path:
+    """
+    Get the save directory path, creating it if it doesn't exist.
+    
+    Returns:
+        Path to save directory (~/.aggravation/saves/)
+    """
+    save_dir = Path.home() / '.aggravation' / 'saves'
+    save_dir.mkdir(parents=True, exist_ok=True)
+    return save_dir
+
+
+def list_saves() -> List[Dict]:
+    """
+    Return list of save files with metadata.
+    
+    Returns:
+        List of dictionaries containing save file information:
+        - filepath: Path to save file
+        - name: Save game name
+        - timestamp: ISO timestamp when saved
+        - current_player: Current player number
+        - num_players: Number of players
+    """
+    save_dir = get_save_directory()
+    saves = []
+    
+    for filepath in save_dir.glob('*.json'):
+        try:
+            info = get_save_info(str(filepath))
+            if info:
+                saves.append({
+                    'filepath': str(filepath),
+                    'name': info.get('name', filepath.stem),
+                    'timestamp': info.get('timestamp'),
+                    'current_player': info.get('current_player'),
+                    'num_players': info.get('num_players')
+                })
+        except (json.JSONDecodeError, KeyError, IOError):
+            # Skip corrupted or invalid save files
+            continue
+    
+    # Sort by timestamp, most recent first
+    saves.sort(key=lambda x: x['timestamp'] if x['timestamp'] else '', reverse=True)
+    return saves
+
+
+def get_save_info(filepath: str) -> Optional[Dict]:
+    """
+    Read save file metadata without fully loading the game.
+    
+    Args:
+        filepath: Path to save file
+        
+    Returns:
+        Dictionary with metadata or None if file can't be read
+    """
+    try:
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+        
+        return {
+            'name': data.get('name', 'Unnamed Save'),
+            'timestamp': data.get('timestamp'),
+            'version': data.get('version', '1.0'),
+            'current_player': data.get('game_state', {}).get('current_player'),
+            'num_players': data.get('game_state', {}).get('num_players'),
+            'game_over': data.get('game_state', {}).get('game_over'),
+            'winner': data.get('game_state', {}).get('winner')
+        }
+    except (json.JSONDecodeError, KeyError, IOError):
+        return None
+
+
+def delete_save(filepath: str) -> bool:
+    """
+    Delete a save file.
+    
+    Args:
+        filepath: Path to save file
+        
+    Returns:
+        True if file was deleted, False otherwise. Returns False if the
+        path is outside the save directory or if deletion fails.
+    """
+    try:
+        save_dir = get_save_directory().resolve()
+        target_path = Path(filepath).resolve()
+
+        # Ensure the target path is within the save directory to prevent
+        # accidental or malicious deletion of arbitrary files.
+        try:
+            # Python 3.9+: use is_relative_to for a clear containment check
+            if not target_path.is_relative_to(save_dir):
+                return False
+        except AttributeError:
+            # Fallback for environments without Path.is_relative_to
+            if save_dir not in target_path.parents and target_path != save_dir:
+                return False
+
+        target_path.unlink()
+        return True
+    except (FileNotFoundError, PermissionError, IOError, OSError):
+        return False
+
+
+def generate_save_filename(name: str = None) -> str:
+    """
+    Generate a unique filename for a save file.
+    
+    Args:
+        name: Optional base name for the save file
+        
+    Returns:
+        Full path to save file
+    """
+    save_dir = get_save_directory()
+    
+    if name:
+        # Sanitize the name to be filesystem-safe
+        # Remove path separators and dangerous characters
+        safe_name = "".join(c for c in name if c.isalnum() or c in (' ', '-', '_')).strip()
+        # Replace spaces with underscores
+        safe_name = safe_name.replace(' ', '_')
+        # Prevent path traversal by removing any remaining separators
+        safe_name = safe_name.replace('/', '').replace('\\', '').replace('..', '')
+        # Ensure we have a valid name
+        if not safe_name:
+            safe_name = "unnamed"
+        filename = f"{safe_name}.json"
+    else:
+        # Generate timestamp-based filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"save_{timestamp}.json"
+    
+    return str(save_dir / filename)
+
