@@ -6,7 +6,20 @@ This directory contains the WebAssembly version of Aggravation built with [Pygba
 
 - `main.py` - Entry point for Pygbag (calls the async run function)
 - `aggravation_web.py` - Web-adapted version of the game with async/await support
-- `game_engine.py` - Core game logic (copied from parent directory)
+- `game_engine.py` - Core game logic (automatically copied from parent directory by build script)
+- `build.sh` - Build script that copies game_engine.py and runs Pygbag
+
+## Build Process and Pygbag Limitation
+
+**Important**: Pygbag cannot access files outside its build directory. This means `game_engine.py` must exist in the `web/` directory even though the authoritative version lives in the root directory.
+
+To avoid maintaining duplicate copies, we use a build script (`build.sh`) that:
+1. Copies `../game_engine.py` to `./game_engine.py` 
+2. Runs Pygbag to build the web version
+
+The copied `web/game_engine.py` is excluded from git tracking (via `.gitignore`) and is generated automatically during the build process.
+
+**Future Improvement**: A better long-term solution would be to restructure the project with a shared `src/` package that both the desktop and web versions import from. This would eliminate the need for copying files while maintaining Pygbag compatibility.
 
 ## Local Development
 
@@ -18,18 +31,24 @@ pip install pygbag
 
 ### Run Locally
 
-From the web directory:
+From the web directory, use the build script:
 
 ```bash
-pygbag .
+./build.sh --serve
 ```
 
-Then open http://localhost:8000 in your browser.
+This will copy `game_engine.py` from the root directory and start the development server at http://localhost:8000.
 
 ### Build Only (No Server)
 
 ```bash
-pygbag --build .
+./build.sh --build
+```
+
+Or simply:
+
+```bash
+./build.sh
 ```
 
 The output will be in `build/web/`.
