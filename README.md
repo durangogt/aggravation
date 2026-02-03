@@ -1,6 +1,6 @@
 # Aggravation Board Game
 
-A Python implementation of the classic Aggravation board game with **two versions**: a graphical GUI (Pygame) and a beautiful terminal CLI with rich animations.
+A Python implementation of the classic Aggravation board game with **three ways to play**: Terminal/SSH, Web Browser (coming soon), and Desktop GUI.
 
 ![Python Version](https://img.shields.io/badge/python-3.12.3-blue.svg)
 ![Pygame Version](https://img.shields.io/badge/pygame-2.6.1-green.svg)
@@ -29,30 +29,59 @@ Aggravation is a classic marble race board game where players compete to move al
 - [Resources](#resources)
 - [License](#license)
 
-## ✨ Features
+## ✨ Three Ways to Play
 
-### 🖥️ GUI Version (`aggravation.py`)
-- ✅ Complete 4-player board game implementation
-- ✅ Graphical dice rolling with pygame
-- ✅ Marble movement animation
-- ✅ Star hole and center hole shortcuts
-- ✅ Home zone safe spots
-- ✅ Home stretch logic working with win detection for Player 1
-- ✅ Interactive GUI built with pygame
-- ✅ All game assets included
-
-### 🎲 Terminal CLI Version (`terminal_game.py`) **NEW!**
+### 🖥️ 1. Terminal/SSH Version (`terminal_game.py`) **NEW!**
+**Perfect for remote play and mobile devices**
 - ✅ Beautiful terminal UI with Unicode art and colored marbles (🔴 ⚫ 🟢 🔵)
 - ✅ GitHub CLI-style animations (spinning dice, marble movement, victory)
 - ✅ Works over SSH - play from iPhone/iPad using terminal apps!
 - ✅ `--no-animation` mode for slow connections
 - ✅ Pure Python - no pygame required
 - ✅ Full gameplay with all core mechanics
+- ✅ Debug mode with `--debug` and `--force-roll` flags
 - 📱 Perfect for mobile play via Termius, Blink Shell, or a-Shell
+
+**Quick Start:**
+```bash
+pip install -r requirements-terminal.txt
+python terminal_game.py
+```
 
 👉 **[See Terminal Version README](TERMINAL_README.md)** for detailed instructions and screenshots
 
-### Four-in-a-Row Game (`fourinarow.py`)
+---
+
+### 🌐 2. Web Browser Version (Coming Soon)
+**Play directly in your browser - no installation required**
+- 🚧 Web version using Pygbag (in development)
+- 🌐 Play directly in any modern web browser
+- 📱 Works on mobile devices, tablets, and desktop
+- 🔗 Shareable game link
+- ⚡ No installation or dependencies needed
+
+---
+
+### 🎮 3. Desktop GUI Version (`aggravation.py`)
+**Full-featured desktop application with graphics**
+- ✅ Complete 4-player board game implementation
+- ✅ Graphical dice rolling with pygame
+- ✅ Marble movement animation
+- ✅ Star hole and center hole shortcuts
+- ✅ Home zone safe spots
+- ✅ Home stretch logic working with win detection
+- ✅ Interactive GUI built with pygame
+- ✅ All game assets included
+
+**Quick Start:**
+```bash
+pip install pygame
+python aggravation.py
+```
+
+---
+
+### 🎯 Bonus: Four-in-a-Row Game (`fourinarow.py`)
 - 🎯 Connect Four clone implementation
 - ✅ All image assets now included
 - ⚠️ Game still has some minor bugs
@@ -60,9 +89,19 @@ Aggravation is a classic marble race board game where players compete to move al
 
 ## 🔧 Prerequisites
 
-- **Python 3.12.3** or higher
+### For All Versions
+- **Python 3.8+** (tested with 3.12.3)
+
+### Terminal/SSH Version
+- **rich** 13.7.0+ (for terminal UI)
+- **textual** 0.47.0+ (optional, for future enhancements)
+
+### Desktop GUI Version
 - **Pygame 2.6.1** or higher
 - For headless environments: **Xvfb** (virtual display)
+
+### Web Browser Version
+- **Pygbag** (coming soon - no local installation required for end users)
 
 ## 📥 Installation
 
@@ -73,16 +112,31 @@ git clone https://github.com/durangogt/aggravation.git
 cd aggravation
 ```
 
-### 2. Install Pygame
+### 2. Install Dependencies (Choose Your Version)
 
+#### For Terminal/SSH Version:
+```bash
+pip install -r requirements-terminal.txt
+```
+
+#### For Desktop GUI Version:
 ```bash
 pip install pygame
 ```
 
 Installation typically takes ~10 seconds.
 
+#### For Web Browser Version:
+No installation required! (Coming soon - just visit the game URL)
+
 ### 3. Verify Installation
 
+**Terminal Version:**
+```bash
+python -c "import rich; print('Terminal version ready!')"
+```
+
+**GUI Version:**
 ```bash
 python -c "import pygame; print('pygame version:', pygame.version.ver)"
 ```
@@ -91,33 +145,50 @@ Expected output: `pygame version: 2.6.1`
 
 ## 🚀 Quick Start
 
-### Running the GUI Version
+### 🖥️ Terminal/SSH Version (Recommended for Remote Play)
 
 ```bash
+# Install dependencies
+pip install -r requirements-terminal.txt
+
+# Play the game
+python terminal_game.py
+
+# Play with options
+python terminal_game.py --players 2           # 2-player game
+python terminal_game.py --no-animation        # Disable animations for SSH
+python terminal_game.py --debug               # Enable debug mode
+python terminal_game.py --force-roll 6        # Force all rolls to 6 (testing)
+```
+
+**Play from iPhone/iPad via SSH:**
+1. Install a terminal app (Termius, Blink Shell, or a-Shell)
+2. SSH to your server: `ssh user@yourserver.com`
+3. Run: `python terminal_game.py --no-animation`
+
+👉 **[Full Terminal Instructions](TERMINAL_README.md)**
+
+---
+
+### 🌐 Web Browser Version
+
+Coming soon! Will be accessible via a URL - no installation required.
+
+---
+
+### 🎮 Desktop GUI Version
+
+```bash
+# Install pygame
+pip install pygame
+
+# Run the game
 python aggravation.py
 ```
 
 The game window will open immediately. Startup time is ~0.6 seconds.
 
-### Running the Terminal CLI Version
-
-```bash
-# Install terminal dependencies
-pip install -r requirements-terminal.txt
-
-# Play the terminal version
-python terminal_game.py
-
-# Or with options
-python terminal_game.py --players 2           # 2-player game
-python terminal_game.py --no-animation        # Disable animations for SSH
-```
-
-👉 **Play from iPhone/iPad via SSH!** See [TERMINAL_README.md](TERMINAL_README.md) for instructions.
-
-### Running in Headless Environments
-
-For CI/CD pipelines or remote servers without a display:
+**For Headless Environments** (CI/CD, remote servers):
 
 ```bash
 # Start virtual display
@@ -179,22 +250,37 @@ For complete movement tracking details, see `.github/copilot-instructions.md`.
 
 ```
 aggravation/
-├── aggravation.py          # Main game (717 lines)
-├── fourinarow.py           # Four-in-a-Row game (364 lines)
+├── terminal_game.py        # Terminal/SSH version (CLI with rich animations)
+├── aggravation.py          # Desktop GUI version (Pygame)
+├── game_engine.py          # Core game logic (shared by all versions)
+├── fourinarow.py           # Four-in-a-Row bonus game
+│
+├── terminal/               # Terminal UI components
+│   ├── board_renderer.py   # ASCII board with colored marbles
+│   ├── animations.py       # GitHub CLI-style animations
+│   └── input_handler.py    # Keyboard input handling
+│
+├── requirements-terminal.txt  # Dependencies for terminal version
 ├── README.md               # This file
+├── TERMINAL_README.md      # Detailed terminal version docs
 ├── DebugNotes.txt          # Development debugging notes
 ├── DecisionTables.xlsx     # Game rule decision tables
-├── board_coords.txt        # Board coordinate reference
-├── thorpy/                 # ThorPy GUI library (included but not currently used)
+│
+├── thorpy/                 # ThorPy GUI library (not currently used)
 ├── .github/
 │   └── copilot-instructions.md  # GitHub Copilot agent instructions
 └── .vscode/
     └── launch.json         # VSCode debug configurations
 ```
 
-### Key Functions
+### Key Components by Version
 
-**aggravation.py**:
+**Terminal/SSH Version (`terminal_game.py`)**:
+- `play_turn()` - Turn execution with debug support
+- `display_game_state()` - Render board and status
+- Terminal UI components in `terminal/` directory
+
+**Desktop GUI Version (`aggravation.py`)**:
 - `main()` - Game initialization and main loop
 - `drawBoard()` - Renders the game board
 - `isValidMove()` - Validates player moves
@@ -202,10 +288,30 @@ aggravation/
 - `animatePlayerMove()` - Handles marble animation
 - `getBoxAtPixel()` - Maps screen coordinates to board positions
 
+**Shared Game Logic (`game_engine.py`)**:
+- `AggravationGame` - Core game state and rules
+- `roll_dice()` - Dice rolling
+- `execute_move()` - Move execution and validation
+- `check_win_condition()` - Win detection
+- No pygame dependencies - pure Python logic
+
 ## 💻 Development
 
 ### Testing & Validation
 
+**Terminal Version:**
+```bash
+# Run component tests
+python test_terminal_game.py
+
+# Syntax check
+python -m py_compile terminal_game.py
+
+# Run with debug output
+python terminal_game.py --debug --force-roll 6
+```
+
+**GUI Version:**
 ```bash
 # Syntax check
 python -m py_compile aggravation.py
@@ -215,6 +321,15 @@ python -c "import aggravation; print('Import successful')"
 
 # Quick game startup test
 timeout 5 python aggravation.py
+```
+
+**Shared Game Logic:**
+```bash
+# Run game engine tests
+python test_game_engine.py
+
+# Test imports
+python -c "from game_engine import AggravationGame; print('Game engine ready')"
 ```
 
 ### Development Environment
