@@ -520,12 +520,45 @@ def main():
                             # Replace current game state
                             game = loaded_game
                             current_player = loaded_player
+                            gameWon = loaded_game.game_over
+                            winner = loaded_game.winner
                             waitingForInput = False
                             moves = 0
                             # Redraw the entire board with new state
                             DISPLAYSURF.fill(BGCOLOR)
                             drawBoard()
                             drawCurrentPlayerIndicator()
+                            
+                            # Draw all marbles from loaded game state
+                            for player_num in range(1, 5):
+                                player_color = PLAYER_COLORS[player_num]
+                                
+                                # Draw marbles on the board
+                                player_marbles = get_player_marbles(game, player_num)
+                                for marble in player_marbles:
+                                    if marble and marble != (None, None):
+                                        drawPlayerBox(player_color, marble)
+                                
+                                # Draw marbles in home base
+                                player_home = get_player_home(game, player_num)
+                                for home_pos in player_home:
+                                    if home_pos and home_pos != (None, None):
+                                        drawPlayerBox(player_color, home_pos)
+                                
+                                # Draw marbles in final home (end_home)
+                                if player_num == 1:
+                                    end_home = game.p1_end_home
+                                elif player_num == 2:
+                                    end_home = game.p2_end_home
+                                elif player_num == 3:
+                                    end_home = game.p3_end_home
+                                elif player_num == 4:
+                                    end_home = game.p4_end_home
+                                
+                                for end_pos in end_home:
+                                    if end_pos and end_pos != (None, None):
+                                        drawPlayerBox(player_color, end_pos)
+                            
                             pygame.display.update()
 
                     elif EXIT_RECT.collidepoint(event.pos):

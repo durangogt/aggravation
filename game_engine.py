@@ -861,10 +861,22 @@ class AggravationGame:
             
         Raises:
             FileNotFoundError: If file doesn't exist
-            ValueError: If file is corrupted or incompatible version
+            ValueError: If file is corrupted or incompatible version or if
+                       filepath is outside save directory
             json.JSONDecodeError: If file contains invalid JSON
         """
-        filepath_obj = Path(filepath)
+        filepath_obj = Path(filepath).resolve()
+        save_dir = get_save_directory().resolve()
+        
+        # Ensure the filepath is within the save directory
+        try:
+            # Python 3.9+: use is_relative_to for a clear containment check
+            if not filepath_obj.is_relative_to(save_dir):
+                raise ValueError(f"Save file must be within save directory: {save_dir}")
+        except AttributeError:
+            # Fallback for environments without Path.is_relative_to
+            if save_dir not in filepath_obj.parents and filepath_obj != save_dir:
+                raise ValueError(f"Save file must be within save directory: {save_dir}")
         
         if not filepath_obj.exists():
             raise FileNotFoundError(f"Save file not found: {filepath}")
@@ -959,12 +971,27 @@ def delete_save(filepath: str) -> bool:
         filepath: Path to save file
         
     Returns:
-        True if file was deleted, False otherwise
+        True if file was deleted, False otherwise. Returns False if the
+        path is outside the save directory or if deletion fails.
     """
     try:
-        Path(filepath).unlink()
+        save_dir = get_save_directory().resolve()
+        target_path = Path(filepath).resolve()
+
+        # Ensure the target path is within the save directory to prevent
+        # accidental or malicious deletion of arbitrary files.
+        try:
+            # Python 3.9+: use is_relative_to for a clear containment check
+            if not target_path.is_relative_to(save_dir):
+                return False
+        except AttributeError:
+            # Fallback for environments without Path.is_relative_to
+            if save_dir not in target_path.parents and target_path != save_dir:
+                return False
+
+        target_path.unlink()
         return True
-    except (FileNotFoundError, PermissionError, IOError):
+    except (FileNotFoundError, PermissionError, IOError, OSError):
         return False
 
 
