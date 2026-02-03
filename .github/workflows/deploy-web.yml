@@ -3,6 +3,8 @@ name: Deploy Web Version to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -33,9 +35,40 @@ jobs:
           # Add .nojekyll to prevent Jekyll processing on GitHub Pages
           touch web/build/web/.nojekyll
       
+      - name: Determine target branch
+        id: target-branch
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "branch=gh-pages" >> $GITHUB_OUTPUT
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "branch=gh-pages-preview" >> $GITHUB_OUTPUT
+            echo "environment=preview" >> $GITHUB_OUTPUT
+          fi
+      
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./web/build/web
-          publish_branch: gh-pages
+          publish_branch: ${{ steps.target-branch.outputs.branch }}
+      
+      - name: Add deployment summary
+        run: |
+          echo "### Deployment Complete! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ steps.target-branch.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Branch:** \`${{ steps.target-branch.outputs.branch }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.target-branch.outputs.environment }}" == "production" ]; then
+            echo "✅ **Production URL:** https://durangogt.github.io/aggravation/" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🔍 **Preview Deployment:** Deployed to \`gh-pages-preview\` branch" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "To view the preview:" >> $GITHUB_STEP_SUMMARY
+            echo "1. Go to Settings > Pages in the repository" >> $GITHUB_STEP_SUMMARY
+            echo "2. Change the branch from \`gh-pages\` to \`gh-pages-preview\`" >> $GITHUB_STEP_SUMMARY
+            echo "3. Wait a moment for the pages to rebuild" >> $GITHUB_STEP_SUMMARY
+            echo "4. Visit https://durangogt.github.io/aggravation/" >> $GITHUB_STEP_SUMMARY
+            echo "5. Switch back to \`gh-pages\` when done testing" >> $GITHUB_STEP_SUMMARY
+          fi
