@@ -121,10 +121,17 @@ The game is also available as a **browser-based version** that works on any devi
 - ✅ Powered by WebAssembly (Pygbag)
 
 **How It Works**:
-The web version is automatically built and deployed to GitHub Pages via GitHub Actions. When changes are pushed to the main branch, the workflow:
-1. Builds the web version from the `web/` directory using Pygbag
-2. Deploys the built files to the `gh-pages` branch
-3. GitHub Pages serves the game from the `gh-pages` branch
+The web version is automatically built and deployed via GitHub Actions when changes are merged to the main branch:
+1. The workflow builds the web version from the `web/` directory using Pygbag
+2. A `.nojekyll` file is added to prevent Jekyll processing
+3. The built files (`index.html`, `web.apk`, etc.) are deployed to the `gh-pages` branch
+4. GitHub Pages serves the game from `https://durangogt.github.io/aggravation/`
+
+**GitHub Pages Configuration**:
+In your repository settings under "Pages", set:
+- **Source**: Deploy from a branch
+- **Branch**: `gh-pages`
+- **Folder**: `/ (root)`
 
 **Local Development/Testing**:
 ```bash

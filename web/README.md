@@ -36,14 +36,21 @@ The output will be in `build/web/`.
 
 ## Deployment
 
-The game is automatically deployed to GitHub Pages when changes are pushed to the main branch.
+The game is automatically deployed to GitHub Pages when changes are merged to the main branch.
 
 **Deployment workflow**: `.github/workflows/deploy-web.yml`
 
 **How it works**:
-1. GitHub Actions builds the web version using Pygbag
-2. The build output (`index.html`, `web.apk`, etc.) is deployed to the `gh-pages` branch
-3. GitHub Pages serves the content from the `gh-pages` branch at the root path
+1. GitHub Actions builds the web version using Pygbag from the `web/` directory
+2. A `.nojekyll` file is added to the build output to prevent Jekyll processing
+3. Only the build output (`index.html`, `web.apk`, favicon) from `web/build/web/` is deployed to the `gh-pages` branch
+4. GitHub Pages serves the content from the `gh-pages` branch at the root path
+
+**GitHub Pages Configuration Required**:
+In repository Settings > Pages:
+- **Source**: Deploy from a branch
+- **Branch**: `gh-pages`
+- **Folder**: `/ (root)`
 
 **Live URL**: https://durangogt.github.io/aggravation/
 

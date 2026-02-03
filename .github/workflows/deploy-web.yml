@@ -28,17 +28,14 @@ jobs:
           cd web
           python -m pygbag --build .
       
-      - name: Copy build output to root
+      - name: Add .nojekyll file
         run: |
-          # Copy the built web files to root for GitHub Pages
-          cp -r web/build/web/* .
-          # Clean up build directory to avoid committing it
-          rm -rf web/build
+          # Add .nojekyll to prevent Jekyll processing on GitHub Pages
+          touch web/build/web/.nojekyll
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
+          publish_dir: ./web/build/web
           publish_branch: gh-pages
-          exclude_assets: '.github,web,*.py,*.md,*.txt,*.xlsx,*.png,*.sh,thorpy,graphic_dice_simulator_pygame,issues,__pycache__,.vscode,.gitignore'
