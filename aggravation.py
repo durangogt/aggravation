@@ -733,10 +733,9 @@ def displayAggravationMessage(aggressor_player, victim_player):
     pygame.draw.rect(DISPLAYSURF, BGCOLOR, msg_rect)
     pygame.display.update()
 
-def animateAggravation(victim_player, from_pos):
+def animateAggravation(victim_player, from_pos, game):
     """Animate opponent marble returning to home after aggravation."""
     victim_color = PLAYER_COLORS[victim_player]
-    starting_home = PLAYER_STARTING_HOMES[victim_player]
     
     # Flash the marble at its current position before removing
     for _ in range(3):
@@ -748,9 +747,12 @@ def animateAggravation(victim_player, from_pos):
     # Clear the position where marble was
     drawBoardBox(from_pos)
     
-    # Draw marble appearing back in home (first available home spot)
-    if len(starting_home) > 0:
-        home_pos = starting_home[-1]  # Last home position (most recently vacated)
+    # Get the actual home position where the marble was sent to
+    # (send_marble_home() has already been called, so check the game state)
+    victim_home = get_player_home(game, victim_player)
+    if len(victim_home) > 0:
+        # The marble was just added to home, so it's the last one
+        home_pos = victim_home[-1]
         for _ in range(3):
             pygame.draw.circle(DISPLAYSURF, victim_color, 
                              (leftTopCoordsOfBox(home_pos[0], home_pos[1])[0] + 5,
@@ -763,10 +765,8 @@ def animateAggravation(victim_player, from_pos):
             pygame.display.update()
             pygame.time.wait(100)
         
-        # Final draw of marble in home
-        pygame.draw.circle(DISPLAYSURF, victim_color,
-                         (leftTopCoordsOfBox(home_pos[0], home_pos[1])[0] + 5,
-                          leftTopCoordsOfBox(home_pos[0], home_pos[1])[1] + 5), 5, 0)
+        # Final draw of marble in home - use drawPlayerBox for consistency
+        drawPlayerBox(victim_color, home_pos)
         pygame.display.update()
 
 def animatePlayerMove(moves, P1marbles, P1END, game):
@@ -841,6 +841,7 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
     
     inFinalHome = marble_pos in finalHome
     current_pos = marble_pos
+    old_pos = marble_pos
     
     for move in range(moves):
         # Use game engine methods for position calculation
@@ -856,12 +857,11 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
         drawPlayerBox(player_color, coords)
         pygame.time.wait(SIMSPEED)
         drawBoardBox(current_pos)
-        oldLocation = current_pos
         current_pos = coords
-        player_marbles[player_marbles.index(oldLocation)] = current_pos
-        print(f'Player {player} marbles tracking: {player_marbles}')
+        print(f'Player {player} marbles tracking (moving to): {coords}')
 
-    # Check for aggravation - did we land on an opponent's marble?
+    # Check for aggravation BEFORE updating marble position
+    # This is critical - we need to find opponent marble at destination before we overwrite it
     final_pos = current_pos
     if final_pos not in finalHome:  # Can't aggravate in safe zone
         opponent = game.find_marble_at_position(final_pos)
@@ -874,9 +874,13 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
             displayAggravationMessage(player, opp_player)
             
             # Animate opponent marble returning to home
-            animateAggravation(opp_player, opp_old_pos)
+            animateAggravation(opp_player, opp_old_pos, game)
             
             print(f'AGGRAVATION! Player {player} sent Player {opp_player} marble back to home from {opp_old_pos}')
+    
+    # NOW update the current player's marble position in game state
+    player_marbles[player_marbles.index(old_pos)] = current_pos
+    print(f'Player {player} marbles tracking: {player_marbles}')
 
     # Check for win condition
     won = game.check_win_condition(player)
