@@ -149,10 +149,16 @@
                 const canvas = document.getElementById('pygame-canvas');
                 if (!canvas) return false;
                 
+                // Coordinate scaling constants (must match Python game rendering)
+                // These values need adjustment based on actual BOXSIZE and GAPSIZE in Python
+                const PIXEL_SCALE_X = 20;  // Pixels per board unit in X direction
+                const PIXEL_OFFSET_X = 10;  // X offset from board origin
+                const PIXEL_SCALE_Y = 20;  // Pixels per board unit in Y direction
+                const PIXEL_OFFSET_Y = 10;  // Y offset from board origin
+                
                 // Calculate pixel position from board coordinates
-                // This would need to match the Python coordinate system
-                const pixelX = x * 20 + 10; // Adjust based on actual game rendering
-                const pixelY = y * 20 + 10;
+                const pixelX = x * PIXEL_SCALE_X + PIXEL_OFFSET_X;
+                const pixelY = y * PIXEL_SCALE_Y + PIXEL_OFFSET_Y;
                 
                 // Create and dispatch click event
                 const event = new MouseEvent('click', {

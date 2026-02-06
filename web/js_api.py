@@ -27,7 +27,6 @@ def _inject_js_api():
     """Inject JavaScript API into the browser window object."""
     try:
         # Use platform.window to access JavaScript window object in Pygbag
-        import platform
         if hasattr(platform, "window"):
             # Inject game state API
             platform.window.gameState = {

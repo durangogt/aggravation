@@ -4,6 +4,7 @@ Exports game state to localStorage for browser automation access.
 """
 
 import json
+import platform
 
 
 class GameStateExporter:
@@ -26,7 +27,6 @@ class GameStateExporter:
             
         try:
             # Try to use platform module for browser localStorage access
-            import platform
             if hasattr(platform, "window") and hasattr(platform.window, "localStorage"):
                 state = game_instance.get_game_state()
                 state_json = json.dumps(state, default=str)

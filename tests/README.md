@@ -39,23 +39,30 @@ This starts the Pygbag development server at http://localhost:8000
 ### 3. Run Automation Tests
 
 ```bash
-# Run all tests
+# Run all tests (headless by default)
 pytest tests/test_web_automation.py -v
+
+# Run with browser visible (for debugging)
+HEADLESS=false pytest tests/test_web_automation.py -v
 
 # Run specific test
 pytest tests/test_web_automation.py::test_full_game_simulation -v
 
-# Run with browser visible (for debugging)
+# Run with pytest's headed mode option (alternative)
 pytest tests/test_web_automation.py --headed
 ```
 
 ### 4. Run Direct Automation (Non-Pytest)
 
 ```bash
+# Run with visible browser (default for direct execution)
 python tests/test_web_automation.py
+
+# Run headless
+HEADLESS=true python tests/test_web_automation.py
 ```
 
-This runs the automation script directly and shows the browser window.
+This runs the automation script directly and shows the browser window by default.
 
 ## JavaScript API Reference
 

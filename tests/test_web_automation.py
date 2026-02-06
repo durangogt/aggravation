@@ -5,6 +5,7 @@ Enables AI agent to play the game and detect bugs automatically.
 
 import json
 import time
+import os
 import pytest
 from playwright.sync_api import sync_playwright, Page, expect
 
@@ -211,8 +212,11 @@ class AggravationAutomation:
 @pytest.fixture
 def browser_context():
     """Create a browser context for testing."""
+    # Check for headless mode from environment variable
+    headless = os.environ.get('HEADLESS', 'true').lower() == 'true'
+    
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=headless)
         context = browser.new_context()
         yield context
         context.close()
@@ -275,8 +279,11 @@ def test_full_game_simulation(page):
 
 if __name__ == "__main__":
     """Run automation directly (not via pytest)."""
+    # Check for headless mode from environment variable (default: visible)
+    headless = os.environ.get('HEADLESS', 'false').lower() == 'true'
+    
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=headless)
         page = browser.new_page()
         
         automation = AggravationAutomation(page)
