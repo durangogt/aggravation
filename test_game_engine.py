@@ -974,11 +974,13 @@ class TestAggravation:
         
         # Place P2 marble in P1's final home position (15, 2) - this is unusual but tests the safety check
         # In normal gameplay this shouldn't happen, but we want to ensure safety is enforced
+        assert len(game.p2_home) == 4  # Verify initial state
         game.p2_marbles[0] = (15, 2)  # P1's first final home spot
         game.p2_home = game.p2_home[:-1]
         
         # Place P1 marble at (15, 1) - the last position before entering final home
         # This is the last spot on P1's home stretch
+        assert len(game.p1_home) == 4  # Verify initial state
         game.p1_marbles[0] = (15, 1)
         game.p1_home = game.p1_home[:-1]
         
