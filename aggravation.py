@@ -750,8 +750,23 @@ def animateAggravation(victim_player, from_pos, game):
     # (send_marble_home() has already been called, so check the game state)
     victim_home = get_player_home(game, victim_player)
     if len(victim_home) > 0:
-        # The marble was just added to home, so it's the last one
-        home_pos = victim_home[-1]
+        # Try to infer which home position is newly occupied by inspecting the display.
+        # This avoids assuming any particular ordering of victim_home.
+        home_pos = None
+        for pos in victim_home:
+            # Look at the center pixel of this home position.
+            left, top = leftTopCoordsOfBox(pos[0], pos[1])
+            center_x = left + 5
+            center_y = top + 5
+            # If this position is not currently showing the victim's color, treat it
+            # as the newly returned marble's home position.
+            if DISPLAYSURF.get_at((center_x, center_y)) != victim_color:
+                home_pos = pos
+                break
+        
+        # If we can't determine the new home position reliably, skip the home animation.
+        if home_pos is None:
+            return
         for _ in range(3):
             pygame.draw.circle(DISPLAYSURF, victim_color, 
                              (leftTopCoordsOfBox(home_pos[0], home_pos[1])[0] + 5,
