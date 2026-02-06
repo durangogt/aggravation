@@ -11,6 +11,19 @@ from game_engine import (
     PLAYER_STARTS, PLAYER_STARTING_HOMES, PLAYER_FINAL_HOMES, PLAYER_HOME_STRETCHES
 )
 
+# Import state exporter for browser automation support
+try:
+    from state_exporter import get_exporter
+    _state_exporter = get_exporter()
+except ImportError:
+    # If state_exporter not available, create a no-op version
+    class _NoOpExporter:
+        def update_state(self, game): pass
+        def log_dice_roll(self, player, dice): pass
+        def log_move(self, player, idx, from_pos, to_pos, dice): pass
+        def set_valid_moves(self, moves): pass
+    _state_exporter = _NoOpExporter()
+
 # How many spaces/pixels wide & tall is the board?
 # 27 spaces tall with one filled in every other
 # 30 spaces wide with one filled in every other
@@ -273,6 +286,12 @@ async def run():
     while True: # main game loop
         mouseClicked = False
         
+        # Export game state for automation
+        try:
+            _state_exporter.update_state(game)
+        except:
+            pass
+        
         # Get current player's data
         player_marbles = get_player_marbles(game, current_player)
         player_home = get_player_home(game, current_player)
@@ -343,6 +362,13 @@ async def run():
                         else:
                             moves = await displayDice(game)
                             print("A roll of %i has been rolled...." % moves)
+
+                        # Export valid moves for automation
+                        try:
+                            valid_moves = game.get_valid_moves(current_player, moves)
+                            _state_exporter.set_valid_moves(valid_moves)
+                        except:
+                            pass
 
                         # Refresh player data after roll
                         player_marbles = get_player_marbles(game, current_player)
@@ -750,6 +776,13 @@ async def displayDice(game):
     Uses game engine for dice roll.
     """
     die1 = game.roll_dice()
+    
+    # Export dice roll for automation
+    try:
+        _state_exporter.log_dice_roll(game.current_player, die1)
+    except:
+        pass
+    
     # testing of text for showing dice rolls via text at first
     fontObj = pygame.font.Font('freesansbold.ttf', 32)
     diceString = 'Dice Roll: %s ' % die1
