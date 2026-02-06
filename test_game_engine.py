@@ -967,6 +967,33 @@ class TestAggravation:
         
         assert result['aggravated_opponent'] == True
         assert game.p2_start_occupied == False  # Flag should be cleared
+    
+    def test_aggravation_in_home_stretch(self):
+        """Test that aggravation CAN occur in home stretch positions (not safe)."""
+        game = AggravationGame(num_players=2)
+        
+        # Place P2 marble in their home stretch at (25, 6)
+        # This is P2's first home stretch position (NOT final home, so not safe)
+        game.p2_marbles[0] = (25, 6)
+        game.p2_home = game.p2_home[:-1]  # Remove one from home
+        
+        # Place P1 marble at (23, 6) - one space before P2's home stretch position
+        game.p1_marbles[0] = (23, 6)
+        game.p1_home = game.p1_home[:-1]  # Remove one from home
+        
+        # P1 moves 1 space to land EXACTLY on P2's home stretch position
+        result = game.execute_move(1, 0, 1)
+        
+        # Verify aggravation occurs even in home stretch
+        assert result['success'] == True
+        assert result['aggravated_opponent'] == True
+        assert result['aggravated_info']['player'] == 2
+        assert result['aggravated_info']['marble_idx'] == 0
+        assert result['aggravated_info']['from_position'] == (25, 6)
+        assert game.p1_marbles[0] == (25, 6)  # P1 now at P2's old home stretch spot
+        assert game.p2_marbles[0] == (None, None)  # P2 marble sent home
+        assert len(game.p2_home) == 4  # P2 marble returned to home
+
 class TestSaveLoad:
     """Test game state persistence (save/load functionality)."""
     
