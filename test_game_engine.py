@@ -967,6 +967,34 @@ class TestAggravation:
         
         assert result['aggravated_opponent'] == True
         assert game.p2_start_occupied == False  # Flag should be cleared
+    
+    def test_no_aggravation_in_final_home(self):
+        """Test that aggravation does NOT occur when landing in final home (safe zone)."""
+        game = AggravationGame(num_players=2)
+        
+        # Place P2 marble in P1's final home position (15, 2) - this is unusual but tests the safety check
+        # In normal gameplay this shouldn't happen, but we want to ensure safety is enforced
+        game.p2_marbles[0] = (15, 2)  # P1's first final home spot
+        game.p2_home = game.p2_home[:-1]
+        
+        # Place P1 marble at (15, 1) - the last position before entering final home
+        # This is the last spot on P1's home stretch
+        game.p1_marbles[0] = (15, 1)
+        game.p1_home = game.p1_home[:-1]
+        
+        # P1 moves 1 space to land on (15, 2) - where P2 marble is
+        result = game.execute_move(1, 0, 1)
+        
+        # Move should succeed
+        assert result['success'] == True
+        assert result['new_position'] == (15, 2)
+        
+        # But NO aggravation should occur - P2 marble should still be there
+        assert result['aggravated_opponent'] == False
+        assert 'aggravated_info' not in result
+        assert game.p2_marbles[0] == (15, 2)  # P2 marble still in place
+        assert len(game.p2_home) == 3  # P2 marble was NOT sent home
+
 class TestSaveLoad:
     """Test game state persistence (save/load functionality)."""
     
