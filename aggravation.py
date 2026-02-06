@@ -878,7 +878,11 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
             print(f'AGGRAVATION! Player {player} sent Player {opp_player} marble back to home from {opp_old_pos}')
     
     # NOW update the current player's marble position in game state
-    player_marbles[player_marbles.index(old_pos)] = current_pos
+    if old_pos in player_marbles:
+        player_marbles[player_marbles.index(old_pos)] = current_pos
+    else:
+        # Defensive check: avoid ValueError if old_pos is not in the list
+        print(f'Warning: could not find old position {old_pos} in player {player} marbles list {player_marbles}; skipping update.')
     print(f'Player {player} marbles tracking: {player_marbles}')
 
     # Check for win condition
