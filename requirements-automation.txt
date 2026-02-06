@@ -1,0 +1,13 @@
+# Playwright Web Automation Requirements
+# Install with: pip install -r requirements-automation.txt
+
+# Core automation
+playwright>=1.40.0
+pytest-playwright>=0.4.0
+
+# Testing framework
+pytest>=7.0.0
+
+# Already installed for the project
+# pygame>=2.5.0  # For the game itself
+# pygbag>=0.8.0  # For web builds
