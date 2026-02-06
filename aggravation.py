@@ -873,6 +873,15 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
         current_pos = coords
         print(f'Player {player} marbles tracking (moving to): {coords}')
     
+    # Ensure animation ended at the correct position (should match execute_move result)
+    if current_pos != final_pos:
+        print(f'WARNING: Animation ended at {current_pos} but execute_move calculated {final_pos}')
+        # Draw the final position to ensure visual consistency
+        drawPlayerBox(player_color, final_pos)
+        if current_pos != old_pos:
+            drawBoardBox(current_pos)
+        current_pos = final_pos
+    
     # Handle aggravation animation if it occurred
     if move_result['aggravated_opponent']:
         agg_info = move_result['aggravated_info']
