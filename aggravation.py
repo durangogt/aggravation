@@ -704,7 +704,6 @@ def displayStatus(passed_SURF, passed_RECT):
 def displayAggravationMessage(aggressor_player, victim_player):
     """Display aggravation message when a player sends opponent home."""
     aggressor_color = PLAYER_COLORS[aggressor_player]
-    victim_color = PLAYER_COLORS[victim_player]
     
     # Create aggravation message
     msg = f"Player {aggressor_player} AGGRAVATED Player {victim_player}!"
