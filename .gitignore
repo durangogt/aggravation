@@ -162,3 +162,9 @@ Thumbs.db
 
 # Web build - game_engine.py is copied from root by build script
 web/game_engine.py
+
+# Playwright automation artifacts
+tests/anomaly_*.png
+tests/game_results.json
+test-results/
+playwright-report/

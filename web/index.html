@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aggravation - Board Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-container {
+            position: relative;
+        }
+        #pygame-canvas {
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="pygame-canvas"></canvas>
+    </div>
+
+    <!-- JavaScript API for Playwright Automation -->
+    <script>
+        // Game State API for browser automation
+        window.gameState = {
+            // Internal state storage (updated by Python via localStorage)
+            _currentState: null,
+            _lastDiceRoll: null,
+            _moveLog: [],
+            _isReady: false,
+
+            // Initialize the API
+            init: function() {
+                console.log("Initializing Game State API for automation");
+                this._isReady = true;
+                
+                // Set up polling for state updates from Python
+                setInterval(() => {
+                    const stateJson = localStorage.getItem('aggravation_game_state');
+                    if (stateJson) {
+                        try {
+                            this._currentState = JSON.parse(stateJson);
+                        } catch (e) {
+                            console.error("Failed to parse game state:", e);
+                        }
+                    }
+                    
+                    const diceRoll = localStorage.getItem('aggravation_last_dice_roll');
+                    if (diceRoll) {
+                        this._lastDiceRoll = parseInt(diceRoll);
+                    }
+                    
+                    const moveLogJson = localStorage.getItem('aggravation_move_log');
+                    if (moveLogJson) {
+                        try {
+                            this._moveLog = JSON.parse(moveLogJson);
+                        } catch (e) {
+                            console.error("Failed to parse move log:", e);
+                        }
+                    }
+                }, 100); // Poll every 100ms
+            },
+
+            // Get current player (1-4)
+            getCurrentPlayer: function() {
+                return this._currentState ? this._currentState.current_player : null;
+            },
+
+            // Get all marble positions
+            getMarblePositions: function() {
+                if (!this._currentState) return null;
+                return {
+                    player1: this._currentState.player1.marbles,
+                    player2: this._currentState.player2.marbles,
+                    player3: this._currentState.player3.marbles,
+                    player4: this._currentState.player4.marbles
+                };
+            },
+
+            // Get last dice roll
+            getDiceRoll: function() {
+                return this._lastDiceRoll;
+            },
+
+            // Get valid moves for current player
+            getValidMoves: function() {
+                // This would need to be calculated by Python and stored
+                const validMovesJson = localStorage.getItem('aggravation_valid_moves');
+                if (validMovesJson) {
+                    try {
+                        return JSON.parse(validMovesJson);
+                    } catch (e) {
+                        return [];
+                    }
+                }
+                return [];
+            },
+
+            // Check if game is over
+            isGameOver: function() {
+                return this._currentState ? this._currentState.game_over : false;
+            },
+
+            // Get winner (null if game not over)
+            getWinner: function() {
+                return this._currentState ? this._currentState.winner : null;
+            },
+
+            // Get full game state
+            getFullState: function() {
+                return this._currentState;
+            },
+
+            // Get move log
+            getMoveLog: function() {
+                return this._moveLog;
+            },
+
+            // Check if API is ready
+            isReady: function() {
+                return this._isReady && this._currentState !== null;
+            },
+
+            // Helper to get clickable positions with data attributes
+            getClickablePositions: function() {
+                const positions = [];
+                const elements = document.querySelectorAll('[data-board-position]');
+                elements.forEach(el => {
+                    const pos = el.getAttribute('data-board-position');
+                    if (pos) {
+                        const [x, y] = pos.split(',').map(n => parseInt(n));
+                        positions.push({x, y, element: el});
+                    }
+                });
+                return positions;
+            },
+
+            // Simulate a click on a board position
+            clickPosition: function(x, y) {
+                const canvas = document.getElementById('pygame-canvas');
+                if (!canvas) return false;
+                
+                // Calculate pixel position from board coordinates
+                // This would need to match the Python coordinate system
+                const pixelX = x * 20 + 10; // Adjust based on actual game rendering
+                const pixelY = y * 20 + 10;
+                
+                // Create and dispatch click event
+                const event = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: canvas.offsetLeft + pixelX,
+                    clientY: canvas.offsetTop + pixelY
+                });
+                canvas.dispatchEvent(event);
+                return true;
+            },
+
+            // Get board state as text representation
+            getBoardText: function() {
+                return localStorage.getItem('aggravation_board_text') || '';
+            }
+        };
+
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            window.gameState.init();
+            console.log("Game State API ready for automation");
+        });
+
+        // Export for Playwright
+        if (typeof module !== 'undefined' && module.exports) {
+            module.exports = window.gameState;
+        }
+    </script>
+
+    <!-- Pygbag loader will inject here -->
+</body>
+</html>
