@@ -831,19 +831,33 @@ def animatePlayerHomeMove(moves, P1marbles, P1END, game):
 
 def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
     """
-    Animate any player's marble movement using game engine for position calculations.
+    Animate any player's marble movement using game engine for all logic.
+    Delegates to game.execute_move() for move logic and aggravation, then animates the result.
     Returns (player_marbles, new_pos, won, winner) where won is True if any player won.
     """
     homeStretch = PLAYER_HOME_STRETCHES[player]
     finalHome = PLAYER_FINAL_HOMES[player]
     player_color = PLAYER_COLORS[player]
     
-    inFinalHome = marble_pos in finalHome
-    current_pos = marble_pos
     old_pos = marble_pos
     
+    # Get marble index for execute_move
+    marble_idx = player_marbles.index(marble_pos)
+    
+    # Execute move using game engine - this handles ALL game logic including aggravation
+    move_result = game.execute_move(player, marble_idx, moves)
+    
+    if not move_result['success']:
+        print(f"Move failed: {move_result['message']}")
+        return player_marbles, marble_pos, False, None
+    
+    # Animate the move step by step based on game engine result
+    current_pos = old_pos
+    final_pos = move_result['new_position']
+    inFinalHome = current_pos in finalHome
+    
     for move in range(moves):
-        # Use game engine methods for position calculation
+        # Use game engine methods for position calculation during animation
         if inFinalHome or current_pos in homeStretch:
             coords = game.get_next_home_position(player, current_pos[0], current_pos[1])
             inFinalHome = coords in finalHome
@@ -858,36 +872,32 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
         drawBoardBox(current_pos)
         current_pos = coords
         print(f'Player {player} marbles tracking (moving to): {coords}')
-
-    # Check for aggravation BEFORE updating marble position
-    # This is critical - we need to find opponent marble at destination before we overwrite it
-    final_pos = current_pos
-    if final_pos not in finalHome:  # Can't aggravate in safe zone
-        opponent = game.find_marble_at_position(final_pos)
-        if opponent is not None and opponent[0] != player:
-            opp_player, opp_marble_idx = opponent
-            # Send opponent marble home using game engine
-            opp_old_pos = game.send_marble_home(opp_player, opp_marble_idx)
-            
-            # Visual feedback - flash aggravation message
-            displayAggravationMessage(player, opp_player)
-            
-            # Animate opponent marble returning to home
-            animateAggravation(opp_player, opp_old_pos, game)
-            
-            print(f'AGGRAVATION! Player {player} sent Player {opp_player} marble back to home from {opp_old_pos}')
     
-    # NOW update the current player's marble position in game state
-    player_marbles[player_marbles.index(old_pos)] = current_pos
+    # Handle aggravation animation if it occurred
+    if move_result['aggravated_opponent']:
+        agg_info = move_result['aggravated_info']
+        opp_player = agg_info['player']
+        opp_old_pos = agg_info['from_position']
+        
+        # Visual feedback - flash aggravation message
+        displayAggravationMessage(player, opp_player)
+        
+        # Animate opponent marble returning to home
+        animateAggravation(opp_player, opp_old_pos, game)
+        
+        print(f'AGGRAVATION! Player {player} sent Player {opp_player} marble back to home from {opp_old_pos}')
+    
+    # Update UI tracking (game state already updated by execute_move)
+    player_marbles[marble_idx] = final_pos
     print(f'Player {player} marbles tracking: {player_marbles}')
-
+    
     # Check for win condition
     won = game.check_win_condition(player)
     winner = player if won else None
     if won:
         print(f'PLAYER {player} WINS!')
     
-    return player_marbles, current_pos, won, winner
+    return player_marbles, final_pos, won, winner
 
 
 def drawBoard():
