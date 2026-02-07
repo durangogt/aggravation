@@ -790,22 +790,21 @@ def animateAggravation(victim_player, from_pos, game):
         # If we can't determine the new home position reliably, skip the home animation.
         if home_pos is None:
             return
+            
+        left, top = leftTopCoordsOfBox(home_pos[0], home_pos[1])
+        
         for _ in range(3):
-            pygame.draw.circle(DISPLAYSURF, victim_color, 
-                             (leftTopCoordsOfBox(home_pos[0], home_pos[1])[0] + 5,
-                              leftTopCoordsOfBox(home_pos[0], home_pos[1])[1] + 5), 5, 0)
-            pygame.display.update()
+            # Blink ON: Draw the marble (using drawBoardBox which handles background clearing)
+            drawBoardBox(home_pos)
             pygame.time.wait(100)
-            pygame.draw.circle(DISPLAYSURF, BGCOLOR,
-                             (leftTopCoordsOfBox(home_pos[0], home_pos[1])[0] + 5,
-                              leftTopCoordsOfBox(home_pos[0], home_pos[1])[1] + 5), 5, 0)
+            
+            # Blink OFF: Draw the empty white box
+            pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
             pygame.display.update()
             pygame.time.wait(100)
         
-        # Final draw of marble in home - use smaller radius to match board look
-        left, top = leftTopCoordsOfBox(home_pos[0], home_pos[1])
-        pygame.draw.circle(DISPLAYSURF, victim_color, (left+5, top+5), 5, 0)
-        pygame.display.update()
+        # Final draw of marble in home - use drawBoardBox to ensure correct look
+        drawBoardBox(home_pos)
 
 def animatePlayerMove(moves, P1marbles, P1END, game):
     """
