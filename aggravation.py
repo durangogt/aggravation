@@ -439,6 +439,16 @@ def main():
                         elif ((player_start_occupied == False) and (moves == 1 or moves == 6) and (len(player_home) == 4)): #
                             new_home = removeFromHome(player_home)
                             set_player_home(game, current_player, new_home)
+                            
+                            # Check for aggravation at start position
+                            opponent = game.find_marble_at_position(player_start)
+                            if opponent is not None and opponent[0] != current_player:
+                                opp_player, opp_marble_idx = opponent
+                                opp_old_pos = game.send_marble_home(opp_player, opp_marble_idx)
+                                displayAggravationMessage(current_player, opp_player)
+                                animateAggravation(opp_player, opp_old_pos, game)
+                                print(f'AGGRAVATION! Player {current_player} sent Player {opp_player} marble back to home from start position {opp_old_pos}')
+                            
                             drawPlayerBox(player_color, player_start) # draw player on their start position
                             set_player_end(game, current_player, player_start) # set end of turn locator
                             player_marbles = get_player_marbles(game, current_player)
@@ -637,6 +647,16 @@ def main():
                         elif clickedPos in playerStartingHome and len(player_home) > 0:
                             new_home = removeFromHome(player_home)
                             set_player_home(game, current_player, new_home)
+                            
+                            # Check for aggravation at start position
+                            opponent = game.find_marble_at_position(player_start)
+                            if opponent is not None and opponent[0] != current_player:
+                                opp_player, opp_marble_idx = opponent
+                                opp_old_pos = game.send_marble_home(opp_player, opp_marble_idx)
+                                displayAggravationMessage(current_player, opp_player)
+                                animateAggravation(opp_player, opp_old_pos, game)
+                                print(f'AGGRAVATION! Player {current_player} sent Player {opp_player} marble back to home from start position {opp_old_pos}')
+
                             drawPlayerBox(player_color, player_start)
                             set_player_end(game, current_player, player_start)
                             player_marbles = get_player_marbles(game, current_player)
@@ -711,6 +731,9 @@ def displayAggravationMessage(aggressor_player, victim_player):
     msg_rect = msg_surf.get_rect()
     msg_rect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
     
+    # Save the background behind the message so we can restore it
+    background_save = DISPLAYSURF.subsurface(msg_rect).copy()
+    
     # Flash the message with visual effect
     for _ in range(3):
         # Draw message
@@ -718,8 +741,8 @@ def displayAggravationMessage(aggressor_player, victim_player):
         pygame.display.update()
         pygame.time.wait(200)
         
-        # Clear message
-        pygame.draw.rect(DISPLAYSURF, BGCOLOR, msg_rect)
+        # Clear message by restoring background
+        DISPLAYSURF.blit(background_save, msg_rect)
         pygame.display.update()
         pygame.time.wait(100)
     
@@ -728,8 +751,8 @@ def displayAggravationMessage(aggressor_player, victim_player):
     pygame.display.update()
     pygame.time.wait(500)
     
-    # Clear the message
-    pygame.draw.rect(DISPLAYSURF, BGCOLOR, msg_rect)
+    # Clear the message by restoring background
+    DISPLAYSURF.blit(background_save, msg_rect)
     pygame.display.update()
 
 def animateAggravation(victim_player, from_pos, game):
@@ -767,21 +790,21 @@ def animateAggravation(victim_player, from_pos, game):
         # If we can't determine the new home position reliably, skip the home animation.
         if home_pos is None:
             return
+            
+        left, top = leftTopCoordsOfBox(home_pos[0], home_pos[1])
+        
         for _ in range(3):
-            pygame.draw.circle(DISPLAYSURF, victim_color, 
-                             (leftTopCoordsOfBox(home_pos[0], home_pos[1])[0] + 5,
-                              leftTopCoordsOfBox(home_pos[0], home_pos[1])[1] + 5), 5, 0)
-            pygame.display.update()
+            # Blink ON: Draw the marble (using drawBoardBox which handles background clearing)
+            drawBoardBox(home_pos)
             pygame.time.wait(100)
-            pygame.draw.circle(DISPLAYSURF, BGCOLOR,
-                             (leftTopCoordsOfBox(home_pos[0], home_pos[1])[0] + 5,
-                              leftTopCoordsOfBox(home_pos[0], home_pos[1])[1] + 5), 5, 0)
+            
+            # Blink OFF: Draw the empty white box
+            pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
             pygame.display.update()
             pygame.time.wait(100)
         
-        # Final draw of marble in home - use drawPlayerBox for consistency
-        drawPlayerBox(victim_color, home_pos)
-        pygame.display.update()
+        # Final draw of marble in home - use drawBoardBox to ensure correct look
+        drawBoardBox(home_pos)
 
 def animatePlayerMove(moves, P1marbles, P1END, game):
     """
@@ -870,7 +893,20 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
         print(f'Player {player} move {move} to {coords}')
         drawPlayerBox(player_color, coords)
         pygame.time.wait(SIMSPEED)
-        drawBoardBox(current_pos)
+        
+        # Check if we are jumping over another marble (and not just leaving our start)
+        occupant = game.find_marble_at_position(current_pos)
+        if occupant and current_pos != old_pos:
+            # We are jumping over someone - redraw them
+            # First clear the spot (removes moving marble artifact)
+            drawBoardBox(current_pos)
+            # Then redraw the occupant
+            occ_player, _ = occupant
+            drawPlayerBox(PLAYER_COLORS[occ_player], current_pos)
+        else:
+            # Just clear the spot
+            drawBoardBox(current_pos)
+
         current_pos = coords
         print(f'Player {player} marbles tracking (moving to): {coords}')
 
@@ -889,6 +925,9 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
             
             # Animate opponent marble returning to home
             animateAggravation(opp_player, opp_old_pos, game)
+            
+            # Redraw aggressor marble at the position (it was cleared by animateAggravation)
+            drawPlayerBox(player_color, final_pos)
             
             print(f'AGGRAVATION! Player {player} sent Player {opp_player} marble back to home from {opp_old_pos}')
     
@@ -1008,8 +1047,42 @@ def makeText(text, color, bgcolor, top, left):
 
 def drawBoardBox(coords):
     # draw board box at coordinates x,y
-    left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
-    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    boxx, boxy = coords
+    left, top = leftTopCoordsOfBox(boxx, boxy)
+    
+    # Get spot type from template
+    spot_type = BOARD_TEMPLATE[boxy][boxx]
+    
+    # First clear the area to background color to remove any marble artifacts
+    # Clear a slightly larger area since marbles (radius 7) are larger than box (10x10)
+    pygame.draw.rect(DISPLAYSURF, BGCOLOR, (left-3, top-3, BOXSIZE+6, BOXSIZE+6))
+    
+    # Draw the appropriate spot graphic based on type
+    if spot_type == '1':
+        if boxx == 15:
+            pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+        else:
+            pygame.draw.circle(DISPLAYSURF, P1COLOR, (left+5, top+5), 5, 0)
+    elif spot_type == '2':
+        if boxy == 8:
+            pygame.draw.rect(DISPLAYSURF, P2COLOR, (left, top, BOXSIZE, BOXSIZE))
+        else:
+            pygame.draw.circle(DISPLAYSURF, P2COLOR, (left+5, top+5), 5, 0)
+    elif spot_type == '3':
+        if boxx == 15:
+            pygame.draw.rect(DISPLAYSURF, P3COLOR, (left, top, BOXSIZE, BOXSIZE))
+        else:
+            pygame.draw.circle(DISPLAYSURF, P3COLOR, (left+5, top+5), 5, 0)
+    elif spot_type == '4':
+        if boxy == 8:
+            pygame.draw.rect(DISPLAYSURF, P4COLOR, (left, top, BOXSIZE, BOXSIZE))
+        else:
+            pygame.draw.circle(DISPLAYSURF, P4COLOR, (left+5, top+5), 5, 0)
+    elif spot_type == SPOT:
+        pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    
+    # If spot is BLANK (.), we just leave it as BGCOLOR (which we cleared to above)
+        
     pygame.display.update()
 
 def drawPlayerBox(playerColor,coords):
