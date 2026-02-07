@@ -1048,8 +1048,42 @@ def makeText(text, color, bgcolor, top, left):
 
 def drawBoardBox(coords):
     # draw board box at coordinates x,y
-    left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
-    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    boxx, boxy = coords
+    left, top = leftTopCoordsOfBox(boxx, boxy)
+    
+    # Get spot type from template
+    spot_type = BOARD_TEMPLATE[boxy][boxx]
+    
+    # First clear the area to background color to remove any marble artifacts
+    # Clear a slightly larger area since marbles (radius 7) are larger than box (10x10)
+    pygame.draw.rect(DISPLAYSURF, BGCOLOR, (left-3, top-3, BOXSIZE+6, BOXSIZE+6))
+    
+    # Draw the appropriate spot graphic based on type
+    if spot_type == '1':
+        if boxx == 15:
+            pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
+        else:
+            pygame.draw.circle(DISPLAYSURF, P1COLOR, (left+5, top+5), 5, 0)
+    elif spot_type == '2':
+        if boxy == 8:
+            pygame.draw.rect(DISPLAYSURF, P2COLOR, (left, top, BOXSIZE, BOXSIZE))
+        else:
+            pygame.draw.circle(DISPLAYSURF, P2COLOR, (left+5, top+5), 5, 0)
+    elif spot_type == '3':
+        if boxx == 15:
+            pygame.draw.rect(DISPLAYSURF, P3COLOR, (left, top, BOXSIZE, BOXSIZE))
+        else:
+            pygame.draw.circle(DISPLAYSURF, P3COLOR, (left+5, top+5), 5, 0)
+    elif spot_type == '4':
+        if boxy == 8:
+            pygame.draw.rect(DISPLAYSURF, P4COLOR, (left, top, BOXSIZE, BOXSIZE))
+        else:
+            pygame.draw.circle(DISPLAYSURF, P4COLOR, (left+5, top+5), 5, 0)
+    elif spot_type == SPOT:
+        pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    
+    # If spot is BLANK (.), we just leave it as BGCOLOR (which we cleared to above)
+        
     pygame.display.update()
 
 def drawPlayerBox(playerColor,coords):
