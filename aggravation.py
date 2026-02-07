@@ -890,6 +890,9 @@ def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
             # Animate opponent marble returning to home
             animateAggravation(opp_player, opp_old_pos, game)
             
+            # Redraw aggressor marble at the position (it was cleared by animateAggravation)
+            drawPlayerBox(player_color, final_pos)
+            
             print(f'AGGRAVATION! Player {player} sent Player {opp_player} marble back to home from {opp_old_pos}')
     
     # NOW update the current player's marble position in game state
