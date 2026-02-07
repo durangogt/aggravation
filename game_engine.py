@@ -367,6 +367,73 @@ class AggravationGame:
             return self.p4_end_home
         return []
     
+    def find_marble_at_position(self, position: Tuple[int, int]) -> Optional[Tuple[int, int]]:
+        """
+        Find if any marble occupies the given position.
+        
+        Args:
+            position: (x, y) coordinate to check
+            
+        Returns:
+            Tuple of (player_number, marble_index) if found, None otherwise
+        """
+        if position is None or position == (None, None):
+            return None
+        
+        for player in range(1, self.num_players + 1):
+            pdata = self._get_player_data(player)
+            for idx, marble_pos in enumerate(pdata['marbles']):
+                if marble_pos == position:
+                    return (player, idx)
+        return None
+    
+    def send_marble_home(self, player: int, marble_idx: int) -> Tuple[int, int]:
+        """
+        Send a marble back to the player's home (waiting area).
+        
+        Args:
+            player: Player number (1-4)
+            marble_idx: Index of marble to send home (0-3)
+            
+        Returns:
+            The position the marble was at before being sent home
+        """
+        pdata = self._get_player_data(player)
+        old_pos = pdata['marbles'][marble_idx]
+        
+        # If was on start position, mark start as unoccupied
+        if old_pos == pdata['start_pos']:
+            self._set_start_occupied(player, False)
+        
+        # Set marble position to None (back in home waiting area)
+        pdata['marbles'][marble_idx] = (None, None)
+        
+        # Add marble back to home waiting list
+        starting_home = PLAYER_STARTING_HOMES[player]
+        if len(pdata['home']) < 4:
+            # Add an available starting home position back
+            for pos in starting_home:
+                if pos not in pdata['home']:
+                    pdata['home'].append(pos)
+                    break
+        
+        return old_pos
+    
+    def is_safe_position(self, player: int, position: Tuple[int, int]) -> bool:
+        """
+        Check if a position is safe from aggravation for a player.
+        Only final home positions are safe.
+        
+        Args:
+            player: Player number (1-4)
+            position: (x, y) coordinate to check
+            
+        Returns:
+            True if position is safe (in final home), False otherwise
+        """
+        final_home = PLAYER_FINAL_HOMES.get(player, [])
+        return position in final_home
+    
     def is_valid_move(self, player: int, marble_idx: int, dice_roll: int) -> bool:
         """
         Check if a move is valid for the given player's marble.
@@ -486,6 +553,20 @@ class AggravationGame:
                 if coords in home_stretch:
                     in_final_home = False
         
+        # Check for aggravation - is there an opponent marble at destination?
+        # (Must check BEFORE updating our marble position)
+        if coords not in final_home:  # Can't aggravate in safe zone (final home)
+            opponent = self.find_marble_at_position(coords)
+            if opponent is not None and opponent[0] != player:
+                opp_player, opp_marble_idx = opponent
+                opp_old_pos = self.send_marble_home(opp_player, opp_marble_idx)
+                result['aggravated_opponent'] = True
+                result['aggravated_info'] = {
+                    'player': opp_player,
+                    'marble_idx': opp_marble_idx,
+                    'from_position': opp_old_pos
+                }
+        
         # Update marble position
         marbles[marble_idx] = coords
         self._set_end(player, coords)
@@ -509,7 +590,13 @@ class AggravationGame:
         result['success'] = True
         result['old_position'] = old_pos
         result['new_position'] = coords
-        result['message'] = f'Moved marble from {old_pos} to {coords}'
+        
+        # Build message with aggravation info if applicable
+        if result['aggravated_opponent']:
+            agg_info = result['aggravated_info']
+            result['message'] = f'Moved marble from {old_pos} to {coords} - Aggravated Player {agg_info["player"]}!'
+        else:
+            result['message'] = f'Moved marble from {old_pos} to {coords}'
         
         return result
     

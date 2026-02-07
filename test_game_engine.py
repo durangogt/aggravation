@@ -825,6 +825,203 @@ class TestMultiPlayerIntegration:
             assert game.winner == winning_player
 
 
+class TestAggravation:
+    """Test aggravation mechanics - landing on opponent marbles."""
+    
+    def test_aggravate_opponent_on_landing(self):
+        """Test that landing on opponent marble sends it home."""
+        game = AggravationGame(num_players=2)
+        
+        # Place P1 marble directly at (19, 2)
+        game.p1_marbles[0] = (19, 2)
+        game.p1_home = game.p1_home[:-1]  # Remove one from home
+        
+        # Place P2 marble at (19, 3)
+        game.p2_marbles[0] = (19, 3)
+        game.p2_home = game.p2_home[:-1]  # Remove one from home
+        
+        # P1 moves 1 space to land on P2's position
+        result = game.execute_move(1, 0, 1)
+        
+        assert result['success'] == True
+        assert result['aggravated_opponent'] == True
+        assert result['aggravated_info']['player'] == 2
+        assert result['aggravated_info']['marble_idx'] == 0
+        assert game.p1_marbles[0] == (19, 3)  # P1 now at P2's old spot
+        assert game.p2_marbles[0] == (None, None)  # P2 marble sent home
+        assert len(game.p2_home) == 4  # P2 marble returned to home
+    
+    def test_no_aggravation_on_empty_space(self):
+        """Test no aggravation when landing on empty space."""
+        game = AggravationGame(num_players=2)
+        
+        # Place P1 marble directly at (19, 2) 
+        game.p1_marbles[0] = (19, 2)
+        game.p1_home = game.p1_home[:-1]
+        
+        # Move to (19, 3) - empty space
+        result = game.execute_move(1, 0, 1)
+        
+        assert result['success'] == True
+        assert result['aggravated_opponent'] == False
+        assert 'aggravated_info' not in result
+    
+    def test_cannot_aggravate_own_marble(self):
+        """Test that move is invalid when trying to land on own marble."""
+        game = AggravationGame(num_players=1)
+        
+        # Place two P1 marbles on board
+        game.p1_marbles[0] = (19, 2)
+        game.p1_marbles[1] = (19, 3)
+        game.p1_home = []
+        
+        # Try to move marble 0 to marble 1's position - should be invalid
+        is_valid = game.is_valid_move(1, 0, 1)
+        assert is_valid == False
+    
+    def test_aggravate_at_start_position(self):
+        """Test aggravation works at start position (not safe)."""
+        game = AggravationGame(num_players=2)
+        
+        # P2 is at P2's start position (29, 10)
+        game.p2_marbles[0] = (29, 10)
+        game.p2_home = game.p2_home[:-1]
+        game.p2_start_occupied = True
+        
+        # Place P1 at (29, 9) - one above P2's start
+        # Moving down (+1 in y) on right side lands on (29, 10)
+        game.p1_marbles[0] = (29, 9)
+        game.p1_home = game.p1_home[:-1]
+        
+        result = game.execute_move(1, 0, 1)
+        
+        assert result['success'] == True
+        assert result['aggravated_opponent'] == True
+        assert result['aggravated_info']['player'] == 2
+        assert game.p2_marbles[0] == (None, None)
+    
+    def test_find_marble_at_position(self):
+        """Test helper function to find marble at position."""
+        game = AggravationGame(num_players=4)
+        
+        # Place marbles
+        game.p1_marbles[0] = (19, 2)
+        game.p2_marbles[1] = (25, 10)
+        game.p3_marbles[2] = (11, 12)
+        
+        # Test finding marbles
+        assert game.find_marble_at_position((19, 2)) == (1, 0)
+        assert game.find_marble_at_position((25, 10)) == (2, 1)
+        assert game.find_marble_at_position((11, 12)) == (3, 2)
+        assert game.find_marble_at_position((1, 1)) is None
+        assert game.find_marble_at_position(None) is None
+    
+    def test_send_marble_home(self):
+        """Test sending marble back to home."""
+        game = AggravationGame(num_players=1)
+        
+        # Place marble directly on board
+        game.p1_marbles[0] = (19, 2)
+        game.p1_home = game.p1_home[:-1]  # Now 3 in home
+        
+        assert len(game.p1_home) == 3
+        
+        # Send it back home
+        old_pos = game.send_marble_home(1, 0)
+        
+        assert old_pos == (19, 2)
+        assert game.p1_marbles[0] == (None, None)
+        assert len(game.p1_home) == 4
+    
+    def test_is_safe_position(self):
+        """Test safe position detection (final home only)."""
+        game = AggravationGame(num_players=4)
+        
+        # Final home positions are safe
+        assert game.is_safe_position(1, (15, 2)) == True
+        assert game.is_safe_position(1, (15, 5)) == True
+        assert game.is_safe_position(2, (27, 8)) == True
+        
+        # Start positions are NOT safe
+        assert game.is_safe_position(1, (19, 1)) == False
+        assert game.is_safe_position(2, (29, 10)) == False
+        
+        # Regular board positions are NOT safe
+        assert game.is_safe_position(1, (19, 2)) == False
+        assert game.is_safe_position(3, (11, 10)) == False
+    
+    def test_aggravation_updates_start_occupied(self):
+        """Test that aggravating marble at start clears start_occupied flag."""
+        game = AggravationGame(num_players=2)
+        
+        # P2 at start, manually set up
+        game.p2_marbles[0] = (29, 10)
+        game.p2_home = game.p2_home[:-1]
+        game.p2_start_occupied = True
+        
+        # P1 aggravates P2 at start
+        game.p1_marbles[0] = (29, 9)
+        game.p1_home = game.p1_home[:-1]
+        
+        result = game.execute_move(1, 0, 1)
+        
+        assert result['aggravated_opponent'] == True
+        assert game.p2_start_occupied == False  # Flag should be cleared
+    
+    def test_no_aggravation_in_final_home(self):
+        """Test that aggravation does NOT occur when landing in final home (safe zone)."""
+        game = AggravationGame(num_players=2)
+        
+        # Place P2 marble in P1's final home position (15, 2) - this is unusual but tests the safety check
+        # In normal gameplay this shouldn't happen, but we want to ensure safety is enforced
+        assert len(game.p2_home) == 4  # Verify initial state
+        game.p2_marbles[0] = (15, 2)  # P1's first final home spot
+        game.p2_home = game.p2_home[:-1]
+        
+        # Place P1 marble at (15, 1) - the last position before entering final home
+        # This is the last spot on P1's home stretch
+        assert len(game.p1_home) == 4  # Verify initial state
+        game.p1_marbles[0] = (15, 1)
+        game.p1_home = game.p1_home[:-1]
+        
+        # P1 moves 1 space to land on (15, 2) - where P2 marble is
+        result = game.execute_move(1, 0, 1)
+        
+        # Move should succeed
+        assert result['success'] == True
+        assert result['new_position'] == (15, 2)
+        
+        # But NO aggravation should occur - P2 marble should still be there
+        assert result['aggravated_opponent'] == False
+        assert 'aggravated_info' not in result
+        assert game.p2_marbles[0] == (15, 2)  # P2 marble still in place
+        assert len(game.p2_home) == 3  # P2 marble was NOT sent home
+    def test_aggravation_in_home_stretch(self):
+        """Test that aggravation CAN occur in home stretch positions (not safe)."""
+        game = AggravationGame(num_players=2)
+        
+        # Place P2 marble in their home stretch at (25, 6)
+        # This is P2's first home stretch position (NOT final home, so not safe)
+        game.p2_marbles[0] = (25, 6)
+        game.p2_home = game.p2_home[:-1]  # Remove one from home
+        
+        # Place P1 marble at (23, 6) - one space before P2's home stretch position
+        game.p1_marbles[0] = (23, 6)
+        game.p1_home = game.p1_home[:-1]  # Remove one from home
+        
+        # P1 moves 1 space to land EXACTLY on P2's home stretch position
+        result = game.execute_move(1, 0, 1)
+        
+        # Verify aggravation occurs even in home stretch
+        assert result['success'] == True
+        assert result['aggravated_opponent'] == True
+        assert result['aggravated_info']['player'] == 2
+        assert result['aggravated_info']['marble_idx'] == 0
+        assert result['aggravated_info']['from_position'] == (25, 6)
+        assert game.p1_marbles[0] == (25, 6)  # P1 now at P2's old home stretch spot
+        assert game.p2_marbles[0] == (None, None)  # P2 marble sent home
+        assert len(game.p2_home) == 4  # P2 marble returned to home
+
 class TestSaveLoad:
     """Test game state persistence (save/load functionality)."""
     
