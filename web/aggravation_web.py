@@ -4,10 +4,11 @@
 # Released under a "Simplified BSD" license
 
 import asyncio
-import pygame, sys
+import random, pygame, sys, os
 from pygame.locals import *
 from game_engine import (
     AggravationGame,
+    P1START, P2START, P3START, P4START,
     PLAYER_STARTS, PLAYER_STARTING_HOMES, PLAYER_FINAL_HOMES, PLAYER_HOME_STRETCHES
 )
 
@@ -633,6 +634,92 @@ async def animatePlayerHomeMove(moves, P1marbles, P1END, game):
     return P1marbles, P1END, won
 
 
+async def displayAggravationMessage(aggressor_player, victim_player):
+    """Display aggravation message when a player sends opponent home."""
+    aggressor_color = PLAYER_COLORS[aggressor_player]
+    
+    # Create aggravation message
+    msg = f"Player {aggressor_player} AGGRAVATED Player {victim_player}!"
+    msg_surf = BASICFONT.render(msg, True, aggressor_color, BGCOLOR)
+    msg_rect = msg_surf.get_rect()
+    msg_rect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    
+    # Save the background behind the message so we can restore it
+    background_save = DISPLAYSURF.subsurface(msg_rect).copy()
+    
+    # Flash the message with visual effect
+    for _ in range(3):
+        # Draw message
+        DISPLAYSURF.blit(msg_surf, msg_rect)
+        pygame.display.update()
+        await asyncio.sleep(0.2)  # 200ms
+        
+        # Clear message by restoring background
+        DISPLAYSURF.blit(background_save, msg_rect)
+        pygame.display.update()
+        await asyncio.sleep(0.1)  # 100ms
+    
+    # Show final message for a moment
+    DISPLAYSURF.blit(msg_surf, msg_rect)
+    pygame.display.update()
+    await asyncio.sleep(0.5)  # 500ms
+    
+    # Clear the message by restoring background
+    DISPLAYSURF.blit(background_save, msg_rect)
+    pygame.display.update()
+
+async def animateAggravation(victim_player, from_pos, game):
+    """Animate opponent marble returning to home after aggravation."""
+    victim_color = PLAYER_COLORS[victim_player]
+    
+    # Flash the marble at its current position before removing
+    for _ in range(3):
+        drawPlayerBox(victim_color, from_pos)
+        await asyncio.sleep(0.1)  # 100ms
+        drawBoardBox(from_pos)
+        await asyncio.sleep(0.1)  # 100ms
+    
+    # Clear the position where marble was
+    drawBoardBox(from_pos)
+    
+    # Get the actual home position where the marble was sent to
+    # (send_marble_home() has already been called, so check the game state)
+    victim_home = get_player_home(game, victim_player)
+    if len(victim_home) > 0:
+        # Try to infer which home position is newly occupied by inspecting the display.
+        # This avoids assuming any particular ordering of victim_home.
+        home_pos = None
+        for pos in victim_home:
+            # Look at the center pixel of this home position.
+            left, top = leftTopCoordsOfBox(pos[0], pos[1])
+            center_x = left + 5
+            center_y = top + 5
+            # If this position is not currently showing the victim's color, treat it
+            # as the newly returned marble's home position.
+            if DISPLAYSURF.get_at((center_x, center_y)) != victim_color:
+                home_pos = pos
+                break
+        
+        # If we can't determine the new home position reliably, skip the home animation.
+        if home_pos is None:
+            return
+            
+        left, top = leftTopCoordsOfBox(home_pos[0], home_pos[1])
+        
+        for _ in range(3):
+            # Blink ON: Draw the marble (using drawBoardBox which handles background clearing)
+            drawBoardBox(home_pos)
+            await asyncio.sleep(0.1)  # 100ms
+            
+            # Blink OFF: Draw the empty white box
+            pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+            pygame.display.update()
+            await asyncio.sleep(0.1)  # 100ms
+        
+        # Final draw of marble in home - use drawBoardBox to ensure correct look
+        drawBoardBox(home_pos)
+
+
 async def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
     """
     Animate any player's marble movement using game engine for position calculations.
@@ -644,6 +731,7 @@ async def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, play
     
     inFinalHome = marble_pos in finalHome
     current_pos = marble_pos
+    old_pos = marble_pos
     
     for move in range(moves):
         # Use game engine methods for position calculation
@@ -658,11 +746,51 @@ async def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, play
         print(f'Player {player} move {move} to {coords}')
         drawPlayerBox(player_color, coords)
         await asyncio.sleep(SIMSPEED / 1000.0)  # Convert ms to seconds for async sleep
-        drawBoardBox(current_pos)
-        oldLocation = current_pos
+        
+        # Check if we are jumping over another marble (and not just leaving our start)
+        occupant = game.find_marble_at_position(current_pos)
+        if occupant and current_pos != old_pos:
+            # We are jumping over someone - redraw them
+            # First clear the spot (removes moving marble artifact)
+            drawBoardBox(current_pos)
+            # Then redraw the occupant
+            occ_player, _ = occupant
+            drawPlayerBox(PLAYER_COLORS[occ_player], current_pos)
+        else:
+            # Just clear the spot
+            drawBoardBox(current_pos)
+
         current_pos = coords
-        player_marbles[player_marbles.index(oldLocation)] = current_pos
-        print(f'Player {player} marbles tracking: {player_marbles}')
+        print(f'Player {player} marbles tracking (moving to): {coords}')
+
+    # Check for aggravation BEFORE updating marble position
+    # This is critical - we need to find opponent marble at destination before we overwrite it
+    final_pos = current_pos
+    if final_pos not in finalHome:  # Can't aggravate in safe zone
+        opponent = game.find_marble_at_position(final_pos)
+        if opponent is not None and opponent[0] != player:
+            opp_player, opp_marble_idx = opponent
+            # Send opponent marble home using game engine
+            opp_old_pos = game.send_marble_home(opp_player, opp_marble_idx)
+            
+            # Visual feedback - flash aggravation message
+            await displayAggravationMessage(player, opp_player)
+            
+            # Animate opponent marble returning to home
+            await animateAggravation(opp_player, opp_old_pos, game)
+            
+            # Redraw aggressor marble at the position (it was cleared by animateAggravation)
+            drawPlayerBox(player_color, final_pos)
+            
+            print(f'AGGRAVATION! Player {player} sent Player {opp_player} marble back to home from {opp_old_pos}')
+    
+    # NOW update the current player's marble position in game state
+    if old_pos in player_marbles:
+        player_marbles[player_marbles.index(old_pos)] = current_pos
+    else:
+        # Defensive check: avoid ValueError if old_pos is not in the list
+        print(f'Warning: could not find old position {old_pos} in player {player} marbles list {player_marbles}; skipping update.')
+    print(f'Player {player} marbles tracking: {player_marbles}')
 
     # Check for win condition
     won = game.check_win_condition(player)
@@ -679,34 +807,22 @@ def drawBoard():
         for boxy in range(BOARDHEIGHT):
             left, top = leftTopCoordsOfBox(boxx, boxy)
             if BOARD_TEMPLATE[boxy][boxx] == '1':
-              # Draw a small box representing a game board spot for player 1 red
-              if boxx == 15:
-                  pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
-              else:
-                  pygame.draw.circle(DISPLAYSURF, P1COLOR, (left+5, top+5), 5, 0)
+              # Draw empty spot for player 1 initial home - actual marbles drawn separately
+              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
-            if BOARD_TEMPLATE[boxy][boxx] == '2':
-              # Draw a small box representing a game board spot for player 2 yellow
-              if boxy == 8:
-                  pygame.draw.rect(DISPLAYSURF, P2COLOR, (left, top, BOXSIZE, BOXSIZE))
-              else:
-                  pygame.draw.circle(DISPLAYSURF, P2COLOR, (left+5, top+5), 5, 0)
+            elif BOARD_TEMPLATE[boxy][boxx] == '2':
+              # Draw empty spot for player 2 initial home - actual marbles drawn separately
+              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
-            if BOARD_TEMPLATE[boxy][boxx] == '3':
-              # Draw a small box representing a game board spot for player 3 green
-              if boxx == 15:
-                  pygame.draw.rect(DISPLAYSURF, P3COLOR, (left, top, BOXSIZE, BOXSIZE))
-              else:
-                  pygame.draw.circle(DISPLAYSURF, P3COLOR, (left+5, top+5), 5, 0)
+            elif BOARD_TEMPLATE[boxy][boxx] == '3':
+              # Draw empty spot for player 3 initial home - actual marbles drawn separately
+              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
-            if BOARD_TEMPLATE[boxy][boxx] == '4':
-              # Draw a small box representing a game board spot for player 4 blue
-              if boxy == 8:
-                  pygame.draw.rect(DISPLAYSURF, P4COLOR, (left, top, BOXSIZE, BOXSIZE))
-              else:
-                  pygame.draw.circle(DISPLAYSURF, P4COLOR, (left+5, top+5), 5, 0)
+            elif BOARD_TEMPLATE[boxy][boxx] == '4':
+              # Draw empty spot for player 4 initial home - actual marbles drawn separately
+              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
-            if BOARD_TEMPLATE[boxy][boxx] == SPOT:
+            elif BOARD_TEMPLATE[boxy][boxx] == SPOT:
               # Draw a small box representing a game board spot
 
               pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
