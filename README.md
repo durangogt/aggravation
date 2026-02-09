@@ -43,10 +43,13 @@ Aggravation is a classic marble race board game where players compete to move al
 
 ### Web Version (`web/`)
 - 🌐 **Browser-playable version** using Pygbag (WebAssembly)
-- 📱 **Mobile-friendly** - works on iPhone/iOS Safari
+- 📱 **Mobile-friendly** - works on iPhone/iOS Safari and Android Chrome
 - ☁️ **No installation required** - play directly in browser
 - ⚡ **Auto-deployed** to GitHub Pages via GitHub Actions
 - 🎮 **Same gameplay** as desktop version
+- ✅ **Mobile fix applied** - no "Ready to start!" blocking on mobile devices
+
+**Play now:** [https://durangogt.github.io/aggravation/](https://durangogt.github.io/aggravation/)
 
 ### Four-in-a-Row Game (`fourinarow.py`)
 - 🎯 Connect Four clone implementation
@@ -231,6 +234,7 @@ aggravation/
 
 ### Testing & Validation
 
+#### Desktop Tests
 ```bash
 # Syntax check
 python -m py_compile aggravation.py
@@ -241,6 +245,30 @@ python -c "import aggravation; print('Import successful')"
 # Quick game startup test
 timeout 5 python aggravation.py
 ```
+
+#### Mobile Browser Tests
+Comprehensive Playwright-based tests for mobile Safari and Chrome compatibility:
+
+```bash
+# Install test dependencies
+pip install -r requirements-test.txt
+playwright install chromium webkit
+
+# Run all mobile browser tests
+pytest test_mobile_browsers.py -v -s
+
+# Run specific mobile platform tests
+pytest test_mobile_browsers.py::test_mobile_safari_specific -v -s
+pytest test_mobile_browsers.py::test_mobile_chrome_specific -v -s
+```
+
+**Mobile Test Coverage:**
+- ✅ iPhone 14 Pro (iOS 17, Safari)
+- ✅ iPhone 13 (iOS 16, Safari)  
+- ✅ Pixel 7 (Android 13, Chrome)
+- ✅ Galaxy S21 (Android 12, Chrome)
+
+**📖 See [TESTING_MOBILE.md](TESTING_MOBILE.md) for detailed mobile testing documentation.**
 
 ### Development Environment
 

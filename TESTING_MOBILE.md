@@ -108,6 +108,14 @@ pytest test_mobile_browsers.py -v -s -n auto
 
 ## Test Output
 
+### Sample Screenshots
+
+The repository includes sample screenshots from test runs:
+- `mobile_test_initial.png` - Game loaded on iPhone 14 Pro (initial state)
+- `mobile_test_after_roll.png` - Game state after rolling dice
+
+These demonstrate that the game loads correctly on mobile devices without getting stuck.
+
 ### Console Output
 - Each test prints detailed progress information
 - Device being tested
