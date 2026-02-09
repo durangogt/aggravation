@@ -338,6 +338,14 @@ def main():
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
     drawBoard()
     
+    # Draw initial marbles in home for all players
+    for player_num in range(1, 5):
+        player_color = PLAYER_COLORS[player_num]
+        player_home = get_player_home(game, player_num)
+        for home_pos in player_home:
+            if home_pos and home_pos != (None, None):
+                drawPlayerBox(player_color, home_pos)
+    
     def drawCurrentPlayerIndicator():
         """Draw indicator showing whose turn it is."""
         # Clear previous indicator
@@ -954,34 +962,22 @@ def drawBoard():
         for boxy in range(BOARDHEIGHT):
             left, top = leftTopCoordsOfBox(boxx, boxy)
             if BOARD_TEMPLATE[boxy][boxx] == '1':
-              # Draw a small box representing a game board spot for player 1 red
-              if boxx == 15:
-                  pygame.draw.rect(DISPLAYSURF, P1COLOR, (left, top, BOXSIZE, BOXSIZE))
-              else:
-                  pygame.draw.circle(DISPLAYSURF, P1COLOR, (left+5, top+5), 5, 0)
+              # Draw empty spot for player 1 initial home - actual marbles drawn separately
+              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
-            if BOARD_TEMPLATE[boxy][boxx] == '2':
-              # Draw a small box representing a game board spot for player 2 yellow
-              if boxy == 8:
-                  pygame.draw.rect(DISPLAYSURF, P2COLOR, (left, top, BOXSIZE, BOXSIZE))
-              else:
-                  pygame.draw.circle(DISPLAYSURF, P2COLOR, (left+5, top+5), 5, 0)
+            elif BOARD_TEMPLATE[boxy][boxx] == '2':
+              # Draw empty spot for player 2 initial home - actual marbles drawn separately
+              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
-            if BOARD_TEMPLATE[boxy][boxx] == '3':
-              # Draw a small box representing a game board spot for player 3 green
-              if boxx == 15:
-                  pygame.draw.rect(DISPLAYSURF, P3COLOR, (left, top, BOXSIZE, BOXSIZE))
-              else:
-                  pygame.draw.circle(DISPLAYSURF, P3COLOR, (left+5, top+5), 5, 0)
+            elif BOARD_TEMPLATE[boxy][boxx] == '3':
+              # Draw empty spot for player 3 initial home - actual marbles drawn separately
+              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
-            if BOARD_TEMPLATE[boxy][boxx] == '4':
-              # Draw a small box representing a game board spot for player 4 blue
-              if boxy == 8:
-                  pygame.draw.rect(DISPLAYSURF, P4COLOR, (left, top, BOXSIZE, BOXSIZE))
-              else:
-                  pygame.draw.circle(DISPLAYSURF, P4COLOR, (left+5, top+5), 5, 0)
+            elif BOARD_TEMPLATE[boxy][boxx] == '4':
+              # Draw empty spot for player 4 initial home - actual marbles drawn separately
+              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
-            if BOARD_TEMPLATE[boxy][boxx] == SPOT:
+            elif BOARD_TEMPLATE[boxy][boxx] == SPOT:
               # Draw a small box representing a game board spot
 
               pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
