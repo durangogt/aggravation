@@ -79,10 +79,25 @@ In repository Settings > Pages:
 2. **Async Sleep**: Added `await asyncio.sleep(0)` in the game loop for Pygbag compatibility
 3. **No Headless Mode**: Browser doesn't need headless mode checks
 4. **WebAssembly Runtime**: Runs in browser via WebAssembly instead of native Python
+5. **UME Block Disabled**: Uses `--ume_block 0` flag for mobile browser compatibility
+
+## Mobile Browser Compatibility
+
+The build uses `--ume_block 0` to disable User Media Engagement blocking. This fixes the issue where the game gets stuck at "Ready to start!" on mobile Safari and Chrome browsers.
+
+**Why this is needed:**
+- Mobile browsers (especially iOS Safari/Chrome) have strict touch event handling
+- Pygbag's default UME wait doesn't reliably detect touch events on mobile devices
+- Disabling UME blocking allows the game to start immediately without waiting for user interaction
+- This is a known Pygbag limitation documented in [issue #82](https://github.com/pygame-web/pygbag/issues/82) and [issue #138](https://github.com/pygame-web/pygbag/issues/138)
+
+**Trade-offs:**
+- Audio may not autoplay on first load (browser security requirement)
+- Currently this game doesn't use audio, so there's no negative impact
 
 ## Notes
 
 - All game logic and functionality is identical to the desktop version
 - Uses the same `game_engine.py` for core game logic
-- Works on mobile devices including iPhone/iOS Safari
+- Works on mobile devices including iPhone/iOS Safari and Chrome
 - No additional assets needed (uses pygame's built-in freesansbold.ttf font)

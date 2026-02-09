@@ -162,3 +162,11 @@ Thumbs.db
 
 # Web build - game_engine.py is copied from root by build script
 web/game_engine.py
+web/build/
+
+# Test artifacts
+test-results/
+playwright-report/
+test_screenshots/
+/tmp/*.png
+*.png.tmp
