@@ -260,6 +260,14 @@ async def run():
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
     drawBoard()
     
+    # Draw initial marbles in home for all players
+    for player_num in range(1, 5):
+        player_color = PLAYER_COLORS[player_num]
+        player_home = get_player_home(game, player_num)
+        for home_pos in player_home:
+            if home_pos and home_pos != (None, None):
+                drawPlayerBox(player_color, home_pos)
+    
     def drawCurrentPlayerIndicator():
         """Draw indicator showing whose turn it is."""
         # Clear previous indicator
