@@ -707,8 +707,8 @@ async def animateAggravation(victim_player, from_pos, game):
         left, top = leftTopCoordsOfBox(home_pos[0], home_pos[1])
         
         for _ in range(3):
-            # Blink ON: Draw the marble (using drawBoardBox which handles background clearing)
-            drawBoardBox(home_pos)
+            # Blink ON: Draw the marble at the home position
+            drawPlayerBox(victim_color, home_pos)
             await asyncio.sleep(0.1)  # 100ms
             
             # Blink OFF: Draw the empty white box
@@ -716,8 +716,8 @@ async def animateAggravation(victim_player, from_pos, game):
             pygame.display.update()
             await asyncio.sleep(0.1)  # 100ms
         
-        # Final draw of marble in home - use drawBoardBox to ensure correct look
-        drawBoardBox(home_pos)
+        # Final draw of marble in home position
+        drawPlayerBox(victim_color, home_pos)
 
 
 async def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, player):
@@ -785,9 +785,9 @@ async def animatePlayerMoveGeneric(moves, player_marbles, marble_pos, game, play
             print(f'AGGRAVATION! Player {player} sent Player {opp_player} marble back to home from {opp_old_pos}')
     
     # NOW update the current player's marble position in game state
-    if old_pos in player_marbles:
+    try:
         player_marbles[player_marbles.index(old_pos)] = current_pos
-    else:
+    except ValueError:
         # Defensive check: avoid ValueError if old_pos is not in the list
         print(f'Warning: could not find old position {old_pos} in player {player} marbles list {player_marbles}; skipping update.')
     print(f'Player {player} marbles tracking: {player_marbles}')
