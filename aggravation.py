@@ -309,6 +309,11 @@ def main():
 
     TURNOVER_SURF, TURNOVER_RECT = makeText('TURN OVER',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEARTURNOVER_SURF, CLEARTURNOVER_RECT = makeText('TURN OVER',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+    
+    # Message surfaces dictionary for already rolled
+    ALREADY_ROLLED_SURFS = {}
+    CLEAR_ALREADY_ROLLED_SURF = None
+    ALREADY_ROLLED_RECT = None
 
     TEST_SURF, TEST_RECT = makeText('DEBUG', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 30)
     
@@ -334,6 +339,7 @@ def main():
     gameWon = False
     winner = None
     moves = 0  # Track current dice roll
+    has_rolled = False  # Track if current player has already rolled this turn
 
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
     drawBoard()
@@ -389,6 +395,8 @@ def main():
             DISPLAYSURF.blit(CLEARERROR_SURF, CLEARERROR_RECT)          # clear 'invalid choice' text
             DISPLAYSURF.blit(CLEARTURNOVER_SURF, CLEARTURNOVER_RECT)    # clear 'TURN OVER' text
             DISPLAYSURF.blit(CLEARERROR2_SURF, CLEARERROR2_RECT)        # clear 'no marbles home' text
+            if CLEAR_ALREADY_ROLLED_SURF and ALREADY_ROLLED_RECT:       # clear 'already rolled' text
+                DISPLAYSURF.blit(CLEAR_ALREADY_ROLLED_SURF, ALREADY_ROLLED_RECT)
 
             pygame.display.update()                                     # update screen with invisible text
             if event.type == MOUSEBUTTONUP:
@@ -419,6 +427,19 @@ def main():
                                 drawPlayerBox(player_color, marble)
 
                     if (ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos) or ROLL6_RECT.collidepoint(event.pos)):
+                        # Check if player has already rolled this turn
+                        if has_rolled:
+                            # Display message that player can only roll once
+                            msg = f"You can only roll once. Result of your roll: {moves}."
+                            if moves not in ALREADY_ROLLED_SURFS:
+                                ALREADY_ROLLED_SURFS[moves], ALREADY_ROLLED_RECT = makeText(msg, TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+                                # Create clear surface for this message if not exists
+                                if CLEAR_ALREADY_ROLLED_SURF is None:
+                                    globals()['CLEAR_ALREADY_ROLLED_SURF'], _ = makeText(msg, BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+                            displayStatus(ALREADY_ROLLED_SURFS[moves], ALREADY_ROLLED_RECT)
+                            print(msg)
+                            continue
+                        
                         print(f"Player {current_player} clicked on the ROLL Button")
 
                         # for debug purposes putting in a roll 1 & 6 button to speed up testing
@@ -431,6 +452,9 @@ def main():
                         else:
                             moves = displayDice(game)
                             print("A roll of %i has been rolled...." % moves)
+                        
+                        # Mark that player has rolled this turn
+                        has_rolled = True
 
                         # Refresh player data after roll
                         player_marbles = get_player_marbles(game, current_player)
@@ -466,6 +490,7 @@ def main():
                             set_player_start_occupied(game, current_player, True)
                             # Switch to next player after moving out
                             current_player = next_player(current_player)
+                            has_rolled = False  # Reset roll flag for next player
                             drawCurrentPlayerIndicator()
 
                         elif ((player_start_occupied == False) and (moves == 1 or moves == 6) and ((len(player_home) >= 1) and (len(player_home) < 4))):
@@ -478,6 +503,7 @@ def main():
                             displayStatus(TURNOVER_SURF, TURNOVER_RECT)
                             # No valid moves - switch to next player
                             current_player = next_player(current_player)
+                            has_rolled = False  # Reset roll flag for next player
                             drawCurrentPlayerIndicator()
                             waitingForInput = False
                             break
@@ -488,6 +514,7 @@ def main():
                                 set_player_end(game, current_player, new_end)
                                 # Switch to next player after move
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -507,6 +534,7 @@ def main():
                                 set_player_start_occupied(game, current_player, False)
                                 # Switch to next player after move
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -542,6 +570,7 @@ def main():
                             winner = loaded_game.winner
                             waitingForInput = False
                             moves = 0
+                            has_rolled = False  # Reset roll flag when loading game
                             # Redraw the entire board with new state
                             DISPLAYSURF.fill(BGCOLOR)
                             drawBoard()
@@ -609,6 +638,7 @@ def main():
                                 waitingForInput = False
                                 # Switch to next player
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -625,6 +655,7 @@ def main():
                                 waitingForInput = False
                                 # Switch to next player
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -645,6 +676,7 @@ def main():
                                 waitingForInput = False
                                 # Switch to next player
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -675,6 +707,7 @@ def main():
                             waitingForInput = False
                             # Switch to next player after moving out of home
                             current_player = next_player(current_player)
+                            has_rolled = False  # Reset roll flag for next player
                             drawCurrentPlayerIndicator()
 
                         elif (BOARD_TEMPLATE[ clickedPos[1] ][ clickedPos[0] ] == SPOT): # clicked on a marble on the board track
@@ -688,6 +721,7 @@ def main():
                                 waitingForInput = False
                                 # Switch to next player
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
