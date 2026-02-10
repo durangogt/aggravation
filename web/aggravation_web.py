@@ -12,6 +12,22 @@ from game_engine import (
     PLAYER_STARTS, PLAYER_STARTING_HOMES, PLAYER_FINAL_HOMES, PLAYER_HOME_STRETCHES
 )
 
+# Import global variables from main.py (pygbag entry point)
+# These are declared at module level in main.py for optimal WebAssembly compilation
+from __main__ import (
+    BOARD_TEMPLATE,
+    FPS, WINDOWWIDTH, WINDOWHEIGHT, REVEALSPEED, SIMSPEED,
+    BOXSIZE, GAPSIZE, BOARDWIDTH, BOARDHEIGHT, BASICFONTSIZE,
+    BLANK, SPOT, XMARGIN, YMARGIN,
+    GRAY, NAVYBLUE, WHITE, RED, GREEN, BLUE, YELLOW, ORANGE, PURPLE, CYAN, BLACK,
+    BUTTONCOLOR, BUTTONTEXTCOLOR, MESSAGECOLOR, TILECOLOR, TEXTCOLOR,
+    BGCOLOR, LIGHTBGCOLOR, BOXCOLOR, HIGHLIGHTCOLOR,
+    P1COLOR, P2COLOR, P3COLOR, P4COLOR, PLAYER_COLORS
+)
+
+# Import __main__ to access and modify mutable globals (pygame surfaces, etc.)
+import __main__
+
 # How many spaces/pixels wide & tall is the board?
 # 27 spaces tall with one filled in every other
 # 30 spaces wide with one filled in every other
@@ -46,81 +62,6 @@ PLAYER 4 STARTING POSITION IS (1, 6)    # per P4START
 1st safe spot (home stretch) entry point is (5, 10)
 
 '''
-
-BOARD_TEMPLATE =    ['...............................',
-                     '...........#.#.#.#.#...........',
-                     '...1.......#...1...#.......2...',
-                     '.....1.....#...1...#.....2.....',
-                     '.......1...#...1...#...2.......',
-                     '.........1.#...1...#.2.........',
-                     '.#.#.#.#.#.#.......#.#.#.#.#.#.',
-                     '.#...........................#.',
-                     '.#.4.4.4.4.....#.....2.2.2.2.#.',
-                     '.#...........................#.',
-                     '.#.#.#.#.#.#.......#.#.#.#.#.#.',
-                     '.........4.#...3...#.3.........',
-                     '.......4...#...3...#...3.......',
-                     '.....4.....#...3...#.....3.....',
-                     '...4.......#...3...#.......3...',
-                     '...........#.#.#.#.#...........',
-                     '...............................']
-
-# Player colors indexed by player number (set after color definitions)
-PLAYER_COLORS = {1: None, 2: None, 3: None, 4: None}
-
-P1END = None # stores the (x, y) of the last board spot per turn
-P2END = None # stores the (x, y) of the last board spot per turn
-P3END = None # stores the (x, y) of the last board spot per turn
-P4END = None # stores the (x, y) of the last board spot per turn
-
-FPS = 30 # frames per second, the general speed of the program
-WINDOWWIDTH = 640 # size of window's width in pixels
-WINDOWHEIGHT = 480 # size of windows' height in pixels
-REVEALSPEED = 8 # speed of player movement in simulation
-SIMSPEED = 250 # speed of game simulation
-BOXSIZE = 10 # size of box height & width in pixels (using box size for now to be the board spot marker)
-GAPSIZE = 10 # size of gap between boxes in pixels
-BOARDWIDTH = 30 # number of columns of icons
-BOARDHEIGHT = 16 # number of rows of icons
-BASICFONTSIZE = 20 # font size of options buttons
-
-BLANK = '.'
-SPOT = '#'
-
-#assert (BOARDWIDTH * BOARDHEIGHT) % 2 == 0, 'Board needs to have an even number of boxes for pairs of matches.'
-XMARGIN = int((WINDOWWIDTH - (BOARDWIDTH * (BOXSIZE + GAPSIZE))) / 2)
-YMARGIN = int((WINDOWHEIGHT - (BOARDHEIGHT * (BOXSIZE + GAPSIZE))) / 2)
-
-#            R    G    B
-GRAY     = (100, 100, 100)
-NAVYBLUE = ( 60,  60, 100)
-WHITE    = (255, 255, 255)
-RED      = (255,   0,   0)
-GREEN    = (  0, 255,   0)
-BLUE     = (  0,   0, 255)
-YELLOW   = (255, 255,   0)
-ORANGE   = (255, 128,   0)
-PURPLE   = (255,   0, 255)
-CYAN     = (  0, 255, 255)
-BLACK    = (  0,   0,   0)
-
-BUTTONCOLOR = WHITE
-BUTTONTEXTCOLOR = BLACK
-MESSAGECOLOR = WHITE
-TILECOLOR = BLACK
-TEXTCOLOR = WHITE
-BGCOLOR = NAVYBLUE
-LIGHTBGCOLOR = GRAY
-BOXCOLOR = WHITE
-HIGHLIGHTCOLOR = BLUE
-
-P1COLOR = RED
-P2COLOR = BLACK
-P3COLOR = GREEN
-P4COLOR = BLUE
-
-# Set player colors dict after color definitions
-PLAYER_COLORS = {1: RED, 2: BLACK, 3: GREEN, 4: BLUE}
 
 def get_player_marbles(game, player):
     """Get marble positions for the specified player."""
@@ -205,38 +146,34 @@ def next_player(current_player, num_players=4):
 
 async def run():
     """Main async game loop for Pygbag web version."""
-    global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT, CLEAR_SURF, CLEAR_RECT, ROLL6_SURF, ROLL6_RECT
-    global PLAYERROR_SURF, PLAYERROR_RECT, CLEARERROR_SURF, CLEARERROR_RECT
-    global TEST_SURF, TEST_RECT
-    
     # Initialize game engine
     game = AggravationGame()
     current_player = 1  # Track whose turn it is
     
     pygame.init()
-    FPSCLOCK = pygame.time.Clock()
-    DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+    __main__.FPSCLOCK = pygame.time.Clock()
+    __main__.DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     pygame.display.set_caption('Aggravation')
 
-    BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
+    __main__.BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
 
     # Store the option buttons and their rectangles in OPTIONS.
-    ROLL_SURF, ROLL_RECT = makeText('Roll',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
-    ROLL1_SURF,   ROLL1_RECT   = makeText('ROLL 1', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
-    ROLL6_SURF,   ROLL6_RECT   = makeText('ROLL 6', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 60)
-    EXIT_SURF, EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
-    OPTION_SURF, OPTION_RECT = makeText('Click Marble to Move',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-    CLEAR_SURF, CLEAR_RECT = makeText('Click Marble to Move',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+    __main__.ROLL_SURF, __main__.ROLL_RECT = makeText('Roll',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
+    __main__.ROLL1_SURF,   __main__.ROLL1_RECT   = makeText('ROLL 1', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
+    __main__.ROLL6_SURF,   __main__.ROLL6_RECT   = makeText('ROLL 6', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 60)
+    __main__.EXIT_SURF, __main__.EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
+    __main__.OPTION_SURF, __main__.OPTION_RECT = makeText('Click Marble to Move',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+    __main__.CLEAR_SURF, __main__.CLEAR_RECT = makeText('Click Marble to Move',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
-    PLAYERROR_SURF, PLAYERROR_RECT = makeText('Cant jump own marbles',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-    CLEARERROR_SURF, CLEARERROR_RECT = makeText('Cant jump own marbles',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+    __main__.PLAYERROR_SURF, __main__.PLAYERROR_RECT = makeText('Cant jump own marbles',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+    __main__.CLEARERROR_SURF, __main__.CLEARERROR_RECT = makeText('Cant jump own marbles',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     PLAYERROR2_SURF, PLAYERROR2_RECT = makeText('No marbles in home',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEARERROR2_SURF, CLEARERROR2_RECT = makeText('No marbles in home',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
     TURNOVER_SURF, TURNOVER_RECT = makeText('TURN OVER',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
     CLEARTURNOVER_SURF, CLEARTURNOVER_RECT = makeText('TURN OVER',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
 
-    TEST_SURF, TEST_RECT = makeText('DEBUG', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 30)
+    __main__.TEST_SURF, __main__.TEST_RECT = makeText('DEBUG', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 30)
 
     # Winner messages for each player
     WINNER_SURFS = {
@@ -249,7 +186,7 @@ async def run():
     # Current player indicator position
     PLAYER_TURN_POS = (10, 10)
 
-    DISPLAYSURF.fill(BGCOLOR)
+    __main__.DISPLAYSURF.fill(BGCOLOR)
 
     # Use game engine state instead of local variables
     waitingForInput = False
@@ -257,7 +194,7 @@ async def run():
     winner = None
     moves = 0  # Track current dice roll
 
-    DISPLAYSURF.fill(BGCOLOR) # drawing the window
+    __main__.DISPLAYSURF.fill(BGCOLOR) # drawing the window
     drawBoard()
     
     # Draw initial marbles in home for all players
@@ -271,11 +208,11 @@ async def run():
     def drawCurrentPlayerIndicator():
         """Draw indicator showing whose turn it is."""
         # Clear previous indicator
-        pygame.draw.rect(DISPLAYSURF, BGCOLOR, (PLAYER_TURN_POS[0], PLAYER_TURN_POS[1], 200, 25))
+        pygame.draw.rect(__main__.DISPLAYSURF, BGCOLOR, (PLAYER_TURN_POS[0], PLAYER_TURN_POS[1], 200, 25))
         # Draw new indicator
         player_text = f"Player {current_player}'s Turn"
-        text_surf = BASICFONT.render(player_text, True, PLAYER_COLORS[current_player])
-        DISPLAYSURF.blit(text_surf, PLAYER_TURN_POS)
+        text_surf = __main__.BASICFONT.render(player_text, True, PLAYER_COLORS[current_player])
+        __main__.DISPLAYSURF.blit(text_surf, PLAYER_TURN_POS)
     
     drawCurrentPlayerIndicator()
 
@@ -294,23 +231,23 @@ async def run():
         # If game is won, just display winner and wait for exit
         if gameWon:
             winner_surf, winner_rect = WINNER_SURFS[winner]
-            DISPLAYSURF.blit(winner_surf, winner_rect)
+            __main__.DISPLAYSURF.blit(winner_surf, winner_rect)
             pygame.display.update()
             checkForQuit()
             for event in pygame.event.get():
                 if event.type == MOUSEBUTTONUP:
-                    if EXIT_RECT.collidepoint(event.pos):
+                    if __main__.EXIT_RECT.collidepoint(event.pos):
                         terminate()
-            FPSCLOCK.tick(FPS)
+            __main__.FPSCLOCK.tick(FPS)
             continue
 
         checkForQuit()
         for event in pygame.event.get(): # event handling loop
 
-            DISPLAYSURF.blit(CLEAR_SURF, CLEAR_RECT)                    # clear 'click marble to move' text
-            DISPLAYSURF.blit(CLEARERROR_SURF, CLEARERROR_RECT)          # clear 'invalid choice' text
-            DISPLAYSURF.blit(CLEARTURNOVER_SURF, CLEARTURNOVER_RECT)    # clear 'TURN OVER' text
-            DISPLAYSURF.blit(CLEARERROR2_SURF, CLEARERROR2_RECT)        # clear 'no marbles home' text
+            __main__.DISPLAYSURF.blit(__main__.CLEAR_SURF, __main__.CLEAR_RECT)                    # clear 'click marble to move' text
+            __main__.DISPLAYSURF.blit(__main__.CLEARERROR_SURF, __main__.CLEARERROR_RECT)          # clear 'invalid choice' text
+            __main__.DISPLAYSURF.blit(CLEARTURNOVER_SURF, CLEARTURNOVER_RECT)    # clear 'TURN OVER' text
+            __main__.DISPLAYSURF.blit(CLEARERROR2_SURF, CLEARERROR2_RECT)        # clear 'no marbles home' text
 
             pygame.display.update()                                     # update screen with invisible text
             if event.type == MOUSEBUTTONUP:
@@ -319,7 +256,7 @@ async def run():
                 boxx, boxy = getBoxAtPixel(mousex, mousey)
                 if boxx is None and boxy is None:
                     # check if the user clicked on an option button
-                    if ( TEST_RECT.collidepoint(event.pos) ): # if clicked the debug button setup marbles going home
+                    if ( __main__.TEST_RECT.collidepoint(event.pos) ): # if clicked the debug button setup marbles going home
                         # Debug: set up current player's marbles near home
                         if current_player == 1:
                             game.p1_marbles = [(11,2), (11,3), (11,4), (11,5)]
@@ -339,14 +276,14 @@ async def run():
                             if marble and marble != (None, None):
                                 drawPlayerBox(player_color, marble)
 
-                    if (ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos) or ROLL6_RECT.collidepoint(event.pos)):
+                    if (__main__.ROLL_RECT.collidepoint(event.pos) or __main__.ROLL1_RECT.collidepoint(event.pos) or __main__.ROLL6_RECT.collidepoint(event.pos)):
                         print(f"Player {current_player} clicked on the ROLL Button")
 
                         # for debug purposes putting in a roll 1 & 6 button to speed up testing
-                        if ROLL1_RECT.collidepoint(event.pos):
+                        if __main__.ROLL1_RECT.collidepoint(event.pos):
                             moves = 1
                             print("A roll of 1 has been rolled....manually")
-                        elif ROLL6_RECT.collidepoint(event.pos):
+                        elif __main__.ROLL6_RECT.collidepoint(event.pos):
                             moves = 6
                             print("A roll of 6 has been rolled....manually")
                         else:
@@ -361,7 +298,7 @@ async def run():
 
                         if ((player_start_occupied == True) and ((len(player_home) >= 0) and (len(player_home) < 3))): # if marble on start & 1 or more marbles in home
                             # display option to choose marble to move....
-                            await displayStatus(OPTION_SURF, OPTION_RECT)
+                            await displayStatus(__main__.OPTION_SURF, __main__.OPTION_RECT)
                             waitingForInput = True
                             break
 
@@ -381,7 +318,7 @@ async def run():
 
                         elif ((player_start_occupied == False) and (moves == 1 or moves == 6) and ((len(player_home) >= 1) and (len(player_home) < 4))):
                             # choose to move out of home or move a marble on the table...
-                            await displayStatus(OPTION_SURF, OPTION_RECT)
+                            await displayStatus(__main__.OPTION_SURF, __main__.OPTION_RECT)
                             waitingForInput = True
                             break
 
@@ -402,12 +339,12 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(__main__.PLAYERROR_SURF, __main__.PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                         elif ((player_start_occupied == False) and (moves not in (1, 6)) and ((len(player_home) == 2) or (len(player_home) == 1) or (len(player_home) == 0))):
                             # display option to choose marble to move....
-                            await displayStatus(OPTION_SURF, OPTION_RECT)
+                            await displayStatus(__main__.OPTION_SURF, __main__.OPTION_RECT)
                             waitingForInput = True
                             break
 
@@ -421,19 +358,19 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(__main__.PLAYERROR_SURF, __main__.PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                         else:
                             print(f"DEBUG: missing a marble decision option: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
-                    elif ROLL1_RECT.collidepoint(event.pos):
+                    elif __main__.ROLL1_RECT.collidepoint(event.pos):
                         print("Clicked on the ROLL 1 Button") # clicked on New Game button
 
-                    elif OPTION_RECT.collidepoint(event.pos):
+                    elif __main__.OPTION_RECT.collidepoint(event.pos):
                         print("Clicked on the OPTION Button") # clicked on New Game button
 
-                    elif EXIT_RECT.collidepoint(event.pos):
+                    elif __main__.EXIT_RECT.collidepoint(event.pos):
                         print("Clicked on the EXIT Button") # clicked on EXIT button
                         terminate()
                 else:
@@ -466,7 +403,7 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(__main__.PLAYERROR_SURF, __main__.PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                         elif (clickedPos != player_start and clickedPos in player_marbles):  # clicked on a marble NOT on start
@@ -482,7 +419,7 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(__main__.PLAYERROR_SURF, __main__.PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                     elif(player_start_occupied == False and waitingForInput == True):
@@ -502,7 +439,7 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(__main__.PLAYERROR_SURF, __main__.PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
                         
                         # Check if clicked on STARTING home (remove marble and place on start)
@@ -524,7 +461,7 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print(f"Cannot move out of home with a {moves} - need 1 or 6")
-                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(__main__.PLAYERROR_SURF, __main__.PLAYERROR_RECT)
 
                         elif (BOARD_TEMPLATE[ clickedPos[1] ][ clickedPos[0] ] == SPOT): # clicked on a marble on the board track
                             print(f"DEBUG: Clicked on board spot {clickedPos}, checking if valid move...")
@@ -540,7 +477,7 @@ async def run():
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
-                                await displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
+                                await displayStatus(__main__.PLAYERROR_SURF, __main__.PLAYERROR_RECT)
                                 print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
                         elif clickedPos in playerStartingHome and len(player_home) == 0:
@@ -550,7 +487,7 @@ async def run():
 
         # Redraw the screen and wait a clock tick.
         pygame.display.update()
-        FPSCLOCK.tick(FPS)
+        __main__.FPSCLOCK.tick(FPS)
         await asyncio.sleep(0)
 
 def isValidMove(moves, P1marbles, P1END, game):
@@ -576,7 +513,7 @@ def isValidMoveForPlayer(moves, player_marbles, marble_pos, game, player):
 
 async def displayStatus(passed_SURF, passed_RECT):
     """Display a status message for 2 seconds without blocking the async runtime."""
-    DISPLAYSURF.blit(passed_SURF, passed_RECT)
+    __main__.DISPLAYSURF.blit(passed_SURF, passed_RECT)
     pygame.display.update()
     # Use async sleep instead of pygame.time.wait to avoid blocking
     await asyncio.sleep(2.0)
@@ -648,32 +585,32 @@ async def displayAggravationMessage(aggressor_player, victim_player):
     
     # Create aggravation message
     msg = f"Player {aggressor_player} AGGRAVATED Player {victim_player}!"
-    msg_surf = BASICFONT.render(msg, True, aggressor_color, BGCOLOR)
+    msg_surf = __main__.BASICFONT.render(msg, True, aggressor_color, BGCOLOR)
     msg_rect = msg_surf.get_rect()
     msg_rect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
     
     # Save the background behind the message so we can restore it
-    background_save = DISPLAYSURF.subsurface(msg_rect).copy()
+    background_save = __main__.DISPLAYSURF.subsurface(msg_rect).copy()
     
     # Flash the message with visual effect
     for _ in range(3):
         # Draw message
-        DISPLAYSURF.blit(msg_surf, msg_rect)
+        __main__.DISPLAYSURF.blit(msg_surf, msg_rect)
         pygame.display.update()
         await asyncio.sleep(0.2)  # 200ms
         
         # Clear message by restoring background
-        DISPLAYSURF.blit(background_save, msg_rect)
+        __main__.DISPLAYSURF.blit(background_save, msg_rect)
         pygame.display.update()
         await asyncio.sleep(0.1)  # 100ms
     
     # Show final message for a moment
-    DISPLAYSURF.blit(msg_surf, msg_rect)
+    __main__.DISPLAYSURF.blit(msg_surf, msg_rect)
     pygame.display.update()
     await asyncio.sleep(0.5)  # 500ms
     
     # Clear the message by restoring background
-    DISPLAYSURF.blit(background_save, msg_rect)
+    __main__.DISPLAYSURF.blit(background_save, msg_rect)
     pygame.display.update()
 
 async def animateAggravation(victim_player, from_pos, game):
@@ -704,7 +641,7 @@ async def animateAggravation(victim_player, from_pos, game):
             center_y = top + 5
             # If this position is not currently showing the victim's color, treat it
             # as the newly returned marble's home position.
-            if DISPLAYSURF.get_at((center_x, center_y)) != victim_color:
+            if __main__.DISPLAYSURF.get_at((center_x, center_y)) != victim_color:
                 home_pos = pos
                 break
         
@@ -720,7 +657,7 @@ async def animateAggravation(victim_player, from_pos, game):
             await asyncio.sleep(0.1)  # 100ms
             
             # Blink OFF: Draw the empty white box
-            pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+            pygame.draw.rect(__main__.DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
             pygame.display.update()
             await asyncio.sleep(0.1)  # 100ms
         
@@ -816,30 +753,30 @@ def drawBoard():
             left, top = leftTopCoordsOfBox(boxx, boxy)
             if BOARD_TEMPLATE[boxy][boxx] == '1':
               # Draw empty spot for player 1 initial home - actual marbles drawn separately
-              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+              pygame.draw.rect(__main__.DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
             elif BOARD_TEMPLATE[boxy][boxx] == '2':
               # Draw empty spot for player 2 initial home - actual marbles drawn separately
-              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+              pygame.draw.rect(__main__.DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
             elif BOARD_TEMPLATE[boxy][boxx] == '3':
               # Draw empty spot for player 3 initial home - actual marbles drawn separately
-              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+              pygame.draw.rect(__main__.DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
             elif BOARD_TEMPLATE[boxy][boxx] == '4':
               # Draw empty spot for player 4 initial home - actual marbles drawn separately
-              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+              pygame.draw.rect(__main__.DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
             elif BOARD_TEMPLATE[boxy][boxx] == SPOT:
               # Draw a small box representing a game board spot
 
-              pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+              pygame.draw.rect(__main__.DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
-    DISPLAYSURF.blit(ROLL_SURF, ROLL_RECT)
-    DISPLAYSURF.blit(ROLL1_SURF, ROLL1_RECT)
-    DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)
-    DISPLAYSURF.blit(ROLL6_SURF, ROLL6_RECT)
-    DISPLAYSURF.blit(TEST_SURF, TEST_RECT)
+    __main__.DISPLAYSURF.blit(__main__.ROLL_SURF, __main__.ROLL_RECT)
+    __main__.DISPLAYSURF.blit(__main__.ROLL1_SURF, __main__.ROLL1_RECT)
+    __main__.DISPLAYSURF.blit(__main__.EXIT_SURF, __main__.EXIT_RECT)
+    __main__.DISPLAYSURF.blit(__main__.ROLL6_SURF, __main__.ROLL6_RECT)
+    __main__.DISPLAYSURF.blit(__main__.TEST_SURF, __main__.TEST_RECT)
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates
@@ -880,14 +817,14 @@ async def displayDice(game):
     textSurfaceObj = fontObj.render(diceString, True, GREEN, BLUE)
     textRectObj = textSurfaceObj.get_rect()
     textRectObj.center = (175, 50) # top left corner
-    DISPLAYSURF.blit(textSurfaceObj, textRectObj)
+    __main__.DISPLAYSURF.blit(textSurfaceObj, textRectObj)
     pygame.display.update()
     await asyncio.sleep(0.5)  # Convert 500ms to 0.5 seconds for async sleep
     return die1
 
 def makeText(text, color, bgcolor, top, left):
     # create the Surface and Rect objects for some text.
-    textSurf = BASICFONT.render(text, True, color, bgcolor)
+    textSurf = __main__.BASICFONT.render(text, True, color, bgcolor)
     textRect = textSurf.get_rect()
     textRect.topleft = (top, left)
     return (textSurf, textRect)
@@ -895,13 +832,13 @@ def makeText(text, color, bgcolor, top, left):
 def drawBoardBox(coords):
     # draw board box at coordinates x,y
     left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
-    pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
+    pygame.draw.rect(__main__.DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
 
 def drawPlayerBox(playerColor,coords):
     # draw player's box in board coordinates x,y
     left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
-    pygame.draw.circle(DISPLAYSURF, playerColor, (left+5, top+5), 7, 0)
+    pygame.draw.circle(__main__.DISPLAYSURF, playerColor, (left+5, top+5), 7, 0)
     pygame.display.update()
 
 def removeFromHome(PHOME):
@@ -912,6 +849,6 @@ def removeFromHome(PHOME):
         remove = PHOME[(len(PHOME)-1)]
         PHOME = PHOME[:(len(PHOME)-1)] # update global variable
         left, top = leftTopCoordsOfBox(remove[0],remove[1])
-        pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE)) # animate marble removed
+        pygame.draw.rect(__main__.DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE)) # animate marble removed
         pygame.display.update()
         return PHOME
