@@ -146,9 +146,6 @@ def next_player(current_player, num_players=4):
 
 async def run():
     """Main async game loop for Pygbag web version."""
-    # Import __main__ to modify its global variables
-    import __main__
-    
     # Initialize game engine
     game = AggravationGame()
     current_player = 1  # Track whose turn it is
