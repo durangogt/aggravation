@@ -881,10 +881,16 @@ def leftTopCoordsOfBox(boxx, boxy):
     return (left, top)
 
 def getBoxAtPixel(x, y):
+    # Increased tap target for better mobile support
+    # Use a larger hit box (1.5x) for marble detection on mobile
+    TAP_EXPANSION = 5  # Expand the tap area by 5 pixels on each side
+    
     for boxx in range(BOARDWIDTH):
         for boxy in range(BOARDHEIGHT):
             left, top = leftTopCoordsOfBox(boxx, boxy)
-            boxRect = pygame.Rect(left, top, BOXSIZE, BOXSIZE)
+            # Expand the hit box for easier tapping
+            boxRect = pygame.Rect(left - TAP_EXPANSION, top - TAP_EXPANSION, 
+                                 BOXSIZE + (TAP_EXPANSION * 2), BOXSIZE + (TAP_EXPANSION * 2))
             if boxRect.collidepoint(x, y):
                 return (boxx, boxy)
     return (None, None)
@@ -931,9 +937,18 @@ def drawBoardBox(coords):
     pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
     pygame.display.update()
 
-def drawPlayerBox(playerColor,coords):
-    # draw player's box in board coordinates x,y
-    left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
+def drawPlayerBox(playerColor, coords, highlight=False):
+    """
+    Draw player's marble in board coordinates x,y.
+    If highlight=True, draw a white outline to make it more visible/selectable.
+    """
+    left, top = leftTopCoordsOfBox(coords[0], coords[1])
+    
+    # Draw highlight ring for better visibility on mobile
+    if highlight:
+        pygame.draw.circle(DISPLAYSURF, WHITE, (left+5, top+5), 9, 2)  # White outline
+    
+    # Draw the marble
     pygame.draw.circle(DISPLAYSURF, playerColor, (left+5, top+5), 7, 0)
     pygame.display.update()
 
