@@ -354,9 +354,8 @@ async def run():
                             msg = f"You can only roll once. Result of your roll: {moves}."
                             if moves not in ALREADY_ROLLED_SURFS:
                                 ALREADY_ROLLED_SURFS[moves], ALREADY_ROLLED_RECT = makeText(msg, TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-                                # Create clear surface for this message if not exists
-                                if CLEAR_ALREADY_ROLLED_SURF is None:
-                                    globals()['CLEAR_ALREADY_ROLLED_SURF'], _ = makeText(msg, BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
+                                # Create clear surface for this message (reuse same position/size)
+                                globals()['CLEAR_ALREADY_ROLLED_SURF'] = makeText(' ' * 50, BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)[0]
                             await displayStatus(ALREADY_ROLLED_SURFS[moves], ALREADY_ROLLED_RECT)
                             print(msg)
                             continue
@@ -882,7 +881,7 @@ def leftTopCoordsOfBox(boxx, boxy):
 
 def getBoxAtPixel(x, y):
     # Increased tap target for better mobile support
-    # Use a larger hit box (1.5x) for marble detection on mobile
+    # Expands the tap area by 5 pixels on each side (BOXSIZE + 10 pixels total)
     TAP_EXPANSION = 5  # Expand the tap area by 5 pixels on each side
     
     for boxx in range(BOARDWIDTH):
