@@ -278,10 +278,14 @@ def main():
         os.environ['SDL_VIDEODRIVER'] = 'dummy'
         os.environ['SDL_AUDIODRIVER'] = 'dummy'
     
+    # Check for debug mode (environment variable or command-line flag)
+    debug_mode = '--debug' in sys.argv or os.environ.get('AGGRAVATION_DEBUG', '').lower() in ('1', 'true', 'yes')
+    
     global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT, CLEAR_SURF, CLEAR_RECT, ROLL6_SURF, ROLL6_RECT
     global PLAYERROR_SURF, PLAYERROR_RECT, CLEARERROR_SURF, CLEARERROR_RECT
     global TEST_SURF, TEST_RECT
     global SAVE_SURF, SAVE_RECT, LOAD_SURF, LOAD_RECT
+    global ROLL2_SURF, ROLL2_RECT, ROLL3_SURF, ROLL3_RECT, ROLL4_SURF, ROLL4_RECT, ROLL5_SURF, ROLL5_RECT
     
     # Initialize game engine
     game = AggravationGame()
@@ -317,7 +321,20 @@ def main():
 
     TEST_SURF, TEST_RECT = makeText('DEBUG', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 30)
     
-    # Save/Load buttons  
+    # Debug mode roll buttons (2, 3, 4, 5) - only initialized if debug mode is active
+    if debug_mode:
+        print("DEBUG MODE ENABLED - Roll buttons 2-5 available")
+        ROLL2_SURF, ROLL2_RECT = makeText('ROLL 2', TEXTCOLOR, TILECOLOR, 10, WINDOWHEIGHT - 120)
+        ROLL3_SURF, ROLL3_RECT = makeText('ROLL 3', TEXTCOLOR, TILECOLOR, 90, WINDOWHEIGHT - 120)
+        ROLL4_SURF, ROLL4_RECT = makeText('ROLL 4', TEXTCOLOR, TILECOLOR, 170, WINDOWHEIGHT - 120)
+        ROLL5_SURF, ROLL5_RECT = makeText('ROLL 5', TEXTCOLOR, TILECOLOR, 250, WINDOWHEIGHT - 120)
+    else:
+        ROLL2_SURF = ROLL2_RECT = None
+        ROLL3_SURF = ROLL3_RECT = None
+        ROLL4_SURF = ROLL4_RECT = None
+        ROLL5_SURF = ROLL5_RECT = None
+    
+    # Save/Load buttons
     SAVE_SURF, SAVE_RECT = makeText('SAVE', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 90)
     LOAD_SURF, LOAD_RECT = makeText('LOAD', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 460, WINDOWHEIGHT - 90)
 
@@ -426,7 +443,15 @@ def main():
                             if marble and marble != (None, None):
                                 drawPlayerBox(player_color, marble)
 
-                    if (ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos) or ROLL6_RECT.collidepoint(event.pos)):
+                    # Check for any roll button click (including debug mode buttons)
+                    roll_clicked = ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos) or ROLL6_RECT.collidepoint(event.pos)
+                    if debug_mode:
+                        roll_clicked = roll_clicked or (ROLL2_RECT and ROLL2_RECT.collidepoint(event.pos)) or \
+                                                       (ROLL3_RECT and ROLL3_RECT.collidepoint(event.pos)) or \
+                                                       (ROLL4_RECT and ROLL4_RECT.collidepoint(event.pos)) or \
+                                                       (ROLL5_RECT and ROLL5_RECT.collidepoint(event.pos))
+                    
+                    if roll_clicked:
                         # Check if player has already rolled this turn
                         if has_rolled:
                             # Display message that player can only roll once
@@ -440,7 +465,7 @@ def main():
                             print(msg)
                             continue
                         
-                        print(f"Player {current_player} clicked on the ROLL Button")
+                        print(f"Player {current_player} clicked on a ROLL Button")
 
                         # for debug purposes putting in a roll 1 & 6 button to speed up testing
                         if ROLL1_RECT.collidepoint(event.pos):
@@ -449,6 +474,19 @@ def main():
                         elif ROLL6_RECT.collidepoint(event.pos):
                             moves = 6
                             print("A roll of 6 has been rolled....manually")
+                        # Debug mode roll buttons
+                        elif debug_mode and ROLL2_RECT and ROLL2_RECT.collidepoint(event.pos):
+                            moves = 2
+                            print("A roll of 2 has been rolled....manually (debug mode)")
+                        elif debug_mode and ROLL3_RECT and ROLL3_RECT.collidepoint(event.pos):
+                            moves = 3
+                            print("A roll of 3 has been rolled....manually (debug mode)")
+                        elif debug_mode and ROLL4_RECT and ROLL4_RECT.collidepoint(event.pos):
+                            moves = 4
+                            print("A roll of 4 has been rolled....manually (debug mode)")
+                        elif debug_mode and ROLL5_RECT and ROLL5_RECT.collidepoint(event.pos):
+                            moves = 5
+                            print("A roll of 5 has been rolled....manually (debug mode)")
                         else:
                             moves = displayDice(game)
                             print("A roll of %i has been rolled...." % moves)
@@ -1023,6 +1061,13 @@ def drawBoard():
     DISPLAYSURF.blit(TEST_SURF, TEST_RECT)
     DISPLAYSURF.blit(SAVE_SURF, SAVE_RECT)
     DISPLAYSURF.blit(LOAD_SURF, LOAD_RECT)
+    
+    # Display debug mode buttons if enabled
+    if debug_mode and ROLL2_SURF:
+        DISPLAYSURF.blit(ROLL2_SURF, ROLL2_RECT)
+        DISPLAYSURF.blit(ROLL3_SURF, ROLL3_RECT)
+        DISPLAYSURF.blit(ROLL4_SURF, ROLL4_RECT)
+        DISPLAYSURF.blit(ROLL5_SURF, ROLL5_RECT)
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates

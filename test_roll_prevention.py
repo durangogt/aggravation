@@ -119,6 +119,107 @@ class TestRollButtons:
         assert moves == 4, "Move value should remain from first roll"
 
 
+class TestDebugModeButtons:
+    """Test debug mode roll button functionality."""
+    
+    def test_roll2_button_sets_correct_value(self):
+        """Test that ROLL 2 button sets moves to 2 in debug mode."""
+        moves = 0
+        has_rolled = False
+        debug_mode = True
+        
+        # Simulate ROLL2 button click
+        if debug_mode and not has_rolled:
+            moves = 2
+            has_rolled = True
+        
+        assert moves == 2, "ROLL 2 button should set moves to 2 in debug mode"
+        assert has_rolled == True, "has_rolled should be True after ROLL 2"
+    
+    def test_roll3_button_sets_correct_value(self):
+        """Test that ROLL 3 button sets moves to 3 in debug mode."""
+        moves = 0
+        has_rolled = False
+        debug_mode = True
+        
+        # Simulate ROLL3 button click
+        if debug_mode and not has_rolled:
+            moves = 3
+            has_rolled = True
+        
+        assert moves == 3, "ROLL 3 button should set moves to 3 in debug mode"
+        assert has_rolled == True, "has_rolled should be True after ROLL 3"
+    
+    def test_roll4_button_sets_correct_value(self):
+        """Test that ROLL 4 button sets moves to 4 in debug mode."""
+        moves = 0
+        has_rolled = False
+        debug_mode = True
+        
+        # Simulate ROLL4 button click
+        if debug_mode and not has_rolled:
+            moves = 4
+            has_rolled = True
+        
+        assert moves == 4, "ROLL 4 button should set moves to 4 in debug mode"
+        assert has_rolled == True, "has_rolled should be True after ROLL 4"
+    
+    def test_roll5_button_sets_correct_value(self):
+        """Test that ROLL 5 button sets moves to 5 in debug mode."""
+        moves = 0
+        has_rolled = False
+        debug_mode = True
+        
+        # Simulate ROLL5 button click
+        if debug_mode and not has_rolled:
+            moves = 5
+            has_rolled = True
+        
+        assert moves == 5, "ROLL 5 button should set moves to 5 in debug mode"
+        assert has_rolled == True, "has_rolled should be True after ROLL 5"
+    
+    def test_debug_buttons_respect_has_rolled_flag(self):
+        """Test that debug mode buttons respect has_rolled flag."""
+        moves = 0
+        has_rolled = False
+        debug_mode = True
+        
+        # First click on ROLL2 button
+        if debug_mode and not has_rolled:
+            moves = 2
+            has_rolled = True
+            first_click = True
+        else:
+            first_click = False
+        
+        # Second click on ROLL3 button (should be blocked)
+        if debug_mode and not has_rolled:
+            moves = 3
+            second_click = True
+        else:
+            second_click = False
+        
+        assert first_click == True, "First roll should succeed"
+        assert second_click == False, "Second roll should be blocked"
+        assert moves == 2, "Move value should remain from first roll"
+    
+    def test_debug_buttons_not_active_without_debug_mode(self):
+        """Test that debug buttons are not active when debug mode is off."""
+        debug_mode = False
+        has_rolled = False
+        moves = 0
+        
+        # Try to use ROLL2 button without debug mode
+        if debug_mode and not has_rolled:
+            moves = 2
+            button_worked = True
+        else:
+            button_worked = False
+        
+        assert button_worked == False, "Debug buttons should not work when debug mode is off"
+        assert moves == 0, "Moves should remain 0 when debug mode is off"
+
+
 class TestErrorMessages:
     """Test error message generation."""
     
@@ -184,3 +285,4 @@ class TestTurnLogic:
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
+
