@@ -147,6 +147,12 @@ def run_headless_simulation(ai_players):
     
     if moves_count >= max_moves:
         print(f"\n⚠ Game reached maximum moves ({max_moves}) without completion")
+        print(f"Final game state:")
+        for player_num in range(1, 5):
+            marbles_in_final = sum(1 for m in game._get_player_data(player_num)['marbles'] 
+                                   if m in game._get_player_data(player_num)['final_home'])
+            print(f"  Player {player_num}: {marbles_in_final}/4 marbles in final home")
+        return None  # Indicate game did not complete
 
 
 def run_gui_game_with_ai(ai_players):
@@ -262,6 +268,7 @@ def run_gui_game_with_ai(ai_players):
             current_player = (current_player % 4) + 1
         else:
             # Human turn - would need full UI integration
+            # TODO: Implement human player input in GUI mode
             # For now, skip human turns in AI mode
             draw_status(f"Player {current_player} (Human) - Auto-skipping (not implemented in GUI mode)")
             pygame.time.wait(1000)

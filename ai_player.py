@@ -163,6 +163,8 @@ class AggressiveStrategy(AIPlayer):
                 try:
                     coords = game.get_next_position(coords[0], coords[1])
                 except (AssertionError, IndexError):
+                    # get_next_position uses assertions for validation
+                    # TODO: game_engine should raise specific exceptions instead
                     return None
                 if coords is None:
                     return None
@@ -287,6 +289,8 @@ class DefensiveStrategy(AIPlayer):
                 try:
                     coords = game.get_next_position(coords[0], coords[1])
                 except (AssertionError, IndexError):
+                    # get_next_position uses assertions for validation
+                    # TODO: game_engine should raise specific exceptions instead
                     return None
                 if coords is None:
                     return None
@@ -325,6 +329,8 @@ class DefensiveStrategy(AIPlayer):
                         try:
                             test_pos = game.get_next_position(test_pos[0], test_pos[1])
                         except (AssertionError, IndexError):
+                            # get_next_position uses assertions for validation
+                            # TODO: game_engine should raise specific exceptions instead
                             break
                         if test_pos is None:
                             break
