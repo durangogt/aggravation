@@ -41,6 +41,17 @@ Aggravation is a classic marble race board game where players compete to move al
 - ✅ Interactive GUI built with pygame
 - ✅ All game assets included
 
+### AI Players (`aggravation_ai.py`) 🤖 NEW!
+- ✅ **AI opponents** with selectable strategies
+- ✅ **Three difficulty levels:**
+  - **Random (Easy)** - Makes random valid moves
+  - **Aggressive (Medium)** - Prioritizes progress and attacking opponents
+  - **Defensive (Hard)** - Focuses on safety and strategic positioning
+- ✅ **Player selection screen** - Choose Human or AI for each player
+- ✅ **Watch AI vs AI mode** - Observe AI players compete
+- ✅ **Headless simulation mode** - Run games without GUI for testing
+- ✅ **Mix and match** - Play as human against 1-3 AI opponents
+
 ### Web Version (`web/`)
 - 🌐 **Browser-playable version** using Pygbag (WebAssembly)
 - 📱 **Mobile-friendly** - works on iPhone/iOS Safari and Android Chrome
@@ -97,6 +108,52 @@ python aggravation.py
 ```
 
 The game window will open immediately. Startup time is ~0.6 seconds.
+
+### 🤖 Playing with AI Opponents (NEW!)
+
+The game now includes AI players with configurable strategies!
+
+#### Interactive Mode (with Player Selection)
+
+```bash
+python aggravation_ai.py
+```
+
+This launches an interactive player selection screen where you can:
+- Toggle each player between Human and AI
+- Select AI strategy (Random, Aggressive, or Defensive)
+- Click "Start Game" to begin
+- Click "Watch AI vs AI" to set all players to AI
+
+#### Quick AI vs AI Mode
+
+```bash
+python aggravation_ai.py --watch
+```
+
+Launches the game with all 4 players as AI (you can still change strategies in the selection screen).
+
+#### Headless Simulation Mode
+
+```bash
+python aggravation_ai.py --headless
+```
+
+Runs a complete AI vs AI game in the terminal without GUI, showing move-by-move details:
+```
+Move 1: Player 1 rolled 6
+  Moved marble from home to start
+Move 2: Player 2 rolled 3
+  No valid moves available
+...
+🎉 GAME OVER! Player 1 (Aggressive AI) wins in 487 moves!
+```
+
+#### AI Strategy Descriptions
+
+- **Random (Easy)**: Makes completely random valid moves. Good for beginners or testing.
+- **Aggressive (Medium)**: Prioritizes moving forward and attacking opponents. Gets pieces out of home quickly.
+- **Defensive (Hard)**: Focuses on safety, avoids risky positions, and protects marbles strategically.
 
 ### Running in Headless Environments
 
