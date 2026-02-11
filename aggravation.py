@@ -74,8 +74,8 @@ P3END = None # stores the (x, y) of the last board spot per turn
 P4END = None # stores the (x, y) of the last board spot per turn
 
 FPS = 30 # frames per second, the general speed of the program
-WINDOWWIDTH = 640 # size of window's width in pixels
-WINDOWHEIGHT = 480 # size of windows' height in pixels
+WINDOWWIDTH = 800 # size of window's width in pixels (wide enough for debug controls)
+WINDOWHEIGHT = 590 # size of windows' height in pixels (expanded for debug mode controls)
 REVEALSPEED = 8 # speed of player movement in simulation
 SIMSPEED = 250 # speed of game simulation
 BOXSIZE = 10 # size of box height & width in pixels (using box size for now to be the board spot marker)
@@ -278,10 +278,23 @@ def main():
         os.environ['SDL_VIDEODRIVER'] = 'dummy'
         os.environ['SDL_AUDIODRIVER'] = 'dummy'
     
+    # Check for debug mode (environment variable or command-line flag)
+    global debug_mode
+    debug_mode = '--debug' in sys.argv or os.environ.get('AGGRAVATION_DEBUG', '').lower() in ('1', 'true', 'yes')
+    
     global FPSCLOCK, DISPLAYSURF, BASICFONT, ROLL_SURF, ROLL_RECT, ROLL1_SURF, ROLL1_RECT, EXIT_SURF, EXIT_RECT, OPTION_SURF, OPTION_RECT, CLEAR_SURF, CLEAR_RECT, ROLL6_SURF, ROLL6_RECT
     global PLAYERROR_SURF, PLAYERROR_RECT, CLEARERROR_SURF, CLEARERROR_RECT
     global TEST_SURF, TEST_RECT
     global SAVE_SURF, SAVE_RECT, LOAD_SURF, LOAD_RECT
+    global ROLL2_SURF, ROLL2_RECT, ROLL3_SURF, ROLL3_RECT, ROLL4_SURF, ROLL4_RECT, ROLL5_SURF, ROLL5_RECT
+    global WINDOWHEIGHT, YMARGIN
+    
+    # Adjust window height based on mode
+    if debug_mode:
+        WINDOWHEIGHT = 590  # Extra rows for debug buttons
+    else:
+        WINDOWHEIGHT = 500  # Compact: status row + single button row
+    YMARGIN = int((WINDOWHEIGHT - (BOARDHEIGHT * (BOXSIZE + GAPSIZE))) / 2)
     
     # Initialize game engine
     game = AggravationGame()
@@ -295,26 +308,65 @@ def main():
     BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
 
     # Store the option buttons and their rectangles in OPTIONS.
-    ROLL_SURF, ROLL_RECT = makeText('Roll',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 90)
-    ROLL1_SURF,   ROLL1_RECT   = makeText('ROLL 1', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 60)
-    ROLL6_SURF,   ROLL6_RECT   = makeText('ROLL 6', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 60)
-    EXIT_SURF, EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 120, WINDOWHEIGHT - 30)
-    OPTION_SURF, OPTION_RECT = makeText('Click Marble to Move',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-    CLEAR_SURF, CLEAR_RECT = makeText('Click Marble to Move',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-
-    PLAYERROR_SURF, PLAYERROR_RECT = makeText('Cant jump own marbles',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-    CLEARERROR_SURF, CLEARERROR_RECT = makeText('Cant jump own marbles',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-    PLAYERROR2_SURF, PLAYERROR2_RECT = makeText('No marbles in home',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-    CLEARERROR2_SURF, CLEARERROR2_RECT = makeText('No marbles in home',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-
-    TURNOVER_SURF, TURNOVER_RECT = makeText('TURN OVER',    TEXTCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-    CLEARTURNOVER_SURF, CLEARTURNOVER_RECT = makeText('TURN OVER',    BGCOLOR, BGCOLOR, WINDOWWIDTH - 425, WINDOWHEIGHT - 60)
-
-    TEST_SURF, TEST_RECT = makeText('DEBUG', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 30)
+    # Non-debug layout (2 rows):
+    #   Row 1 (y-60): Status messages (full width, centered)
+    #   Row 2 (y-30): SAVE, LOAD  |  Roll, EXIT
+    # Debug layout (4 rows):
+    #   Row 1 (y-120): Status messages (full width, centered)
+    #   Row 2 (y-90):  SAVE, LOAD          |  Roll,   ROLL 2, ROLL 5
+    #   Row 3 (y-60):  ROLL 6              |  ROLL 1, ROLL 3
+    #   Row 4 (y-30):  DEBUG               |  EXIT,   ROLL 4
     
-    # Save/Load buttons  
-    SAVE_SURF, SAVE_RECT = makeText('SAVE', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 550, WINDOWHEIGHT - 90)
-    LOAD_SURF, LOAD_RECT = makeText('LOAD', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 460, WINDOWHEIGHT - 90)
+    if debug_mode:
+        # Debug mode - full layout with all controls
+        ROLL_SURF, ROLL_RECT = makeText('Roll',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 220, WINDOWHEIGHT - 90)
+        ROLL1_SURF, ROLL1_RECT = makeText('ROLL 1', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 220, WINDOWHEIGHT - 60)
+        EXIT_SURF, EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 220, WINDOWHEIGHT - 30)
+        SAVE_SURF, SAVE_RECT = makeText('SAVE', TEXTCOLOR, TILECOLOR, 10, WINDOWHEIGHT - 90)
+        LOAD_SURF, LOAD_RECT = makeText('LOAD', TEXTCOLOR, TILECOLOR, 90, WINDOWHEIGHT - 90)
+        ROLL6_SURF, ROLL6_RECT = makeText('ROLL 6', TEXTCOLOR, TILECOLOR, 10, WINDOWHEIGHT - 60)
+        TEST_SURF, TEST_RECT = makeText('DEBUG', TEXTCOLOR, TILECOLOR, 10, WINDOWHEIGHT - 30)
+        msg_x = WINDOWWIDTH // 2 - 200
+        msg_y = WINDOWHEIGHT - 120
+    else:
+        # Normal mode - clean minimal layout
+        ROLL_SURF, ROLL_RECT = makeText('Roll',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 220, WINDOWHEIGHT - 30)
+        EXIT_SURF, EXIT_RECT = makeText('EXIT',    TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 130, WINDOWHEIGHT - 30)
+        SAVE_SURF, SAVE_RECT = makeText('SAVE', TEXTCOLOR, TILECOLOR, 10, WINDOWHEIGHT - 30)
+        LOAD_SURF, LOAD_RECT = makeText('LOAD', TEXTCOLOR, TILECOLOR, 90, WINDOWHEIGHT - 30)
+        ROLL1_SURF = ROLL1_RECT = None
+        ROLL6_SURF = ROLL6_RECT = None
+        TEST_SURF = TEST_RECT = None
+        msg_x = WINDOWWIDTH // 2 - 200
+        msg_y = WINDOWHEIGHT - 60
+    OPTION_SURF, OPTION_RECT = makeText('Click Marble to Move',    TEXTCOLOR, BGCOLOR, msg_x, msg_y)
+    CLEAR_SURF, CLEAR_RECT = makeText('Click Marble to Move',    BGCOLOR, BGCOLOR, msg_x, msg_y)
+
+    PLAYERROR_SURF, PLAYERROR_RECT = makeText('Cant jump own marbles',    TEXTCOLOR, BGCOLOR, msg_x, msg_y)
+    CLEARERROR_SURF, CLEARERROR_RECT = makeText('Cant jump own marbles',    BGCOLOR, BGCOLOR, msg_x, msg_y)
+    PLAYERROR2_SURF, PLAYERROR2_RECT = makeText('No marbles in home',    TEXTCOLOR, BGCOLOR, msg_x, msg_y)
+    CLEARERROR2_SURF, CLEARERROR2_RECT = makeText('No marbles in home',    BGCOLOR, BGCOLOR, msg_x, msg_y)
+
+    TURNOVER_SURF, TURNOVER_RECT = makeText('TURN OVER',    TEXTCOLOR, BGCOLOR, msg_x, msg_y)
+    CLEARTURNOVER_SURF, CLEARTURNOVER_RECT = makeText('TURN OVER',    BGCOLOR, BGCOLOR, msg_x, msg_y)
+    
+    # Message surfaces dictionary for already rolled
+    ALREADY_ROLLED_SURFS = {}
+    CLEAR_ALREADY_ROLLED_SURF = None
+    ALREADY_ROLLED_RECT = None
+    
+    # Debug mode roll buttons (2, 3, 4, 5) - right column, below main controls
+    if debug_mode:
+        print("DEBUG MODE ENABLED - Roll buttons 2-5 available")
+        ROLL2_SURF, ROLL2_RECT = makeText('ROLL 2', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 130, WINDOWHEIGHT - 90)
+        ROLL3_SURF, ROLL3_RECT = makeText('ROLL 3', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 130, WINDOWHEIGHT - 60)
+        ROLL4_SURF, ROLL4_RECT = makeText('ROLL 4', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 130, WINDOWHEIGHT - 30)
+        ROLL5_SURF, ROLL5_RECT = makeText('ROLL 5', TEXTCOLOR, TILECOLOR, WINDOWWIDTH - 50, WINDOWHEIGHT - 90)
+    else:
+        ROLL2_SURF = ROLL2_RECT = None
+        ROLL3_SURF = ROLL3_RECT = None
+        ROLL4_SURF = ROLL4_RECT = None
+        ROLL5_SURF = ROLL5_RECT = None
 
     # Winner messages for each player
     WINNER_SURFS = {
@@ -334,6 +386,7 @@ def main():
     gameWon = False
     winner = None
     moves = 0  # Track current dice roll
+    has_rolled = False  # Track if current player has already rolled this turn
 
     DISPLAYSURF.fill(BGCOLOR) # drawing the window
     drawBoard()
@@ -389,6 +442,8 @@ def main():
             DISPLAYSURF.blit(CLEARERROR_SURF, CLEARERROR_RECT)          # clear 'invalid choice' text
             DISPLAYSURF.blit(CLEARTURNOVER_SURF, CLEARTURNOVER_RECT)    # clear 'TURN OVER' text
             DISPLAYSURF.blit(CLEARERROR2_SURF, CLEARERROR2_RECT)        # clear 'no marbles home' text
+            if CLEAR_ALREADY_ROLLED_SURF and ALREADY_ROLLED_RECT:       # clear 'already rolled' text
+                DISPLAYSURF.blit(CLEAR_ALREADY_ROLLED_SURF, ALREADY_ROLLED_RECT)
 
             pygame.display.update()                                     # update screen with invisible text
             if event.type == MOUSEBUTTONUP:
@@ -397,7 +452,7 @@ def main():
                 boxx, boxy = getBoxAtPixel(mousex, mousey)
                 if boxx == None and boxy == None:
                     # check if the user clicked on an option button
-                    if ( TEST_RECT.collidepoint(event.pos) ): # if clicked the debug button setup marbles going home
+                    if debug_mode and TEST_RECT and TEST_RECT.collidepoint(event.pos): # if clicked the debug button setup marbles going home
                         # Debug: set up current player's marbles near home
                         home_stretch = PLAYER_HOME_STRETCHES[current_player]
                         if current_player == 1:
@@ -418,19 +473,58 @@ def main():
                             if marble and marble != (None, None):
                                 drawPlayerBox(player_color, marble)
 
-                    if (ROLL_RECT.collidepoint(event.pos) or ROLL1_RECT.collidepoint(event.pos) or ROLL6_RECT.collidepoint(event.pos)):
-                        print(f"Player {current_player} clicked on the ROLL Button")
+                    # Check for any roll button click (including debug mode buttons)
+                    roll_clicked = ROLL_RECT.collidepoint(event.pos)
+                    if debug_mode:
+                        roll_clicked = roll_clicked or \
+                                       (ROLL1_RECT and ROLL1_RECT.collidepoint(event.pos)) or \
+                                       (ROLL6_RECT and ROLL6_RECT.collidepoint(event.pos)) or \
+                                       (ROLL2_RECT and ROLL2_RECT.collidepoint(event.pos)) or \
+                                       (ROLL3_RECT and ROLL3_RECT.collidepoint(event.pos)) or \
+                                       (ROLL4_RECT and ROLL4_RECT.collidepoint(event.pos)) or \
+                                       (ROLL5_RECT and ROLL5_RECT.collidepoint(event.pos))
+                    
+                    if roll_clicked:
+                        # Check if player has already rolled this turn
+                        if has_rolled:
+                            # Display message that player can only roll once
+                            msg = f"You can only roll once. Result of your roll: {moves}."
+                            if moves not in ALREADY_ROLLED_SURFS:
+                                ALREADY_ROLLED_SURFS[moves], ALREADY_ROLLED_RECT = makeText(msg, TEXTCOLOR, BGCOLOR, msg_x, msg_y)
+                                # Create clear surface for this message (reuse same position/size)
+                                globals()['CLEAR_ALREADY_ROLLED_SURF'] = makeText(' ' * 50, BGCOLOR, BGCOLOR, msg_x, msg_y)[0]
+                            displayStatus(ALREADY_ROLLED_SURFS[moves], ALREADY_ROLLED_RECT)
+                            print(msg)
+                            continue
+                        
+                        print(f"Player {current_player} clicked on a ROLL Button")
 
-                        # for debug purposes putting in a roll 1 & 6 button to speed up testing
-                        if ROLL1_RECT.collidepoint(event.pos):
+                        # Debug mode: specific roll buttons for testing
+                        if debug_mode and ROLL1_RECT and ROLL1_RECT.collidepoint(event.pos):
                             moves = 1
                             print("A roll of 1 has been rolled....manually")
-                        elif ROLL6_RECT.collidepoint(event.pos):
+                        elif debug_mode and ROLL6_RECT and ROLL6_RECT.collidepoint(event.pos):
                             moves = 6
                             print("A roll of 6 has been rolled....manually")
+                        # Debug mode roll buttons
+                        elif debug_mode and ROLL2_RECT and ROLL2_RECT.collidepoint(event.pos):
+                            moves = 2
+                            print("A roll of 2 has been rolled....manually (debug mode)")
+                        elif debug_mode and ROLL3_RECT and ROLL3_RECT.collidepoint(event.pos):
+                            moves = 3
+                            print("A roll of 3 has been rolled....manually (debug mode)")
+                        elif debug_mode and ROLL4_RECT and ROLL4_RECT.collidepoint(event.pos):
+                            moves = 4
+                            print("A roll of 4 has been rolled....manually (debug mode)")
+                        elif debug_mode and ROLL5_RECT and ROLL5_RECT.collidepoint(event.pos):
+                            moves = 5
+                            print("A roll of 5 has been rolled....manually (debug mode)")
                         else:
                             moves = displayDice(game)
                             print("A roll of %i has been rolled...." % moves)
+                        
+                        # Mark that player has rolled this turn
+                        has_rolled = True
 
                         # Refresh player data after roll
                         player_marbles = get_player_marbles(game, current_player)
@@ -466,6 +560,7 @@ def main():
                             set_player_start_occupied(game, current_player, True)
                             # Switch to next player after moving out
                             current_player = next_player(current_player)
+                            has_rolled = False  # Reset roll flag for next player
                             drawCurrentPlayerIndicator()
 
                         elif ((player_start_occupied == False) and (moves == 1 or moves == 6) and ((len(player_home) >= 1) and (len(player_home) < 4))):
@@ -474,27 +569,16 @@ def main():
                             waitingForInput = True
                             break
 
-                        elif ((player_start_occupied == False) and (moves != 1 or moves != 6) and (len(player_home) == 4)):
+                        elif ((player_start_occupied == False) and (moves != 1 and moves != 6) and (len(player_home) == 4)):
                             displayStatus(TURNOVER_SURF, TURNOVER_RECT)
                             # No valid moves - switch to next player
                             current_player = next_player(current_player)
+                            has_rolled = False  # Reset roll flag for next player
                             drawCurrentPlayerIndicator()
                             waitingForInput = False
                             break
 
-                        elif ((player_start_occupied == False) and (moves != 1 or moves != 6) and (len(player_home) == 3)):
-                            if (isValidMoveForPlayer(moves, player_marbles, player_end, game, current_player) == True):
-                                player_marbles, new_end, gameWon, winner = animatePlayerMoveGeneric(moves, player_marbles, player_end, game, current_player)
-                                set_player_end(game, current_player, new_end)
-                                # Switch to next player after move
-                                current_player = next_player(current_player)
-                                drawCurrentPlayerIndicator()
-                            else:
-                                print("Invalid move, marble already exists, can't jump your own marbles")
-                                displayStatus(PLAYERROR_SURF, PLAYERROR_RECT)
-                                print(f"DEBUG: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
-
-                        elif ((player_start_occupied == False) and (moves != 1 or moves != 6) and ((len(player_home) == 2) or (len(player_home) == 1) or (len(player_home) == 0))):
+                        elif ((player_start_occupied == False) and (moves != 1 and moves != 6) and (len(player_home) >= 0) and (len(player_home) <= 3)):
                             # display option to choose marble to move....
                             displayStatus(OPTION_SURF, OPTION_RECT)
                             waitingForInput = True
@@ -507,6 +591,7 @@ def main():
                                 set_player_start_occupied(game, current_player, False)
                                 # Switch to next player after move
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -516,8 +601,8 @@ def main():
                         else:
                             print(f"DEBUG: missing a marble decision option: Roll: {moves}  NumInHome: {len(player_home)}  Marbles: {player_marbles}")
 
-                    elif ROLL1_RECT.collidepoint(event.pos):
-                        print("Clicked on the ROLL 1 Button") # clicked on New Game button
+                    elif debug_mode and ROLL1_RECT and ROLL1_RECT.collidepoint(event.pos):
+                        print("Clicked on the ROLL 1 Button")
 
                     elif OPTION_RECT.collidepoint(event.pos):
                         print("Clicked on the OPTION Button") # clicked on New Game button
@@ -542,6 +627,7 @@ def main():
                             winner = loaded_game.winner
                             waitingForInput = False
                             moves = 0
+                            has_rolled = False  # Reset roll flag when loading game
                             # Redraw the entire board with new state
                             DISPLAYSURF.fill(BGCOLOR)
                             drawBoard()
@@ -609,6 +695,7 @@ def main():
                                 waitingForInput = False
                                 # Switch to next player
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -625,6 +712,7 @@ def main():
                                 waitingForInput = False
                                 # Switch to next player
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -645,6 +733,7 @@ def main():
                                 waitingForInput = False
                                 # Switch to next player
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -675,6 +764,7 @@ def main():
                             waitingForInput = False
                             # Switch to next player after moving out of home
                             current_player = next_player(current_player)
+                            has_rolled = False  # Reset roll flag for next player
                             drawCurrentPlayerIndicator()
 
                         elif (BOARD_TEMPLATE[ clickedPos[1] ][ clickedPos[0] ] == SPOT): # clicked on a marble on the board track
@@ -688,6 +778,7 @@ def main():
                                 waitingForInput = False
                                 # Switch to next player
                                 current_player = next_player(current_player)
+                                has_rolled = False  # Reset roll flag for next player
                                 drawCurrentPlayerIndicator()
                             else:
                                 print("Invalid move, marble already exists, can't jump your own marbles")
@@ -725,9 +816,14 @@ def isValidMoveForPlayer(moves, player_marbles, marble_pos, game, player):
     return False
 
 def displayStatus(passed_SURF, passed_RECT):
-    DISPLAYSURF.blit(passed_SURF, passed_RECT)  # let user know they can't choose that marble
+    DISPLAYSURF.blit(passed_SURF, passed_RECT)  # show status message
     pygame.display.update()
-    pygame.time.wait(2000) # WAIT for player to see status message - TODO make this a wait X amount of time AND clicked on a marble later, maybe a countdown timer onscreen too...
+    pygame.time.wait(2000) # WAIT for player to see status message
+    # Auto-clear: paint over message area with background color then redraw board
+    clear_surf = pygame.Surface(passed_RECT.size)
+    clear_surf.fill(BGCOLOR)
+    DISPLAYSURF.blit(clear_surf, passed_RECT)
+    pygame.display.update()
 
 def displayAggravationMessage(aggressor_player, victim_player):
     """Display aggravation message when a player sends opponent home."""
@@ -983,12 +1079,23 @@ def drawBoard():
               pygame.draw.rect(DISPLAYSURF, BOXCOLOR, (left, top, BOXSIZE, BOXSIZE))
 
     DISPLAYSURF.blit(ROLL_SURF, ROLL_RECT)
-    DISPLAYSURF.blit(ROLL1_SURF, ROLL1_RECT)
     DISPLAYSURF.blit(EXIT_SURF, EXIT_RECT)
-    DISPLAYSURF.blit(ROLL6_SURF, ROLL6_RECT)
-    DISPLAYSURF.blit(TEST_SURF, TEST_RECT)
     DISPLAYSURF.blit(SAVE_SURF, SAVE_RECT)
     DISPLAYSURF.blit(LOAD_SURF, LOAD_RECT)
+    
+    # Display debug mode buttons if enabled
+    if debug_mode:
+        if ROLL1_SURF:
+            DISPLAYSURF.blit(ROLL1_SURF, ROLL1_RECT)
+        if ROLL6_SURF:
+            DISPLAYSURF.blit(ROLL6_SURF, ROLL6_RECT)
+        if TEST_SURF:
+            DISPLAYSURF.blit(TEST_SURF, TEST_RECT)
+        if ROLL2_SURF:
+            DISPLAYSURF.blit(ROLL2_SURF, ROLL2_RECT)
+            DISPLAYSURF.blit(ROLL3_SURF, ROLL3_RECT)
+            DISPLAYSURF.blit(ROLL4_SURF, ROLL4_RECT)
+            DISPLAYSURF.blit(ROLL5_SURF, ROLL5_RECT)
 
 def leftTopCoordsOfBox(boxx, boxy):
     # Convert board coordinates to pixel coordinates
@@ -997,10 +1104,16 @@ def leftTopCoordsOfBox(boxx, boxy):
     return (left, top)
 
 def getBoxAtPixel(x, y):
+    # Increased tap target for better mobile support
+    # Expands the tap area by 5 pixels on each side (BOXSIZE + 10 pixels total)
+    TAP_EXPANSION = 5  # Expand the tap area by 5 pixels on each side
+    
     for boxx in range(BOARDWIDTH):
         for boxy in range(BOARDHEIGHT):
             left, top = leftTopCoordsOfBox(boxx, boxy)
-            boxRect = pygame.Rect(left, top, BOXSIZE, BOXSIZE)
+            # Expand the hit box for easier tapping
+            boxRect = pygame.Rect(left - TAP_EXPANSION, top - TAP_EXPANSION, 
+                                 BOXSIZE + (TAP_EXPANSION * 2), BOXSIZE + (TAP_EXPANSION * 2))
             if boxRect.collidepoint(x, y):
                 return (boxx, boxy)
     return (None, None)
@@ -1081,9 +1194,18 @@ def drawBoardBox(coords):
         
     pygame.display.update()
 
-def drawPlayerBox(playerColor,coords):
-    # draw player's box in board coordinates x,y
-    left, top = leftTopCoordsOfBox(coords[0],coords[1]) # move to 3rd spot (x==moves) on board and leave it there
+def drawPlayerBox(playerColor, coords, highlight=False):
+    """
+    Draw player's marble in board coordinates x,y.
+    If highlight=True, draw a white outline to make it more visible/selectable.
+    """
+    left, top = leftTopCoordsOfBox(coords[0], coords[1])
+    
+    # Draw highlight ring for better visibility on mobile
+    if highlight:
+        pygame.draw.circle(DISPLAYSURF, WHITE, (left+5, top+5), 9, 2)  # White outline
+    
+    # Draw the marble
     pygame.draw.circle(DISPLAYSURF, playerColor, (left+5, top+5), 7, 0)
     pygame.display.update()
 
