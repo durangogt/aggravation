@@ -68,6 +68,21 @@ PLAYER_HOME_STRETCHES = {
 BLANK = '.'
 SPOT = '#'
 
+# Shortcut positions
+# ====================
+# Star holes (corner shortcuts) - the 4 corner positions of the board
+# When a marble lands exactly on a star hole, on the next turn it can:
+# 1. Move clockwise to the next star hole
+# 2. Exit toward its home base (if it's the player's preferred star)
+# Star hole sequence (clockwise): (11,1) -> (29,6) -> (19,15) -> (1,10) -> (11,1)
+STAR_HOLES = [(11, 1), (29, 6), (19, 15), (1, 10)]
+
+# Center hole (middle shortcut) - the center position of the board
+# A marble in the center hole can only exit by rolling exactly 1.
+# With a roll of 1, it can jump to any star hole (typically the player's preferred one).
+# This is the fastest route to home but risky (need exact roll).
+CENTER_HOLE = (15, 8)
+
 
 class AggravationGame:
     """
@@ -112,6 +127,24 @@ class AggravationGame:
         self.p4_end_home = [(None, None), (None, None), (None, None), (None, None)]
         self.p4_start_occupied = False
         
+        # Shortcut state tracking for each player
+        # ========================================
+        # Track which marbles (0-3) are currently on shortcuts.
+        # - on_star_hole: True if marble landed on a star hole and can use shortcut next turn
+        # - in_center_hole: True if marble is in center hole and needs roll of 1 to exit
+        # These flags are automatically set/cleared by execute_move() based on marble position.
+        self.p1_on_star_hole = [False, False, False, False]
+        self.p1_in_center_hole = [False, False, False, False]
+        
+        self.p2_on_star_hole = [False, False, False, False]
+        self.p2_in_center_hole = [False, False, False, False]
+        
+        self.p3_on_star_hole = [False, False, False, False]
+        self.p3_in_center_hole = [False, False, False, False]
+        
+        self.p4_on_star_hole = [False, False, False, False]
+        self.p4_in_center_hole = [False, False, False, False]
+        
         # Game state
         self.current_player = 1
         self.game_over = False
@@ -139,6 +172,11 @@ class AggravationGame:
         """
         # Validate current position is on the board
         assert BOARD_TEMPLATE[y][x] == SPOT, 'Current spot must be a valid board position (#)'
+        
+        # Special handling for center hole - can only exit with special rules
+        # (implemented separately in shortcut logic)
+        if (x, y) == CENTER_HOLE:
+            raise ValueError(f"Cannot calculate next position from center hole ({x}, {y}) - use shortcut-aware movement methods instead")
         
         # Corner positions - hard coded for the 12 corners
         if (x, y) == (19, 1):     # p1 outside corner
@@ -280,6 +318,159 @@ class AggravationGame:
         
         raise ValueError(f"Home position not implemented for player {player} at ({x}, {y})")
     
+    def is_star_hole(self, position: Tuple[int, int]) -> bool:
+        """
+        Check if a position is a star hole (corner shortcut).
+        
+        Args:
+            position: (x, y) coordinate tuple
+            
+        Returns:
+            True if position is a star hole, False otherwise
+        """
+        return position in STAR_HOLES
+    
+    def is_center_hole(self, position: Tuple[int, int]) -> bool:
+        """
+        Check if a position is the center hole (middle shortcut).
+        
+        Args:
+            position: (x, y) coordinate tuple
+            
+        Returns:
+            True if position is the center hole, False otherwise
+        """
+        return position == CENTER_HOLE
+    
+    def get_next_star_hole_clockwise(self, current_star: Tuple[int, int]) -> Tuple[int, int]:
+        """
+        Get the next star hole moving clockwise around the board.
+        
+        Args:
+            current_star: Current star hole position
+            
+        Returns:
+            Next star hole position clockwise
+        """
+        if current_star not in STAR_HOLES:
+            raise ValueError(f"Position {current_star} is not a star hole")
+        
+        # Star holes in clockwise order: (11,1) -> (29,6) -> (19,15) -> (1,10) -> (11,1)
+        current_index = STAR_HOLES.index(current_star)
+        next_index = (current_index + 1) % len(STAR_HOLES)
+        return STAR_HOLES[next_index]
+    
+    def can_exit_to_home_from_star(self, player: int, star_position: Tuple[int, int]) -> bool:
+        """
+        Check if a player can exit from a star hole toward their home base.
+        A player can exit from a star hole if it's on their path toward home.
+        
+        Args:
+            player: Player number (1-4)
+            star_position: Star hole position
+            
+        Returns:
+            True if player can exit to their home from this star hole
+        """
+        if star_position not in STAR_HOLES:
+            return False
+        
+        # Each player has a preferred star hole that leads toward their home
+        # Player 1: (11,1) - leads to home entry at (11,3)
+        # Player 2: (29,6) - leads to home entry at (25,6)
+        # Player 3: (19,15) - leads to home entry at (19,13)
+        # Player 4: (1,10) - leads to home entry at (5,10)
+        
+        preferred_stars = {
+            1: (11, 1),
+            2: (29, 6),
+            3: (19, 15),
+            4: (1, 10)
+        }
+        
+        return star_position == preferred_stars.get(player, None)
+    
+    def get_star_hole_exit_position(self, player: int, star_position: Tuple[int, int]) -> Tuple[int, int]:
+        """
+        Get the exit position from a star hole toward player's home.
+        
+        Args:
+            player: Player number (1-4)
+            star_position: Star hole position
+            
+        Returns:
+            Next position toward home from the star hole
+        """
+        if not self.can_exit_to_home_from_star(player, star_position):
+            raise ValueError(f"Player {player} cannot exit from star {star_position}")
+        
+        # Return the position right after the star hole on the path toward final home.
+        # For each player, this follows the same clockwise path as get_next_home_position.
+        exit_positions = {
+            1: (13, 1),   # From (11,1), next step toward final home via (13,1) -> (15,1) -> (15,2)...
+            2: (29, 7),   # From (29,6), next step toward final home via (29,7) -> (29,8) -> (27,8)...
+            3: (17, 15),  # From (19,15), next step toward final home via (17,15) -> (15,15) -> (15,14)...
+            4: (1, 9)     # From (1,10), next step toward final home via (1,9) -> (1,8) -> (3,8)...
+        }
+        
+        return exit_positions.get(player)
+    
+    def get_next_position_with_shortcuts(self, player: int, marble_idx: int, x: int, y: int, 
+                                          dice_roll: int, move_number: int) -> Tuple[int, int]:
+        """
+        Get the next board position considering shortcut rules.
+        
+        Args:
+            player: Player number (1-4)
+            marble_idx: Index of marble (0-3)
+            x: Current x coordinate
+            y: Current y coordinate
+            dice_roll: Total dice roll for this turn
+            move_number: Which move in the sequence (0 to dice_roll-1)
+            
+        Returns:
+            Tuple of (next_x, next_y) coordinates
+        """
+        current_pos = (x, y)
+        pdata = self._get_player_data(player)
+        on_star_hole = pdata['on_star_hole']
+        in_center_hole = pdata['in_center_hole']
+        
+        # Special handling for center hole
+        if in_center_hole[marble_idx] and current_pos == CENTER_HOLE:
+            # In center hole: can only exit with roll of 1 to player's preferred star hole
+            if dice_roll == 1 and move_number == 0:
+                # Exit to player's preferred star hole (closest to their home)
+                preferred_stars = {
+                    1: (11, 1),
+                    2: (29, 6),
+                    3: (19, 15),
+                    4: (1, 10)
+                }
+                return preferred_stars[player]
+            else:
+                # Cannot move with other rolls - stuck in center
+                raise ValueError("Cannot move from center hole except with roll of 1")
+        
+        # Special handling for star holes
+        if on_star_hole[marble_idx] and current_pos in STAR_HOLES:
+            # On star hole: player chooses to either:
+            # 1. Move clockwise to next star hole
+            # 2. Exit toward home (if it's their preferred star)
+            
+            # For simplicity, automatically choose the best move:
+            # - If on preferred star, exit toward home
+            # - Otherwise, move to next star hole
+            if self.can_exit_to_home_from_star(player, current_pos):
+                # Exit toward home
+                return self.get_star_hole_exit_position(player, current_pos)
+            else:
+                # Move to next star hole clockwise
+                return self.get_next_star_hole_clockwise(current_pos)
+        
+        # Normal movement - use regular get_next_position
+        return self.get_next_position(x, y)
+    
     def _get_player_data(self, player: int) -> Dict:
         """
         Get player-specific data (marbles, home stretch, final home, etc.)
@@ -298,7 +489,9 @@ class AggravationGame:
                 'start_pos': PLAYER_STARTS[1],
                 'start_occupied': self.p1_start_occupied,
                 'home_stretch': PLAYER_HOME_STRETCHES[1],
-                'final_home': PLAYER_FINAL_HOMES[1]
+                'final_home': PLAYER_FINAL_HOMES[1],
+                'on_star_hole': self.p1_on_star_hole,
+                'in_center_hole': self.p1_in_center_hole
             }
         elif player == 2:
             return {
@@ -308,7 +501,9 @@ class AggravationGame:
                 'start_pos': PLAYER_STARTS[2],
                 'start_occupied': self.p2_start_occupied,
                 'home_stretch': PLAYER_HOME_STRETCHES[2],
-                'final_home': PLAYER_FINAL_HOMES[2]
+                'final_home': PLAYER_FINAL_HOMES[2],
+                'on_star_hole': self.p2_on_star_hole,
+                'in_center_hole': self.p2_in_center_hole
             }
         elif player == 3:
             return {
@@ -318,7 +513,9 @@ class AggravationGame:
                 'start_pos': PLAYER_STARTS[3],
                 'start_occupied': self.p3_start_occupied,
                 'home_stretch': PLAYER_HOME_STRETCHES[3],
-                'final_home': PLAYER_FINAL_HOMES[3]
+                'final_home': PLAYER_FINAL_HOMES[3],
+                'on_star_hole': self.p3_on_star_hole,
+                'in_center_hole': self.p3_in_center_hole
             }
         elif player == 4:
             return {
@@ -328,7 +525,9 @@ class AggravationGame:
                 'start_pos': PLAYER_STARTS[4],
                 'start_occupied': self.p4_start_occupied,
                 'home_stretch': PLAYER_HOME_STRETCHES[4],
-                'final_home': PLAYER_FINAL_HOMES[4]
+                'final_home': PLAYER_FINAL_HOMES[4],
+                'on_star_hole': self.p4_on_star_hole,
+                'in_center_hole': self.p4_in_center_hole
             }
         else:
             raise ValueError(f"Invalid player number: {player}")
@@ -570,6 +769,23 @@ class AggravationGame:
         # Update marble position
         marbles[marble_idx] = coords
         self._set_end(player, coords)
+        
+        # Update shortcut state tracking
+        on_star_hole = pdata['on_star_hole']
+        in_center_hole = pdata['in_center_hole']
+        
+        # Check if marble landed on a star hole
+        if self.is_star_hole(coords):
+            on_star_hole[marble_idx] = True
+            in_center_hole[marble_idx] = False
+        # Check if marble landed in center hole
+        elif self.is_center_hole(coords):
+            in_center_hole[marble_idx] = True
+            on_star_hole[marble_idx] = False
+        # Marble moved off shortcuts
+        else:
+            on_star_hole[marble_idx] = False
+            in_center_hole[marble_idx] = False
         
         # Track if marble entered final home
         if coords in final_home:
