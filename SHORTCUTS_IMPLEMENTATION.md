@@ -73,7 +73,7 @@ Checks if a player can exit from a star hole toward their home.
 Gets the exit position from a star hole toward a player's home.
 - **Input**: Player number, star hole position
 - **Returns**: Next position on path toward home
-- **Example**: Player 1 from (11,1) → (11,2)
+- **Example**: Player 1 from (11,1) → (13,1)
 
 ##### `get_next_position_with_shortcuts(player, marble_idx, x, y, dice_roll, move_number)`
 Advanced movement method that considers shortcut states.
@@ -116,9 +116,9 @@ The `execute_move()` method now:
 ## Testing
 
 ### Test Coverage
-**Total Tests**: 78 tests
+**Total Tests**: 79 tests
 - **Existing tests**: 58 (all passing)
-- **New shortcut tests**: 20 (all passing)
+- **New shortcut tests**: 21 (all passing)
 
 ### Test Categories
 
@@ -138,11 +138,12 @@ The `execute_move()` method now:
 - ✅ All 4 players can detect their preferred star
 - ✅ Get correct exit positions for each player
 
-#### State Tracking (4 tests)
+#### State Tracking (6 tests)
 - ✅ Initial state is False for all marbles
-- ✅ Landing on star hole sets flag
-- ✅ Landing in center hole sets flag
+- ✅ Landing on star hole sets flag (2 tests for different players)
+- ✅ Landing in center hole detection works
 - ✅ Moving off shortcut clears flag
+- ✅ Shortcut state persists correctly across marbles
 
 ## Known Limitations
 

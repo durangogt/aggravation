@@ -401,13 +401,13 @@ class AggravationGame:
         if not self.can_exit_to_home_from_star(player, star_position):
             raise ValueError(f"Player {player} cannot exit from star {star_position}")
         
-        # Return the position right after the star hole on the path to home
-        # This is typically the home stretch entry point
+        # Return the position right after the star hole on the path toward final home.
+        # For each player, this follows the same clockwise path as get_next_home_position.
         exit_positions = {
-            1: (11, 2),   # From (11,1), next step toward home entry (11,3)
-            2: (29, 7),   # From (29,6), next step toward home entry (25,6)
-            3: (19, 14),  # From (19,15), next step toward home entry (19,13)
-            4: (1, 9)     # From (1,10), next step toward home entry (5,10)
+            1: (13, 1),   # From (11,1), next step toward final home via (13,1) -> (15,1) -> (15,2)...
+            2: (29, 7),   # From (29,6), next step toward final home via (29,7) -> (29,8) -> (27,8)...
+            3: (17, 15),  # From (19,15), next step toward final home via (17,15) -> (15,15) -> (15,14)...
+            4: (1, 9)     # From (1,10), next step toward final home via (1,9) -> (1,8) -> (3,8)...
         }
         
         return exit_positions.get(player)
@@ -435,7 +435,7 @@ class AggravationGame:
         
         # Special handling for center hole
         if in_center_hole[marble_idx] and current_pos == CENTER_HOLE:
-            # In center hole: can only exit with roll of 1 to any star hole
+            # In center hole: can only exit with roll of 1 to player's preferred star hole
             if dice_roll == 1 and move_number == 0:
                 # Exit to player's preferred star hole (closest to their home)
                 preferred_stars = {
